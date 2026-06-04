@@ -20,7 +20,8 @@ description: |
 
 > 이 3가지만 각자 준비하면, 폴더 ID·멤버 정보 등은 **실행 때 자동 조회**된다. 개인 API 키나 비번을 skill에 넣지 않는다.
 >
-> **Dooray API key는 ki-mail에 불필요하다**(메일 기능은 세션 쿠키로 동작). 공식 API 기능이나 형제 skill(ki-pay 등)에서 토큰이 필요할 때만 발급: **https://kist.gov-dooray.com/setting/api/token** — 자세히는 `../../shared/dooray_api_guide.md`. (발급한 토큰은 skill·repo에 저장하지 말고 본인 로컬에만.)
+> **Dooray API key는 ki-mail에 불필요**하다(메일 기능은 세션 쿠키로 동작). 따라서 **설치·첫 실행 때 API 발급을 묻지 않는다.**
+> 단, 사용자가 **토큰이 필요한 작업**(메일 발송·메신저 알림·업무 등록·캘린더 등 = ki-mail 범위 밖 공식 REST API 기능)을 요청하면, **바로 그때 on-demand로** 발급을 안내한다: **https://kist.gov-dooray.com/setting/api/token** (자세히 `../../shared/dooray_api_guide.md`). 발급 토큰은 skill·repo에 저장 금지, 본인 로컬에만.
 
 ---
 
