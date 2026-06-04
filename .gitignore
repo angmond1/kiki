@@ -15,3 +15,6 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
+
+# 로고 분해 자산(4k components)은 repo에 올리지 않음 (용량 크고 불필요 — 로컬 보관)
+assets/components/
