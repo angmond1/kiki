@@ -128,8 +128,9 @@
 
   // ---------- Tier 3: 자연어 자동분류 규칙 엔진 ----------
   // 규칙 1건 생성. 조건은 from(발신) 또는 subject(제목 키워드).
-  //   spec = { fromEmails?:[], subjectKeywords?:[], toFolderName, applyBefore?, operator? }
-  // ⚠️ Dooray는 규칙 배열 POST 시 "첫 1건만" 생성됨 → 반드시 단건 호출.
+  //   spec = { fromEmails?:[], subjectKeywords?:[], toFolderName, applyBefore?, operator?, applyOrder? }
+  // ⚠️ Dooray 제약: 배열 POST 시 "첫 1건만" 생성 → 단건 호출. from.type은 include만(not_include -200200).
+  // ⚠️ 같은 도메인 두 용도 분기는 applyOrder로 — 정확주소(예 nzine@nrf.re.kr)를 도메인(nrf.re.kr)보다 작게(먼저).
   async function createRule(spec) {
     const folder = await ensureFolder(spec.toFolderName);
     if (folder.needManual) return { needManualFolder: folder.name };
@@ -143,6 +144,7 @@
       applyBeforeMail: spec.applyBefore !== false,
       applyBeforeMailFolders: ['inbox', 'user_folders'],
     };
+    if (spec.applyOrder != null) rule.applyOrder = spec.applyOrder;  // 우선순위(낮을수록 먼저 적용)
     // 단건 배열 POST (Dooray 제약)
     const res = await dfetch('/v2/wapi/mail-rules', { method: 'POST', body: [rule] });
     return { folder, rule, res };

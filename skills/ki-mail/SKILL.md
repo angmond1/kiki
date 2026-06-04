@@ -82,13 +82,29 @@ description: |
 ## 부트스트랩 (첫 사용 또는 "ki-mail 설정")
 
 개인화 정보를 자동조회 + 대화로 채워 config를 만든다.
+
 1. 실행 준비(위) 완료.
-2. `window.kiMail.findAllFolders()` → 현재 사용자/시스템 폴더 목록 제시.
-3. 대화로 선호 확인:
-   - "광고성 메일을 별도 폴더로 분류할까요? 하면 어떤 폴더명?" (안 하면 Tier 1 스팸 처리만)
-   - 학회/공고/시약 등 추가 폴더 분류 의향.
-4. `~/.claude/kiki/ki-mail.config.json` 생성/갱신 (`ki-mail.config.example.json` 참고).
-   - config가 없어도 Tier 1(스팸)·Tier 3(자연어 규칙)은 동작. config는 Tier 2 선호 기억용.
+2. **현재 상태 파악** — `findAllFolders()` + `listMailRules()`로 **기존 폴더·분류 규칙을 먼저 조회**(충돌 판단용). 폴더 목록 제시.
+3. (Tier 2 일반) "광고성·스팸은 기본으로 스팸함 처리합니다. 그 외 광고/학회/공고 같은 메일을 **별도 폴더로 분류**할까요?" → 예면 폴더명.
+
+4. **메일분류 기본 권장** — `references/classification_policy.md`의 권장 체계를 **항목별로 순차 제안**(KIST/출연연 공통이라 권장하되 각각 사용자가 켜고/끔). 각 항목마다:
+   - (a) "○○ 메일을 '○○' 폴더로 자동분류할까요?" 제안.
+   - (b) **기존 폴더·규칙과 겹치면** → "기존 'X' 폴더/규칙이 있습니다. **거기 합칠까요, 그대로 두고 새로 나눌까요?**" 묻기. (임의로 기존 규칙 덮어쓰기 금지)
+   - (c) 예 → `ensureFolder`(없으면 자동 생성) + `createRule`. 모두 confirm 후.
+
+   **순차 제안 항목** (도메인·기관 정확값은 `classification_policy.md`):
+   ```
+   1) 결재     ← noreply@kist.re.kr
+   2) 과제공고  ← nrf.re.kr · ketep.or.kr · kiat.or.kr · keit.re.kr
+   3) UST      ← ust.ac.kr
+   4) 기관뉴스  ← nzine@nrf.re.kr · kistep.re.kr · stepi.re.kr · kird.re.kr · kribb.re.kr · pr@kist.re.kr · sema.or.kr
+   5) 학회     ← kiche · ksiec · kecs · kchem · kim · mrs-k · nanokorea · kontrs (.or.kr/.org/.net)
+   ```
+   - ⚠️ **NRF 분기**: `nzine@nrf.re.kr`(기관뉴스)를 `nrf.re.kr`(과제공고)보다 **먼저**(`createRule`의 `applyOrder`를 작게) 등록 → 같은 도메인 두 용도 분리. Dooray는 `not_include`를 지원하지 않으므로 우선순위로만 분기.
+   - ⚠️ **sema.or.kr 확인**: 과학기술인공제회 도메인. 사용자가 "국가안전관리본부"를 뜻했다면 `lmosafety.or.kr`일 수 있어 첫 적용 시 확인.
+
+5. `~/.claude/kiki/ki-mail.config.json` 생성/갱신 (`ki-mail.config.example.json` 참고).
+   - config 없어도 Tier 1(스팸)·Tier 3(자연어 규칙)은 동작. config는 Tier 2/권장분류 선호 기억용.
 
 ---
 

@@ -59,6 +59,8 @@ DELETE /v2/wapi/mail-rules/{rule-id}
 ```
 - ⚠️ **배열에 N개를 넣어도 첫 1건만 생성됨** → 여러 규칙은 단건씩 N회 POST (코어 `createRule`이 단건).
 - `condition`은 `from`·`subject` 중 하나 이상. `applyBeforeMail`=과거 메일 소급.
+- 규칙 객체 필드: `id, type, condition, action, applyOrder`(우선순위·낮을수록 먼저 적용), `lastAppliedAt, createdAt`.
+- ⚠️ `condition.from.type`은 **`include`만** 지원 (`not_include`/`exact`는 -200200, 2026-06-04 확인). → 같은 도메인 두 용도 분기(예 `nrf.re.kr`→공고 / `nzine@nrf.re.kr`→뉴스)는 **`applyOrder`로** 처리(정확주소 규칙을 도메인 규칙보다 작은 값=먼저).
 
 ## 폴더 생성·삭제 (✅ 확정 2026-06-04, DevTools 캡처)
 - **생성**: `POST /v2/wapi/mail-folders/create-path` — body는 **배열** `[{"name":"폴더명","order":N}]`.
