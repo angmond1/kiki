@@ -44,6 +44,16 @@ Claude Code에서 `ki-mail 설정해줘` 하면 순서대로 물어봅니다:
 앞으로 nature.com 에서 오는 메일은 저널 폴더로 자동분류해줘
 ```
 
+## ki-rpa (지급신청) — 추가 준비
+ki-mail 과 달리 ki-rpa 는 **업로드에 Dooray 개인 토큰**이 필요하고, 문서 변환에 한글/Office 를 쓴다.
+1. **Dooray 토큰**: 발급 https://kist.gov-dooray.com/setting/api/token → `~/.claude/kiki/ki-rpa.env` 에 `DOORAY_TOKEN=...` (repo 밖, gitignore). (권장: 토큰을 파일로 저장해 경로를 알려주면 채팅 기록에 안 남음)
+2. **변환 도구**: 한글·MS Office(KIST PC 표준) + python 라이브러리 `pip install Pillow pywin32` (hwp/docx/xlsx→pdf, png→jpg 용. 증빙이 이미 pdf/jpg 면 불필요).
+3. **설치**: `Copy-Item -Recurse "kiki\skills\ki-rpa" "$env:USERPROFILE\.claude\skills\ki-rpa"`
+4. **첫 실행** `ki-rpa 설정해줘` → 토큰 → 카드책임자 이름 → 담당 행정원(**폴더 링크 붙여넣기 권장**, 이름검색은 최대 5분·"검색 중" 표시) → 업로드 범위 → 수행과제 확인 → 영수증 폴더.
+5. **사용 예**: `이번달 영수증 지급신청 처리해줘` / `이 카드결제건들 비목 정해서 올려줘`
+
+> 통합정보(카드·과제) 조회는 Chrome 에 **KIST 통합정보(p.kist.re.kr) 로그인 세션**이 있어야 한다(토큰 불요, fetch 가 세션+authTk 로 동작).
+
 ## 트러블슈팅
 - **"로그인 해달라"고 뜸** → Chrome에서 `kist.gov-dooray.com` 로그인 후 재시도(세션 만료).
 - **브라우저 연결 안 됨** → Claude in Chrome 확장 연결 확인.
