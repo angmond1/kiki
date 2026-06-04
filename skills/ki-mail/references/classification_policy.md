@@ -75,7 +75,9 @@
 ### 기관뉴스 (뉴스·웹진)
 | 발신 | 기관 |
 |------|------|
-| `nzine@nrf.re.kr` | NRF 웹진 (정확주소 — 과제공고보다 우선) |
+| `nzine@nrf.re.kr` | NRF 웹진 (정확주소 — `nrf.re.kr` 과제공고보다 우선) |
+| `email@keit.re.kr` | KEIT 뉴스 (정확주소 — `keit.re.kr` 과제공고보다 우선) |
+| `newsletters@kiat.or.kr` | KIAT 뉴스레터 (정확주소 — `kiat.or.kr` 과제공고보다 우선) |
 | `kistep.re.kr` | 한국과학기술기획평가원 (KISTEP) |
 | `stepi.re.kr` | 과학기술정책연구원 (STEPI) |
 | `kird.re.kr` | 국가과학기술인력개발원 (KIRD) |
@@ -95,12 +97,19 @@
 | `nanokorea.net` | 나노코리아 |
 | `kontrs.or.kr` | 나노기술연구협의회 (KoNTRS) |
 
-### ⭐ 같은 도메인, 두 용도 분기 (NRF 패턴)
-`nrf.re.kr` 일반 발신 = 과제공고, `nzine@nrf.re.kr` = 기관뉴스로 갈려야 한다.
-**Dooray는 규칙 제외(`not_include`) 조건을 지원하지 않으므로**(검증 완료), 규칙 우선순위 `applyOrder`로 처리한다:
-1. **정확 주소 규칙을 먼저**(낮은 `applyOrder`): `nzine@nrf.re.kr` → 기관뉴스.
-2. **도메인 규칙을 나중**(높은 `applyOrder`): `nrf.re.kr` → 과제공고.
-→ Dooray가 `applyOrder` 순으로 적용 → `nzine` 메일은 기관뉴스 규칙에 먼저 잡힌다. (같은 패턴을 다른 도메인의 웹진·뉴스 주소에도 적용. ⚠️ "먼저 매칭 우선" 동작은 첫 적용 시 1건으로 확인 권장.)
+### ⭐ 같은 도메인, 두 용도 분기 (NRF·KEIT·KIAT 패턴)
+한 기관 도메인이 과제공고와 뉴스를 둘 다 보내면, **정확주소(뉴스)를 도메인(공고)보다 먼저** 분류한다:
+
+| 도메인 → **과제공고** | 정확주소 → **기관뉴스** |
+|------|------|
+| `nrf.re.kr` | `nzine@nrf.re.kr` |
+| `keit.re.kr` | `email@keit.re.kr` |
+| `kiat.or.kr` | `newsletters@kiat.or.kr` |
+
+**Dooray는 `not_include`(제외)를 지원하지 않으므로**(검증 완료, -200200) 규칙 우선순위 `applyOrder`로 처리한다:
+1. **정확주소(기관뉴스) 규칙을 먼저** — 낮은 `applyOrder`.
+2. **도메인(과제공고) 규칙을 나중** — 높은 `applyOrder`.
+→ `applyOrder` 순 적용으로 정확주소 메일이 기관뉴스에 먼저 잡힌다. (새로운 도메인·뉴스주소가 생기면 같은 표에 한 줄 추가.) ⚠️ "먼저 매칭 우선" 동작은 첫 적용 시 1건으로 확인 권장.
 
 ### 기존 분류와 충돌 시 (필수 — 사용자 지시)
 사용자가 이미 비슷한 폴더·규칙을 가졌을 수 있다(예: 기존 "공고" 폴더에 과제공고+기관뉴스가 개별주소로 섞임).

@@ -97,10 +97,10 @@ description: |
    1) 결재     ← noreply@kist.re.kr
    2) 과제공고  ← nrf.re.kr · ketep.or.kr · kiat.or.kr · keit.re.kr
    3) UST      ← ust.ac.kr
-   4) 기관뉴스  ← nzine@nrf.re.kr · kistep.re.kr · stepi.re.kr · kird.re.kr · kribb.re.kr · pr@kist.re.kr · sema.or.kr
+   4) 기관뉴스  ← nzine@nrf.re.kr · email@keit.re.kr · newsletters@kiat.or.kr · kistep.re.kr · stepi.re.kr · kird.re.kr · kribb.re.kr · pr@kist.re.kr · sema.or.kr
    5) 학회     ← kiche · ksiec · kecs · kchem · kim · mrs-k · nanokorea · kontrs (.or.kr/.org/.net)
    ```
-   - ⚠️ **NRF 분기**: `nzine@nrf.re.kr`(기관뉴스)를 `nrf.re.kr`(과제공고)보다 **먼저**(`createRule`의 `applyOrder`를 작게) 등록 → 같은 도메인 두 용도 분리. Dooray는 `not_include`를 지원하지 않으므로 우선순위로만 분기.
+   - ⚠️ **NRF/KEIT/KIAT 분기**: 정확주소(`nzine@nrf.re.kr`·`email@keit.re.kr`·`newsletters@kiat.or.kr` → 기관뉴스)를 도메인(`nrf.re.kr`·`keit.re.kr`·`kiat.or.kr` → 과제공고)보다 **먼저**(`createRule` `applyOrder` 작게) 등록. Dooray `not_include` 미지원이라 우선순위로만 분기.
    - ⚠️ **sema.or.kr 확인**: 과학기술인공제회 도메인. 사용자가 "국가안전관리본부"를 뜻했다면 `lmosafety.or.kr`일 수 있어 첫 적용 시 확인.
 
 5. `~/.claude/kiki/ki-mail.config.json` 생성/갱신 (`ki-mail.config.example.json` 참고).
