@@ -1,9 +1,9 @@
 ---
-name: ki-dinning
+name: ki-dining
 description: KIST 회의비 처리 자동화 — 카드 회의비(법인+연구비) 결제 추출, 사전내부결재(fam_0100) 매칭, 별지1호 회의록 hwp 생성, (RPA 부서는)두레이 업로드까지. 사용자가 "회의비 처리하자", "회의록 작성/만들어줘", "회의비 정리해줘", "이번달 회의비", "식대 회의록" 등을 요청할 때 사용. 통합정보(p.kist.re.kr) + 아래아한글 + (선택)두레이 기반.
 ---
 
-# ki-dinning — KIST 회의비 처리
+# ki-dining — KIST 회의비 처리
 
 카드로 결제한 회의비(식사·카페)를 골라 **사전결재와 매칭 → 별지1호 회의록 hwp 생성 → 증빙 정리/업로드**까지 처리한다. 조회는 통합정보 SSO 세션(토큰 불요), 회의록은 아래아한글, 업로드(RPA 부서)는 두레이 토큰.
 
@@ -11,11 +11,11 @@ description: KIST 회의비 처리 자동화 — 카드 회의비(법인+연구�
 - **A 내장**: 회의비 판별(음식점·카페), 인원 산정(⌈금액÷5만⌉+1, 카페는 음료 잔수=인원), 별지1호 셀매핑, 보안팝업 Alt+N, 회의내용 가이드, 분류코드 I·S·K 면제.
 - **B 런타임조회**: 카드내역(fam_0711 법인+연구비)·참여과제(rdm_2011)·사전결재(fam_0100)·발의자 사번. → `scripts/portal_ops.js`
 - **C 환경준비**: Chrome+통합정보 SSO 세션 / 아래아한글+COM+python(pyhwpx·pywin32·pywinauto) / (RPA면)Dooray 로그인.
-- **D 개인config**: 이름·카드책임자·참여과제·처리방식·폴더 → `~/.claude/kiki/ki-dinning.config.json`.
+- **D 개인config**: 이름·카드책임자·참여과제·처리방식·폴더 → `~/.claude/kiki/ki-dining.config.json`.
 - **E 격리**: Dooray 토큰(`~/.claude/kiki/kiki.env`)·사번·참석자 실명. skill 텍스트엔 0건.
 
-## 설치/부트스트랩 (`ki-dinning 설정해줘`)
-순서대로 묻고 `ki-dinning.config.json` 저장:
+## 설치/부트스트랩 (`ki-dining 설정해줘`)
+순서대로 묻고 `ki-dining.config.json` 저장:
 1. **성함** (발의자·참여과제 조회 기반).
 2. **카드책임자** — "회의비 결제 카드 책임자가 본인이신가요? 다르면 성함" + 사번 확보(없으면 fam_0711 화면에서 1회 확인).
 3. **참여과제 자동조회**(`queryProjects`) → 과제번호·명·분류코드 출력 → "이 과제들 맞나요?".
@@ -34,8 +34,8 @@ description: KIST 회의비 처리 자동화 — 카드 회의비(법인+연구�
 
 ### 경로 (설치 시 지침으로 안내)
 - 📁 **영수증**: 모아둔 폴더나 파일명+경로를 알려달라.
-- 📁 **회의록 출력**: 지정 폴더 알려주거나, 미지정 시 `C:\kiki\dinning\<yymmdd>\`(yymmdd=**연 2자리**, 예 260604).
-- 📁 **과제보고서**(회의내용 작성용): 과제별 경로 알려주거나 `C:\kiki\dinning\project_report\`. **개별 폴더를 주면 그 파일을 project_report로 복사해 앞으로 써도 될지 확인**.
+- 📁 **회의록 출력**: 지정 폴더 알려주거나, 미지정 시 `C:\kiki\dining\<yymmdd>\`(yymmdd=**연 2자리**, 예 260604).
+- 📁 **과제보고서**(회의내용 작성용): 과제별 경로 알려주거나 `C:\kiki\dining\project_report\`. **개별 폴더를 주면 그 파일을 project_report로 복사해 앞으로 써도 될지 확인**.
 
 ## 작업 (`회의비 처리하자`)
 1. **카드 조회 즉시 출력** — 화면 기본기간(조회일 직전 1개월) 그대로 `queryCardsBoth` → 음식점·카페 회의비 후보를 **법인/연구비 구분 표시**해 바로 리스트.
@@ -48,11 +48,11 @@ description: KIST 회의비 처리 자동화 — 카드 회의비(법인+연구�
 6. **인원 산정** — ⌈금액÷5만⌉+1, 카페 음료 잔수 우선.
 7. **참석자** — "내부 N·외부 N — 참석자(내부 성명/외부 소속·성명) 알려주세요".
 8. **회의내용**(10만원↑만) — 과제보고서 기반 생성 후 확인. 10만 미만 생략.
-9. **회의록 hwp 생성·저장** — `make_minutes.make_batch(..., watcher_path=popup_watcher.py)` → `C:\kiki\dinning\<yymmdd>\`.
+9. **회의록 hwp 생성·저장** — `make_dininglog.make_batch(..., watcher_path=popup_watcher.py)` → `C:\kiki\dining\<yymmdd>\`.
 10. **마무리** — RPA부서: "업로드할까요?"(confirm) → 회의록+카페영수증 두레이 `2.회의비` 업로드(`dooray_drive.py`). 아니면 로컬 정리 + "이 파일들을 메일로 보내시면 됩니다" 안내.
 
 ### ⭐ 중복 방지 (작업마다 검사)
-회의록을 `C:\kiki\dinning\<yymmdd>\` 날짜별로 정리. 작업 시 **과거 회의록 폴더 1회 스캔** → 제목·회의내용을 이전과 다르게(같은 제목/내용 재사용 금지).
+회의록을 `C:\kiki\dining\<yymmdd>\` 날짜별로 정리. 작업 시 **과거 회의록 폴더 1회 스캔** → 제목·회의내용을 이전과 다르게(같은 제목/내용 재사용 금지).
 
 ## 안전 규칙
 - **모든 쓰기(업로드·전송)는 사용자 confirm 후.** 조회·생성·분류는 자동, 업로드만 확인.
@@ -61,4 +61,4 @@ description: KIST 회의비 처리 자동화 — 카드 회의비(법인+연구�
 
 ## 참고
 - `references/minutes_form.md` 양식·셀매핑·인원·증빙·중복 / `references/project_code.md` 분류코드·면제·발의자 / `references/fam0100_reference.md` fetch 명세 / `references/hwp_automation.md` 한글 자동화·WPF팝업.
-- scripts: `portal_ops.js`(조회) · `make_minutes.py`(hwp) · `popup_watcher.py`(팝업) · `dooray_drive.py`(업로드).
+- scripts: `portal_ops.js`(조회) · `make_dininglog.py`(hwp) · `popup_watcher.py`(팝업) · `dooray_drive.py`(업로드).

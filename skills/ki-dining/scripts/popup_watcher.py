@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-ki-dinning 코어 (3) — 한글 보안 팝업 자동 처리 watcher (독립 프로세스)
+ki-dining 코어 (3) — 한글 보안 팝업 자동 처리 watcher (독립 프로세스)
 - 한글 보안 팝업 = WPF 창(class 'HwndWrapper[hwp.exe;;...]', 제목 한컴사제폰트 '글', 작은 크기).
   WPF 라 win32 버튼 0개 + UIAutomation 차단 → 클릭 불가.
 - 해결: 창 감지 → SetForegroundWindow → Alt+N('모두 허용(N)' 액셀러레이터) keybd_event.
 - 별도 프로세스 필수: 같은 프로세스 스레드는 한글 COM 블록 중 GIL 로 안 돎.
-- make_minutes.make_batch(..., watcher_path=이 파일) 로 subprocess 동반.
+- make_dininglog.make_batch(..., watcher_path=이 파일) 로 subprocess 동반.
 """
 import win32gui, win32con, win32api, time, datetime, tempfile, os
 
-LOG = os.path.join(tempfile.gettempdir(), 'ki_dinning_watcher.log')
+LOG = os.path.join(tempfile.gettempdir(), 'ki_dining_watcher.log')
 
 def logw(m):
     try:

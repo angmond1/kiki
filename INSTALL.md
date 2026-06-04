@@ -54,14 +54,14 @@ ki-mail 과 달리 ki-rpa 는 **업로드에 Dooray 개인 토큰**이 필요하
 
 > 통합정보(카드·과제) 조회는 Chrome 에 **KIST 통합정보(p.kist.re.kr) 로그인 세션**이 있어야 한다(토큰 불요, fetch 가 세션+authTk 로 동작).
 
-## ki-dinning (회의비) — 추가 준비
+## ki-dining (회의비) — 추가 준비
 회의록을 **.hwp** 로 만들기 때문에 **아래아한글**이 필수다(MS Word 불가). RPA 업로드 부서는 Dooray 토큰을 쓴다.
 1. **아래아한글** 설치 + python 패키지 `pip install pyhwpx pywin32 pywinauto`.
 2. **Dooray 토큰**(RPA 업로드 부서만): `~/.claude/kiki/kiki.env` 의 `DOORAY_TOKEN=...` — **모든 kiki skill 이 공유**(repo 밖, gitignore). 발급 https://kist.gov-dooray.com/setting/api/token. (메일 등으로 제출하는 부서는 토큰 불요)
-3. **설치**: `Copy-Item -Recurse "kiki\skills\ki-dinning" "$env:USERPROFILE\.claude\skills\ki-dinning"`
-4. **첫 실행** `ki-dinning 설정해줘` → 이름 → 카드책임자 → 참여과제 확인 → 사전결재 면제(I·S·K) 확인 → "Dooray 드라이브 RPA 처리? 예/아니요" → (예면)토큰·행정원 폴더 → 한글 환경 점검 → 영수증/출력/과제보고서 폴더 안내.
+3. **설치**: `Copy-Item -Recurse "kiki\skills\ki-dining" "$env:USERPROFILE\.claude\skills\ki-dining"`
+4. **첫 실행** `ki-dining 설정해줘` → 이름 → 카드책임자 → 참여과제 확인 → 사전결재 면제(I·S·K) 확인 → "Dooray 드라이브 RPA 처리? 예/아니요" → (예면)토큰·행정원 폴더 → 한글 환경 점검 → 영수증/출력/과제보고서 폴더 안내.
 5. **사용 예**: `회의비 처리하자` / `이번달 회의비 회의록 만들어줘`
-> 카드·과제·사전결재 조회는 통합정보 SSO 세션(토큰 불요). 회의록 출력 기본 경로 `C:\kiki\dinning\<yymmdd>\`, 회의내용 작성용 과제보고서는 `C:\kiki\dinning\project_report\`.
+> 카드·과제·사전결재 조회는 통합정보 SSO 세션(토큰 불요). 회의록 출력 기본 경로 `C:\kiki\dining\<yymmdd>\`, 회의내용 작성용 과제보고서는 `C:\kiki\dining\project_report\`.
 
 ## 트러블슈팅
 - **"로그인 해달라"고 뜸** → Chrome에서 `kist.gov-dooray.com` 로그인 후 재시도(세션 만료).

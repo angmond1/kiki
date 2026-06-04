@@ -18,7 +18,7 @@ KIST 구성원이 Claude Code로 **반복적인 행정 업무**를 자동화하�
 | **ki-rpa** | RPA 지급신청 — 카드·세금계산서·회의비 증빙 **비목 분류 → 파일명 규칙 변환 → 담당 행정원 Dooray 폴더 업로드**. 카드 승인번호·과제는 통합정보 backend **fetch 직접호출(좌표 0, 해상도 무관)** | ✅ 사용 가능 |
 | ki-inspect | 물품 소액검수 신청 | 🛠 준비 중 |
 | ki-budget | 과제별 예산 조회·리포트 | 🛠 준비 중 |
-| **ki-dinning** | 회의비 처리 — 카드 회의비(법인+연구비) 추출·사전결재 매칭·**별지1호 회의록 hwp 생성**·증빙 업로드 | ✅ 사용 가능 |
+| **ki-dining** | 회의비 처리 — 카드 회의비(법인+연구비) 추출·사전결재 매칭·**별지1호 회의록 hwp 생성**·증빙 업로드 | ✅ 사용 가능 |
 
 ## 설계 원칙
 - **credential 격리**: 개인 Dooray API key는 **코드·repo에 절대 넣지 않고** 본인 로컬에만 둔다(skill 텍스트엔 credential 0).
@@ -37,14 +37,14 @@ KIST 구성원이 Claude Code로 **반복적인 행정 업무**를 자동화하�
 - **부트스트랩(1회)**: Dooray 토큰 → 카드책임자 이름 → 담당 행정원(폴더 **링크** 권장 / 이름검색) → 업로드 범위(폴더 구조 자동 분기) → 수행과제 확인 → 영수증 폴더.
 - **작업**: 영수증 폴더 스캔 → 형식 변환(이미지→jpg / 문서→pdf) → **건별 과제·비목 확정**(사용자와) → 카드 승인번호 fetch 조회 → 파일명 변환 → Dooray 업로드(=RPA 자동 기안) → 처리완료 정리.
 - **좌표 0**: 통합정보 NEXACRO 를 backend **fetch 직접호출**(`window.application.authTk`) → 모든 모니터·해상도에서 동작.
-- **비목**: `expense_category` 1차 제안 → 사용자 확정, 애매하면 Dooray wiki 실시간 검색. (소모성 우선·외화 환산금지 등 규칙 내장)
+- **비목**: `expense_category`(자주 쓰는 것·판단 원칙) 1차 제안 → 애매하면 `expense_category_table`(전체 41비목·증빙·한도 lookup) → 그래도 모호하면 Dooray wiki, **사용자 확정**. (소모성 우선·외화 환산금지 등 규칙 내장)
 - 인증: 통합정보(카드·과제)=KIST SSO 세션 / Dooray(업로드)=개인 토큰. 자세히: [`skills/ki-rpa/SKILL.md`](skills/ki-rpa/SKILL.md).
 
-## ki-dinning 한눈에
+## ki-dining 한눈에
 - **부트스트랩(1회)**: 이름 → 카드책임자 → 참여과제 확인 → 사전결재 면제(I·S·K) 확인 → "Dooray 드라이브 RPA 처리? 예/아니요" → (예면)토큰·행정원 폴더 → 한글 점검 → 폴더 안내.
 - **작업**: 카드(법인+연구비) 회의비 후보 추출 → 사전결재 매칭(목적·장소·시간 자동, 없으면 과제보고서로 제목·내용 산출) → 인원(⌈금액÷5만⌉+1, **카페는 음료 잔수=인원**) → 참석자 → 회의내용(10만원↑) → **별지1호 회의록 hwp 생성** → (RPA면)두레이 `2.회의비` 업로드.
 - **회의록 hwp**: 아래아한글 COM(pyhwpx) 양식 셀치환 + **보안팝업 Alt+N 무인** 처리. 과거 회의록과 제목·내용 중복 금지.
-- 인증: 통합정보 조회=SSO 세션 / 두레이 업로드=개인 토큰(`kiki.env` 공유). 자세히: [`skills/ki-dinning/SKILL.md`](skills/ki-dinning/SKILL.md).
+- 인증: 통합정보 조회=SSO 세션 / 두레이 업로드=개인 토큰(`kiki.env` 공유). 자세히: [`skills/ki-dining/SKILL.md`](skills/ki-dining/SKILL.md).
 
 ## 설치
 [`INSTALL.md`](INSTALL.md) 참조. 요약: repo clone → `skills/<원하는 skill>/`를 `~/.claude/skills/`로 복사 → Chrome에 본인 Dooray 로그인 → Claude Code에서 사용.

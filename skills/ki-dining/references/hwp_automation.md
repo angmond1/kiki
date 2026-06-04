@@ -7,7 +7,7 @@
 3. python 패키지: `pyhwpx`, `pywin32`, `pywinauto`
 → 부트스트랩에서 **한글 연결 + 빈 양식 1장 생성 테스트**. 안 되면 친절히 안내(이 skill 사용 불가).
 
-## 핵심 동작 (`make_minutes.py`)
+## 핵심 동작 (`make_dininglog.py`)
 - 샘플 양식 hwp 를 **템플릿으로 열어 값 셀만 교체** → 새 hwp `save_as`. 양식·병합·서식 보존.
 - 진입 `get_into_nth_table(0)`, 순회 `TableRightCell()`(직접 메서드 — `Run("TableRightCell")` 은 안 됨).
 - 셀 비우기 **`Erase()`** 필수 (⚠️ `Delete`/`Run('Delete')` 는 셀 내용 안 지워짐).

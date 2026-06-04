@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""kiki 공용 — dooray drive 폴더 검색·구조파악·업로드·처리완료 아카이브 (ki-rpa/ki-dinning 공유).
+"""kiki 공용 — dooray drive 폴더 검색·구조파악·업로드·처리완료 아카이브 (ki-rpa/ki-dining 공유).
 
 인증: dooray 개인 토큰 (업로드는 세션쿠키로 안 됨 → 토큰 필요).
   토큰 로드 우선순위: 환경변수 DOORAY_TOKEN → ~/.claude/kiki/kiki.env (형제 공유, ki-rpa.env 하위호환)
