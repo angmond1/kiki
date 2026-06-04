@@ -1,0 +1,17 @@
+# 개인 config (원칙상 ~/.claude/kiki/ 에 두지만 repo 내 실수 방지 안전망)
+*.config.json
+!*.config.example.json
+
+# credential — 절대 커밋 금지
+*token*
+*.key
+.env
+.env.*
+dooray_token.txt
+
+# OS / 편집기
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/

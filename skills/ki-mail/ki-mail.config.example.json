@@ -1,0 +1,26 @@
+{
+  "_note": "예시 파일. 실제 config는 ~/.claude/kiki/ki-mail.config.json 에 둔다(repo 밖). 토큰·비번·개인키 저장 금지 — 메일 코어는 브라우저 세션 쿠키로 동작하므로 credential이 필요 없다.",
+  "folderClassification": {
+    "enabled": false,
+    "_comment": "Tier 2 폴더 분류 사용 여부. false면 스팸 처리(Tier 1)와 자연어 규칙(Tier 3)만.",
+    "folders": {
+      "광고": { "use": false },
+      "공고": { "use": false },
+      "학회": { "use": false }
+    }
+  },
+  "personalRules": [
+    {
+      "_comment": "개인 자동분류 규칙 메모(실등록은 ki-mail이 createRule로). 예시 1건:",
+      "fromEmails": ["noreply@example-journal.org"],
+      "subjectKeywords": [],
+      "toFolderName": "학회",
+      "applyBefore": true
+    }
+  ],
+  "learnedSenders": {
+    "_comment": "개인이 누적한 발신처 분류 학습. skill 본문에는 안 담고 여기에만.",
+    "toSpam": [],
+    "toFolder": {}
+  }
+}
