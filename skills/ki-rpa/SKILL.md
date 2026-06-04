@@ -55,7 +55,7 @@ description: |
 2. **형식 전처리** — `scripts/convert.py ensure_uploadable` 로 jpg/pdf 보장(이미지→jpg, 문서→pdf). **변환 시 "X→Y 변환함" 알림.** 실패 시 수동 안내.
 3. **건별 과제·비목 확정 (사용자와 함께)** — 각 증빙에 대해:
    - 과제: config 캐시 목록에서 선택(과제명으로 말해도 매핑).
-   - 비목: **3단 조회** — ① `references/bimok_reference.md`(자주 쓰는 것·판단 원칙)로 1차 제안 → ② 애매하면 `references/bimok_table.md`(전체 41비목·증빙·한도·집행가능 lookup)에서 정확히 찾기 → ③ 그래도 모호하면 `references/dooray_wiki.md`로 wiki 실시간 검색 → **사용자 확정**. (소모성 우선·외화 환산금지 등 규칙 적용)
+   - 비목: **3단 조회** — ① `references/expense_category.md`(자주 쓰는 것·판단 원칙)로 1차 제안 → ② 애매하면 `references/expense_category_table.md`(전체 41비목·증빙·한도·집행가능 lookup)에서 정확히 찾기 → ③ 그래도 모호하면 `references/dooray_wiki.md`로 wiki 실시간 검색 → **사용자 확정**. (소모성 우선·외화 환산금지 등 규칙 적용)
    - 카드 종류: **법인/연구비** 확인(법인=`CARDTYPECD` 5, 연구비 3).
 4. **카드 건 승인번호 조회** — `window.kiRpa.queryCards({fromDt,toDt,cardType,empno,custnm})` → 거래처·금액으로 매칭해 `CARDAPPRNO` 확보. **외화는 임의 환산 말고** `USEAMT`(원화청구액) 그대로. (세금계산서·회의비는 승인번호 없음)
    - ⭐ **fetch 실패 시 좌표 fallback 자동 시도** (authTk 없음 / 빈 결과 / HTTP 에러): `references/kist_portal_fetch.md` 의 좌표 절차(화면 캡처 + `zoom` 으로 칸 위치를 찾아 입력·Enter·조회버튼·grid 읽기)로 **재시도**. **시도 순서 = fetch → 좌표, "어떻게든 성공"이 목표.** 둘 다 실패할 때만 화면을 캡처해 사용자에게 보여주고 안내(조용히 멈추지 말 것). 과제목록 조회도 동일.
@@ -68,7 +68,7 @@ description: |
 ## 안전 규칙 (필수)
 - **모든 쓰기(업로드·파일이동·rename)는 사용자 confirm 후.** 분류·제안만 자동.
 - **업로드 = RPA 자동 기안**(매일 10/15/22시 배치) → 실제 결재 발생. 건수·과제·금액 보여주고 confirm.
-- **비목은 제안만, 확정은 사용자·행정원.** 1차 판단은 `bimok_reference.md`, 애매하면 wiki.
+- **비목은 제안만, 확정은 사용자·행정원.** 1차 판단은 `expense_category.md`, 애매하면 wiki.
 - **물품 100~300만원은 소액검수(mcs_0003) 선행** 필요 — 미검수면 RPA 보류. 해당 시 안내.
 - **외화 금액 임의 환산 금지** — fam_0711 `USEAMT` 그대로.
 - **토큰·사번·카드번호는 skill·repo 에 저장 금지.** 토큰은 `ki-rpa.env`(로컬), 사번은 config(로컬), 카드번호는 조회로만(저장 X).
@@ -82,7 +82,7 @@ description: |
 - **토큰은 config 아닌 `ki-rpa.env`.** 민감정보(카드번호 등) 저장 금지.
 
 ## 참고 문서
-- `references/bimok_reference.md` — 비목 매핑·증빙·한도·파일명·외화·RPA운영 통합(1차 판단).
+- `references/expense_category.md` — 비목 매핑·증빙·한도·파일명·외화·RPA운영 통합(1차 판단).
 - `references/kist_portal_fetch.md` — 통합정보 fetch backend 명세(endpoint·ds_search·authTk·함정·좌표 fallback).
 - `references/dooray_folder.md` — 행정원 폴더 조회(링크/이름검색·본부약어·캐시·성능).
 - `references/dooray_wiki.md` — 비목·규정 wiki 실시간 검색.

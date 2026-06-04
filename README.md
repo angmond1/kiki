@@ -37,7 +37,7 @@ KIST 구성원이 Claude Code로 **반복적인 행정 업무**를 자동화하�
 - **부트스트랩(1회)**: Dooray 토큰 → 카드책임자 이름 → 담당 행정원(폴더 **링크** 권장 / 이름검색) → 업로드 범위(폴더 구조 자동 분기) → 수행과제 확인 → 영수증 폴더.
 - **작업**: 영수증 폴더 스캔 → 형식 변환(이미지→jpg / 문서→pdf) → **건별 과제·비목 확정**(사용자와) → 카드 승인번호 fetch 조회 → 파일명 변환 → Dooray 업로드(=RPA 자동 기안) → 처리완료 정리.
 - **좌표 0**: 통합정보 NEXACRO 를 backend **fetch 직접호출**(`window.application.authTk`) → 모든 모니터·해상도에서 동작.
-- **비목**: `bimok_reference` 1차 제안 → 사용자 확정, 애매하면 Dooray wiki 실시간 검색. (소모성 우선·외화 환산금지 등 규칙 내장)
+- **비목**: `expense_category` 1차 제안 → 사용자 확정, 애매하면 Dooray wiki 실시간 검색. (소모성 우선·외화 환산금지 등 규칙 내장)
 - 인증: 통합정보(카드·과제)=KIST SSO 세션 / Dooray(업로드)=개인 토큰. 자세히: [`skills/ki-rpa/SKILL.md`](skills/ki-rpa/SKILL.md).
 
 ## ki-dinning 한눈에
