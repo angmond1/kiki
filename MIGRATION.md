@@ -9,17 +9,17 @@
 ## repo 구조
 ```
 kiki/
-  README.md  INSTALL.md  MIGRATION.md(이 파일)  .gitignore
+  README.md  INSTALL.md  MIGRATION.md(이 파일)  SKILL_BUILDING_GUIDE.md  .gitignore
   shared/   dooray_wapi.md · dooray_api_guide.md · security_policy.md   # 형제 공통 규약
   skills/   ki-mail/ (SKILL.md + references/{classification_policy,wapi_reference} + scripts/ki_mail_ops.js + config 예시)
-            (+ ki-pay/ ki-inspect/ ki-budget/ ki-minutes/ 예정)
+            (+ ki-rpa/ ki-inspect/ ki-budget/ ki-minutes/ 예정)
 ```
 
 ## skill 빌드 상태
 | skill | 상태 | 비고 |
 |-------|------|------|
 | ki-mail | ✅ 빌드 완료 | Tier1 스팸 / Tier2 폴더분류(선택) / Tier3 자연어 규칙 + 권장분류 23규칙(결재알림·과제·UST·기관뉴스·학회, NRF/KEIT/KIAT 분기) + 폴더 자동생성/삭제 |
-| ki-pay / ki-inspect / ki-budget / ki-minutes | ⏳ 다른 세션 진행 중 | 같은 구조·규약·`ki-` 네이밍으로 합류 예정 |
+| ki-rpa / ki-inspect / ki-budget / ki-minutes | ⏳ 다른 세션 진행 중 | 같은 구조·규약·`ki-` 네이밍으로 합류 예정 |
 
 ## 공통 규약 (형제 모두 준수 — `shared/security_policy.md`)
 - C1 개인 credential·식별자·개인학습 skill 텍스트 금지
@@ -31,7 +31,7 @@ kiki/
 - 토큰·비번 저장 금지(세션 쿠키 인증이라 불필요).
 
 ## 통합 관리 세션이 이어받을 일
-1. 형제 skill(ki-pay/inspect/budget/minutes)을 같은 구조로 합류 + `shared/` 규약 일원화.
+1. 형제 skill(ki-rpa/inspect/budget/minutes)을 같은 구조로 합류 + `shared/` 규약 일원화.
 2. (✅ 완료 2026-06-04) ki-mail 폴더 자동생성/삭제 — `create-path` 배열 형식 확정.
 3. 버전·릴리스 관리(태그/CHANGELOG), 설치 스크립트화.
 4. 동료 collaborator 초대·온보딩, 파일럿 피드백 수렴.

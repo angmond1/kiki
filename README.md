@@ -11,7 +11,7 @@ KIST 구성원이 Claude Code로 **반복적인 행정 업무**를 자동화하�
 | skill | 용도 | 상태 |
 |-------|------|------|
 | **ki-mail** | Dooray 메일 관리 — 광고/predatory **스팸 신고(기본)**, **권장 폴더분류**(결재알림·과제·UST·기관뉴스·학회), **"앞으로 X→Y 폴더" 자연어 자동분류 규칙** | ✅ 사용 가능 |
-| ki-pay | RPA 지급신청 | 🛠 준비 중(별도 세션) |
+| ki-rpa | RPA 지급신청 | 🛠 준비 중(별도 세션) |
 | ki-inspect | 물품 소액검수 신청 | 🛠 준비 중 |
 | ki-budget | 과제별 예산 조회·리포트 | 🛠 준비 중 |
 | ki-minutes | 회의록 작성 | 🛠 준비 중 |
@@ -34,3 +34,6 @@ KIST 구성원이 Claude Code로 **반복적인 행정 업무**를 자동화하�
 
 ## 접근
 private repo. 링크/초대를 받은 KIST 구성원만 접근. 통합 관리 방침은 [`MIGRATION.md`](MIGRATION.md).
+
+## 새 skill 만들기
+같은 방식으로 다른 업무를 skill로 만들려면 [`SKILL_BUILDING_GUIDE.md`](SKILL_BUILDING_GUIDE.md) 참조 — 조직·개인에 비종속인 **범용 방법론**(정보 5분류 · 인증 전략 · 미지 API 다루기 · 범용화 체크리스트).

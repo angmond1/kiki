@@ -22,7 +22,7 @@ macOS/Linux:
 ```bash
 cp -r kiki/skills/ki-mail ~/.claude/skills/ki-mail
 ```
-> 형제 skill(ki-pay 등)도 같은 방식. **개인 config는 복사 대상 아님** — 첫 실행 때 `~/.claude/kiki/`에 생성된다.
+> 형제 skill(ki-rpa 등)도 같은 방식. **개인 config는 복사 대상 아님** — 첫 실행 때 `~/.claude/kiki/`에 생성된다.
 
 ## 3. 첫 실행 (부트스트랩)
 Claude Code에서 `ki-mail 설정해줘` 하면 순서대로 물어봅니다:

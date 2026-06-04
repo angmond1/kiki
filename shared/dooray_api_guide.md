@@ -5,7 +5,7 @@
 
 ## ⭐ 먼저: ki-mail은 API 토큰이 불필요
 ki-mail의 메일 기능(조회·스팸·분류·규칙·폴더 생성/삭제)은 **internal wapi**(`kist.gov-dooray.com/v2/wapi`) + **브라우저 세션 쿠키**로 동작한다 → **공식 API 토큰이 필요 없다.**
-아래 토큰 가이드는 **공식 API 기능**(메일 발송 우회·캘린더·드라이브·wiki 등)이나 **형제 skill**(ki-pay 등)이 공식 API를 쓸 때만 해당.
+아래 토큰 가이드는 **공식 API 기능**(메일 발송 우회·캘린더·드라이브·wiki 등)이나 **형제 skill**(ki-rpa 등)이 공식 API를 쓸 때만 해당.
 
 ## API key(개인 인증 토큰) 발급
 - **발급 위치**: https://kist.gov-dooray.com/setting/api/token
