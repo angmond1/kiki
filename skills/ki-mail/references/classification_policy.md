@@ -77,6 +77,7 @@
 |------|------|
 | `nzine@nrf.re.kr` | NRF 웹진 (정확주소 — `nrf.re.kr` 과제보다 우선) |
 | `email@keit.re.kr` | KEIT 뉴스 (정확주소 — `keit.re.kr` 과제보다 우선) |
+| `nabis@keit.re.kr` | KEIT NABIS 안내 (정확주소 — `keit.re.kr` 과제보다 우선) |
 | `newsletters@kiat.or.kr` | KIAT 뉴스레터 (정확주소 — `kiat.or.kr` 과제보다 우선) |
 | `kistep.re.kr` | 한국과학기술기획평가원 (KISTEP) |
 | `stepi.re.kr` | 과학기술정책연구원 (STEPI) |
@@ -103,7 +104,7 @@
 | 도메인 → **과제** | 정확주소 → **기관뉴스** |
 |------|------|
 | `nrf.re.kr` | `nzine@nrf.re.kr` |
-| `keit.re.kr` | `email@keit.re.kr` |
+| `keit.re.kr` | `email@keit.re.kr` · `nabis@keit.re.kr` |
 | `kiat.or.kr` | `newsletters@kiat.or.kr` |
 
 **Dooray는 `not_include`(제외)를 지원하지 않으므로**(검증 완료, -200200) 규칙 우선순위 `applyOrder`로 처리한다:

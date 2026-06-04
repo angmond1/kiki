@@ -5,10 +5,11 @@
   </picture>
 </p>
 
-# kiki — KIST 행정 자동화 skill 패키지
+# KIST 행정 자동화 skill 패키지
 
 KIST 구성원이 Claude Code로 **반복적인 행정 업무**를 자동화하는 skill 모음.
-각 skill을 쓰려면 **개인 Dooray API key 발급이 필요하다**(발급: [개인설정 → API](https://kist.gov-dooray.com/setting/api/token)). 발급한 키는 코드·repo에 넣지 않고 **본인 로컬에만** 둔다.
+**개인 Dooray API key 발급이 필요**(발급: [개인설정 → API](https://kist.gov-dooray.com/setting/api/token)). 
+발급한 키는 코드·repo에 넣지 않고 **본인 로컬에만** 둔다.
 
 ## 구성 skill
 | skill | 용도 | 상태 |
