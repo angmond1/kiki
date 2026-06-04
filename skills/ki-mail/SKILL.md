@@ -19,6 +19,8 @@ description: |
 3. Claude Code에서 이 skill이 설치됨 (`~/.claude/skills/ki-mail/`).
 
 > 이 3가지만 각자 준비하면, 폴더 ID·멤버 정보 등은 **실행 때 자동 조회**된다. 개인 API 키나 비번을 skill에 넣지 않는다.
+>
+> **Dooray API key는 ki-mail에 불필요하다**(메일 기능은 세션 쿠키로 동작). 공식 API 기능이나 형제 skill(ki-pay 등)에서 토큰이 필요할 때만 발급: **https://kist.gov-dooray.com/setting/api/token** — 자세히는 `../../shared/dooray_api_guide.md`. (발급한 토큰은 skill·repo에 저장하지 말고 본인 로컬에만.)
 
 ---
 
@@ -94,7 +96,9 @@ description: |
 - 내용: 폴더 분류 ON 여부, 폴더명 매핑, 개인 분류 규칙/학습 발신처.
 - **민감정보(토큰·비번) 저장 금지.** 메일 코어는 세션 쿠키로 동작하므로 토큰이 필요 없다.
 
-## 참고 문서
+## 참고 문서 / 문제 해결
 - `references/classification_policy.md` — 광고성/predatory **판별 패턴**(보편) + 처리 가이드.
-- `references/wapi_reference.md` — wapi endpoint·body·헤더(조회/스팸/이동/규칙).
-- `../../shared/dooray_wapi.md` — wapi 공통(헤더·rate limit). `../../shared/security_policy.md` — 보안 규약.
+- `references/wapi_reference.md` — wapi endpoint·body·헤더(조회/스팸/이동/규칙/폴더 생성·삭제).
+- `../../shared/dooray_wapi.md` — wapi 공통(필수헤더·rate limit). `../../shared/security_policy.md` — 보안 규약.
+- `../../shared/dooray_api_guide.md` — Dooray **공식 API 가이드·토큰 발급·문제 해결 참조**(원문 링크 포함).
+- **호출 실패 시 순서**: `header.resultMessage` 확인 → `-200200`/빈 응답이면 필수헤더 점검(`dooray_wapi.md`) → 정확한 body 미상이면 **DevTools Network 캡처**(폴더 `create-path`도 이렇게 확정) → 공식 API(토큰) 문제면 `dooray_api_guide.md` + 원문 가이드 참조.
