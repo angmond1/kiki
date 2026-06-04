@@ -60,11 +60,9 @@ description: |
   4. **규칙 생성** — `window.kiMail.createRule({fromEmails, subjectKeywords, toFolderName, applyBefore})`.
 - 결과를 사용자에게 보고(어떤 조건 → 어떤 폴더, 소급 여부).
 
-#### 폴더 확보 절차 (Tier 2/3 공통)
-`ensureFolder`가 `{needManualFolder: name}`을 반환하면(자동 생성 미지원):
-> "Dooray 메일 좌측 폴더 영역에서 **'<name>' 폴더를 직접 만들어** 주세요(폴더 옆 + 또는 우클릭 → 폴더 추가, 5초). 만드신 뒤 알려주시면 규칙을 자동 등록하겠습니다."
-폴더가 생긴 뒤 `createRule` 재호출.
-> (참고: 폴더 자동생성 wapi payload는 추후 1회 캡처로 보완 예정 — `references/wapi_reference.md` TODO.)
+#### 폴더 확보 (Tier 2/3 공통)
+`ensureFolder(name)`이 **없으면 자동 생성**한다(`create-path` 형식 확정). 폴더 생성·자동분류 규칙은 사용자 confirm 후.
+> 만에 하나 `{needManualFolder}`를 반환하면(생성 실패) Dooray UI 수동 생성을 안내 후 재시도.
 
 ---
 

@@ -31,10 +31,11 @@ kiki/
 
 ## 통합 관리 세션이 이어받을 일
 1. 형제 skill(ki-pay/inspect/budget/minutes)을 같은 구조로 합류 + `shared/` 규약 일원화.
-2. **ki-mail 보완**: 폴더 자동생성 wapi payload 캡처 → `ki_mail_ops.js` `tryCreateFolder` 확정(`skills/ki-mail/references/wapi_reference.md`의 TODO).
+2. (✅ 완료 2026-06-04) ki-mail 폴더 자동생성/삭제 — `create-path` 배열 형식 확정.
 3. 버전·릴리스 관리(태그/CHANGELOG), 설치 스크립트화.
 4. 동료 collaborator 초대·온보딩, 파일럿 피드백 수렴.
 5. 접근정책 운영(private 유지, 초대 관리). 정식 plugin marketplace 형식 검토(후순위).
 
 ## 빌드 이력
 - 2026-06-04: ki-mail 초판(본 세션). 코어 `ki_mail_ops.js` = 기존 `spam_report_snippet.js` 패키지화 + `ensureFolder`/`createRule`/단건POST/기간조회.
+- 2026-06-04: 폴더 자동생성/삭제 확정(`POST /mail-folders/create-path` 배열 `[{name,order}]` / `DELETE /mail-folders/{id}`) → `ki_mail_ops` v1.1. `ensureFolder` 자동생성 + `deleteFolder` 추가.

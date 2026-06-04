@@ -47,36 +47,31 @@
     return null;
   }
 
-  // 폴더 확보: 있으면 반환. 없으면 생성 시도(best-effort).
-  // ⚠️ Dooray 사용자 폴더 생성 wapi payload가 비공개라 현재 자동생성 미확정.
-  //   → 실패 시 { needManual:true } 반환. 호출측(skill)이 사용자에게
-  //     "Dooray 좌측 메뉴에서 '<name>' 폴더를 직접 만들어 달라"고 안내 후 재시도.
-  //   (TODO: 폴더 생성 시 DevTools Network payload 1회 캡처되면 createFolder 확정)
+  // 폴더 확보: 있으면 반환, 없으면 생성. (생성/삭제 형식 확정: 2026-06-04 DevTools 캡처)
   async function ensureFolder(name) {
     const found = await findFolderId(name);
     if (found) return { ...found, created: false };
     const made = await tryCreateFolder(name);
     if (made) return { ...made, created: true };
-    return { needManual: true, name };
+    return { needManual: true, name };  // 만일 생성 실패 시 수동생성 안내 fallback
   }
 
-  // best-effort 폴더 생성 — payload 후보 순차 시도. 성공 시 {id,name,type}, 실패 시 null.
+  // 사용자 폴더 생성 — POST /mail-folders/create-path, body=[{name,order}] (⚠️ 배열, order=기존 max+1).
   async function tryCreateFolder(name) {
-    const candidates = [
-      { name, parentFolderId: null, type: 'user' },
-      { name, parentFolderId: null },
-      { name },
-    ];
-    for (const body of candidates) {
-      const d = await dfetch('/v2/wapi/mail-folders', { method: 'POST', body });
-      if (d.header && d.header.isSuccessful) {
-        const id = d.result && (d.result.id || (d.result[0] && d.result[0].id));
-        if (id) return { id, name, type: 'user' };
-        const re = await findFolderId(name);
-        if (re) return re;
-      }
+    const d = await dfetch('/v2/wapi/mail-folders?type=user&size=1000');
+    const arr = (d.result && d.result.contents) ? d.result.contents : [];
+    const maxOrder = Math.max(0, ...arr.map(f => f.displayOrder || 0));
+    const res = await dfetch('/v2/wapi/mail-folders/create-path', { method: 'POST', body: [{ name, order: maxOrder + 1 }] });
+    if (res.header && res.header.isSuccessful) {
+      const re = await findFolderId(name);
+      if (re) return re;
     }
     return null;
+  }
+
+  // 폴더 삭제 — DELETE /mail-folders/{id}. (정리·롤백용)
+  async function deleteFolder(folderId) {
+    return dfetch(`/v2/wapi/mail-folders/${folderId}`, { method: 'DELETE' });
   }
 
   // ---------- 메일 조회 ----------
@@ -165,11 +160,11 @@
 
   // ---------- export ----------
   window.kiMail = {
-    dfetch, findAllFolders, findFolderId, ensureFolder,
+    dfetch, findAllFolders, findFolderId, ensureFolder, deleteFolder,
     listInbox, listFolderMails, summarize,
     reportSpam, moveMails,
     createRule, listMailRules, deleteMailRule,
-    _version: 'ki-mail-ops/1.0',
+    _version: 'ki-mail-ops/1.1',
   };
   return window.kiMail._version;
 })();

@@ -31,5 +31,5 @@ dooray-drive-api-version: 1.1
 ## 알려진 함정 (이번 빌드에서 확인)
 - `mail-rules` 목록 GET은 `page=0` 명시해야 `contents` 정상 반환.
 - `mail-rules` POST는 배열이어도 **첫 1건만 생성** → 여러 규칙은 단건씩 N회.
-- `mail-folders` 생성 payload는 미확정(-200200) → 폴더는 UI 수동 생성 권장(추후 캡처로 보완).
+- `mail-folders` 생성은 `POST /mail-folders/create-path` + **배열** body `[{name,order}]` (확정 2026-06-04). 삭제는 `DELETE /mail-folders/{id}`. (`/mail-folders`에 단일 객체 POST는 -200200)
 - 파일 업로드/다운로드는 `api`→307→`file-api` redirect 시 Authorization 자동 제거 → manual redirect 필요(메일 관리엔 불필요).

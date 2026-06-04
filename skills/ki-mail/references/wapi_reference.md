@@ -60,9 +60,10 @@ DELETE /v2/wapi/mail-rules/{rule-id}
 - ⚠️ **배열에 N개를 넣어도 첫 1건만 생성됨** → 여러 규칙은 단건씩 N회 POST (코어 `createRule`이 단건).
 - `condition`은 `from`·`subject` 중 하나 이상. `applyBeforeMail`=과거 메일 소급.
 
-## 폴더 생성 — ⚠️ 미확정 (TODO)
-- 추정 `POST /v2/wapi/mail-folders {name,...}` 시도했으나 `{name}`/`{name,parentFolderId,type}` 모두 **-200200**.
-- 정확한 payload 미상 → 코어 `ensureFolder`는 best-effort 시도 후 실패 시 `{needManual:true}` 반환.
-- **확정 방법**: Dooray UI에서 폴더 1개 생성 시 DevTools Network 탭의 `mail-folders` 요청 payload를 1회 캡처 → `tryCreateFolder` 후보에 추가.
-- 그 전까지: 폴더는 사용자가 Dooray UI에서 직접 생성, skill은 규칙만 자동.
+## 폴더 생성·삭제 (✅ 확정 2026-06-04, DevTools 캡처)
+- **생성**: `POST /v2/wapi/mail-folders/create-path` — body는 **배열** `[{"name":"폴더명","order":N}]`.
+  - `order` = 기존 사용자 폴더 `displayOrder` 최대값 + 1.
+  - ⚠️ endpoint가 `/mail-folders`가 아니라 **`/mail-folders/create-path`**. 또 body가 **단일 객체면 -200200** — 반드시 배열.
+- **삭제**: `DELETE /v2/wapi/mail-folders/{id}`.
+- 코어: `ensureFolder(name)`(찾고 없으면 생성) / `deleteFolder(id)`(정리·롤백).
 - 폴더 객체 필드: `id, name, type, parentFolderId(null=루트), displayOrder, totalCount`.
