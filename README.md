@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="assets/kiki-logo.png" alt="KIKI" width="360">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/kiki-logo-1-dark.png">
+    <img src="assets/kiki-logo-1.png" alt="KIKI" width="360">
+  </picture>
 </p>
 
 # kiki — KIST 행정 자동화 skill 패키지
