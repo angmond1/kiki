@@ -98,6 +98,17 @@
 | `nanokorea.net` | 나노코리아 |
 | `kontrs.or.kr` | 나노기술연구협의회 (KoNTRS) |
 
+### 시약 (시약·기자재 업체)
+| 발신 | 업체 |
+|------|------|
+| `rnadigital@e.sigmaaldrich.com` | Sigma-Aldrich |
+| `aleuser_pse@sial.com` | Sigma-Aldrich (SIAL) |
+| `logsds@sial.com` | Sigma-Aldrich (SIAL) |
+| `sakr@merckgroup.com` | Merck |
+| `noreply@merckgroup.com` | Merck |
+| `help@sejinci.co.kr` | 세진씨아이 |
+| `dscsi@hanmail.net` | 시약 거래처 |
+
 ### ⭐ 같은 도메인, 두 용도 분기 (NRF·KEIT·KIAT 패턴)
 한 기관 도메인이 과제와 뉴스를 둘 다 보내면, **정확주소(뉴스)를 도메인(공고)보다 먼저** 분류한다:
 

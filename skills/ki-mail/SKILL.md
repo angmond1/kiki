@@ -99,6 +99,7 @@ description: |
    3) UST      ← ust.ac.kr
    4) 기관뉴스  ← nzine@nrf.re.kr · email@keit.re.kr · nabis@keit.re.kr · newsletters@kiat.or.kr · kistep.re.kr · stepi.re.kr · kird.re.kr · kribb.re.kr · pr@kist.re.kr · sema.or.kr
    5) 학회     ← kiche · ksiec · kecs · kchem · kim · mrs-k · nanokorea · kontrs (.or.kr/.org/.net)
+   6) 시약     ← sigmaaldrich · sial.com · merckgroup · sejinci 등 시약·기자재 업체 발신주소 (정확값은 classification_policy.md)
    ```
    - ⚠️ **NRF/KEIT/KIAT 분기**: 정확주소(`nzine@nrf.re.kr`·`email@keit.re.kr`·`nabis@keit.re.kr`·`newsletters@kiat.or.kr` → 기관뉴스)를 도메인(`nrf.re.kr`·`keit.re.kr`·`kiat.or.kr` → 과제)보다 **먼저**(`createRule` `applyOrder` 작게) 등록. Dooray `not_include` 미지원이라 우선순위로만 분기.
 

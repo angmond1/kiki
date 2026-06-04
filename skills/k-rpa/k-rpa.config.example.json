@@ -1,0 +1,28 @@
+{
+  "_note": "예시 파일. 실제 config 는 ~/.claude/kiki/k-rpa.config.json (repo 밖). dooray 토큰 같은 민감정보는 여기 말고 ~/.claude/kiki/k-rpa.env 에. 카드번호·사번 등은 박지 않음(조회로 자동) — 단 사번은 이름→사번 자동변환 보강 전까지 cardHolderEmpno 임시 허용.",
+
+  "cardHolderName": "",
+  "_cardHolderName": "카드책임자 이름 (보통 본인). fam_0711 조회 키.",
+  "cardHolderEmpno": "",
+  "_cardHolderEmpno": "(임시) 카드책임자 사번. 이름→사번 자동변환(chkPopup) 보강 전까지 1회 확인해 저장. 개인 식별자이므로 로컬 config 에만.",
+
+  "adminFolderUrl": "",
+  "_adminFolderUrl": "옵션1(권장): 담당 행정원이 공지한 dooray 폴더 링크. 예 https://kist.gov-dooray.com/drive/3311002956353796322/{folderId}. 있으면 이름검색 불필요.",
+  "adminName": "",
+  "deptName": "",
+  "_adminName_deptName": "옵션2: 링크 모를 때 이름 검색용. 본부명(약어 가능)을 주면 가속.",
+
+  "uploadScope": { "card": true, "taxInvoice": false, "meeting": false },
+  "_uploadScope": "RPA 처리 범위. 카드는 보통 true. 세금계산서/회의비는 부서별로.",
+  "separateFolders": null,
+  "_separateFolders": "세금계산서/회의비를 별도 폴더에 올리는지(true) 카드와 같은 폴더(false). 행정원 폴더 구조 자동파악으로 채움.",
+
+  "receiptFolder": "",
+  "_receiptFolder": "PC 영수증 저장 폴더 경로 (사람마다 다름).",
+
+  "moveOrCopy": null,
+  "_moveOrCopy": "업로드 완료 후 처리완료 폴더로 'move' | 'copy' | 'keep'. 첫 2~3회 묻고 일관되면 학습 저장.",
+
+  "projects": [],
+  "_projects": "수행과제 캐시 [{acccd, name}]. queryProjects 로 자동수집 후 사용자 확인한 목록."
+}
