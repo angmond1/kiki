@@ -55,7 +55,7 @@ description: |
 2. **형식 전처리** — `scripts/convert.py ensure_uploadable` 로 jpg/pdf 보장(이미지→jpg, 문서→pdf). **변환 시 "X→Y 변환함" 알림.** 실패 시 수동 안내.
 3. **건별 과제·비목 확정 (사용자와 함께)** — 각 증빙에 대해:
    - 과제: config 캐시 목록에서 선택(과제명으로 말해도 매핑).
-   - 비목: `references/bimok_reference.md` 로 **제안** → 사용자 확정. 애매하면 `references/dooray_wiki.md` 로 wiki 실시간 검색. (소모성 우선 판단 등 규칙 적용)
+   - 비목: **3단 조회** — ① `references/bimok_reference.md`(자주 쓰는 것·판단 원칙)로 1차 제안 → ② 애매하면 `references/bimok_table.md`(전체 41비목·증빙·한도·집행가능 lookup)에서 정확히 찾기 → ③ 그래도 모호하면 `references/dooray_wiki.md`로 wiki 실시간 검색 → **사용자 확정**. (소모성 우선·외화 환산금지 등 규칙 적용)
    - 카드 종류: **법인/연구비** 확인(법인=`CARDTYPECD` 5, 연구비 3).
 4. **카드 건 승인번호 조회** — `window.kiRpa.queryCards({fromDt,toDt,cardType,empno,custnm})` → 거래처·금액으로 매칭해 `CARDAPPRNO` 확보. **외화는 임의 환산 말고** `USEAMT`(원화청구액) 그대로. (세금계산서·회의비는 승인번호 없음)
    - ⭐ **fetch 실패 시 좌표 fallback 자동 시도** (authTk 없음 / 빈 결과 / HTTP 에러): `references/kist_portal_fetch.md` 의 좌표 절차(화면 캡처 + `zoom` 으로 칸 위치를 찾아 입력·Enter·조회버튼·grid 읽기)로 **재시도**. **시도 순서 = fetch → 좌표, "어떻게든 성공"이 목표.** 둘 다 실패할 때만 화면을 캡처해 사용자에게 보여주고 안내(조용히 멈추지 말 것). 과제목록 조회도 동일.

@@ -33,3 +33,12 @@ dooray-drive-api-version: 1.1
 - `mail-rules` POST는 배열이어도 **첫 1건만 생성** → 여러 규칙은 단건씩 N회.
 - `mail-folders` 생성은 `POST /mail-folders/create-path` + **배열** body `[{name,order}]` (확정 2026-06-04). 삭제는 `DELETE /mail-folders/{id}`. (`/mail-folders`에 단일 객체 POST는 -200200)
 - 파일 업로드/다운로드는 `api`→307→`file-api` redirect 시 Authorization 자동 제거 → manual redirect 필요(메일 관리엔 불필요).
+
+## Drive (ki-rpa 등 — 공식 API + 개인 토큰)
+메일은 세션쿠키 wapi 지만, **drive 업로드/조회는 공식 API(`api.gov-dooray.com`) + 개인 토큰** 사용(세션쿠키 wapi 업로드는 미검증). 토큰은 `~/.claude/kiki/<skill>.env`(repo 밖).
+- 폴더 목록: `GET /drive/v1/drives/{driveId}/files?parentId={}&page=&size=` — 페이징(`result`/`totalCount`). 폴더 판별 `type=="folder"`.
+- 업로드: `POST /drive/v1/drives/{driveId}/files?parentId={}` (multipart, field `file`) → **307** → `Location`(file-api) 로 **같은 `session.post` 재전송**(Session 이라 Authorization 유지).
+- 다운로드: `GET .../files/{id}?media=raw` → 307 → file-api **manual GET**(Authorization 헤더만; requests 자동 follow 는 cross-host 에서 Authorization 제거되어 401).
+- ⚠️ **폴더 이름 검색 API 없음** → 트리 `files` 재귀 순회 + 이름 매칭. root 가 **수천 항목**일 수 있어 전수 검색은 수 분 → 상위(본부 등) 폴더 id 를 캐시해 그 안만 검색하면 수 초.
+- ⚠️ **동명 폴더 복수 존재** 가능 → 하위 구조(특정 폴더 보유)로 정식 식별 + 모호 시 사용자 확인.
+- web URL: `https://kist.gov-dooray.com/drive/{projectId}/{folderId}` — **projectId ≠ driveId** (`GET /drive/v1/drives/{driveId}` 의 `result.project.id` 가 projectId, URL 용 / `result.id`·요청경로는 driveId).

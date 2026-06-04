@@ -1,0 +1,14 @@
+{
+  "_comment": "ki-dinning 개인 설정 예시. 실제 파일은 ~/.claude/kiki/ki-dinning.config.json (repo 밖). 토큰은 여기 X → ~/.claude/kiki/kiki.env 의 DOORAY_TOKEN.",
+  "user_name": "홍길동",
+  "card_holder": { "name": "홍길동", "empno": "00XXXX" },
+  "projects": [
+    { "acccd": "26E0331", "name": "e-Chemical 제조 기술", "code": "E", "pre_approval": true },
+    { "acccd": "26I0123", "name": "국제공동 예시과제", "code": "I", "pre_approval": false }
+  ],
+  "upload_via_rpa": true,
+  "agent_folder_url": "https://kist.gov-dooray.com/drive/.../  (담당 행정원 2.회의비 폴더 링크)",
+  "receipt_path": "C:\\Users\\me\\Desktop\\receipts",
+  "output_dir": "C:\\kiki\\dinning",
+  "project_report_dir": "C:\\kiki\\dinning\\project_report"
+}
