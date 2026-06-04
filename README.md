@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/kiki-logo.png" alt="KIKI" width="360">
+</p>
+
 # kiki — KIST 행정 자동화 skill 패키지
 
 KIST 구성원이 Claude Code로 **반복적인 행정 업무**를 자동화하는 skill 모음.
