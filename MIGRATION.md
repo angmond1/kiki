@@ -10,14 +10,15 @@
 ```
 kiki/
   README.md  INSTALL.md  MIGRATION.md(이 파일)  .gitignore
-  shared/   dooray_wapi.md · security_policy.md      # 형제 공통 규약
-  skills/   ki-mail/ (+ ki-pay/ ki-inspect/ ki-budget/ ki-minutes/ 예정)
+  shared/   dooray_wapi.md · dooray_api_guide.md · security_policy.md   # 형제 공통 규약
+  skills/   ki-mail/ (SKILL.md + references/{classification_policy,wapi_reference} + scripts/ki_mail_ops.js + config 예시)
+            (+ ki-pay/ ki-inspect/ ki-budget/ ki-minutes/ 예정)
 ```
 
 ## skill 빌드 상태
 | skill | 상태 | 비고 |
 |-------|------|------|
-| ki-mail | ✅ 빌드 완료 | 본 세션. Tier1 스팸 / Tier2 폴더분류(선택) / Tier3 자연어 규칙 |
+| ki-mail | ✅ 빌드 완료 | Tier1 스팸 / Tier2 폴더분류(선택) / Tier3 자연어 규칙 + 권장분류 23규칙(결재알림·과제·UST·기관뉴스·학회, NRF/KEIT/KIAT 분기) + 폴더 자동생성/삭제 |
 | ki-pay / ki-inspect / ki-budget / ki-minutes | ⏳ 다른 세션 진행 중 | 같은 구조·규약·`ki-` 네이밍으로 합류 예정 |
 
 ## 공통 규약 (형제 모두 준수 — `shared/security_policy.md`)
@@ -39,3 +40,4 @@ kiki/
 ## 빌드 이력
 - 2026-06-04: ki-mail 초판(본 세션). 코어 `ki_mail_ops.js` = 기존 `spam_report_snippet.js` 패키지화 + `ensureFolder`/`createRule`/단건POST/기간조회.
 - 2026-06-04: 폴더 자동생성/삭제 확정(`POST /mail-folders/create-path` 배열 `[{name,order}]` / `DELETE /mail-folders/{id}`) → `ki_mail_ops` v1.1. `ensureFolder` 자동생성 + `deleteFolder` 추가.
+- 2026-06-04: 권장 분류 체계 추가 — KIST/출연연 공통 23규칙(결재알림·과제·UST·기관뉴스·학회, 기관 도메인 웹검증). 같은 도메인 두 용도 분기(nrf/keit/kiat: 정확주소=뉴스 먼저, 도메인=과제 나중) — Dooray `not_include` 미지원이라 `applyOrder`로 처리, `createRule`에 `applyOrder` 추가. 부트스트랩에 권장분류 순차질문 + 기존폴더 합치기 로직. API key는 설치 시 안 묻고 토큰 필요 작업 요청 시 on-demand 안내 + `shared/dooray_api_guide.md` 추가.

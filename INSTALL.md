@@ -25,11 +25,17 @@ cp -r kiki/skills/ki-mail ~/.claude/skills/ki-mail
 > 형제 skill(ki-pay 등)도 같은 방식. **개인 config는 복사 대상 아님** — 첫 실행 때 `~/.claude/kiki/`에 생성된다.
 
 ## 3. 첫 실행 (부트스트랩)
-Claude Code에서:
-```
-ki-mail 설정해줘
-```
-→ skill이 Chrome 연결·Dooray 로그인 확인 → 본인 메일 폴더를 자동 조회 → "광고/학회/공고를 폴더로 분류할지" 물어봄 → `~/.claude/kiki/ki-mail.config.json` 생성.
+Claude Code에서 `ki-mail 설정해줘` 하면 순서대로 물어봅니다:
+1. (준비) Chrome 연결·Dooray 로그인 확인 → 현재 폴더·기존 규칙 자동 조회.
+2. **Q1** "광고/스팸은 기본으로 스팸 처리합니다. 그 외 메일도 폴더로 분류할까요?"
+3. **메일분류 기본 권장** — 항목별로 순차 질문(각각 켜고/끔, 기존 폴더와 겹치면 합칠지 확인):
+   - **결재알림** ← `noreply@kist.re.kr`
+   - **과제** ← NRF·KETEP·KIAT·KEIT
+   - **UST** ← `ust.ac.kr`
+   - **기관뉴스** ← NRF웹진·KISTEP·STEPI·KIRD·KRIBB·KIST홍보·과학기술인공제회 (+ KEIT/KIAT 뉴스 주소)
+   - **학회** ← 화공·공업화학·전기화학·대한화학·금속재료·재료·나노
+4. 각 '예'마다 폴더 **자동 생성** + (과거 메일 소급할지) 확인 후 규칙 등록 — 모두 confirm 후.
+5. `~/.claude/kiki/ki-mail.config.json` 생성.
 - config 없이도 스팸 처리·자연어 규칙은 동작. config는 폴더 분류 선호 기억용.
 
 ## 4. 사용 예
@@ -41,5 +47,5 @@ ki-mail 설정해줘
 ## 트러블슈팅
 - **"로그인 해달라"고 뜸** → Chrome에서 `kist.gov-dooray.com` 로그인 후 재시도(세션 만료).
 - **브라우저 연결 안 됨** → Claude in Chrome 확장 연결 확인.
-- **폴더 자동 생성 안 됨** → 현재는 Dooray 좌측에서 폴더를 직접 만든 뒤 규칙을 걸면 됨(자동분류는 정상 동작).
+- **폴더 자동 생성** → 권장/자연어 분류 시 없는 폴더는 자동 생성됩니다. 혹시 실패하면 Dooray 좌측에서 직접 만든 뒤 재시도하면 규칙이 걸립니다.
 - **사내망 필요** → Dooray 접속은 KIST 망/계정 권한을 따른다.
