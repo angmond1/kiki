@@ -8,7 +8,7 @@
 # kiki — KIST 행정 자동화 skill 패키지
 
 KIST 구성원이 Claude Code로 **반복적인 행정 업무**를 자동화하는 skill 모음.
-각 skill은 **본인 브라우저 로그인 세션**으로 동작하며, 개인 API 키·비번을 요구하지 않는다.
+각 skill을 쓰려면 **개인 Dooray API key 발급이 필요하다**(발급: [개인설정 → API](https://kist.gov-dooray.com/setting/api/token)). 발급한 키는 코드·repo에 넣지 않고 **본인 로컬에만** 둔다.
 
 ## 구성 skill
 | skill | 용도 | 상태 |
@@ -20,7 +20,7 @@ KIST 구성원이 Claude Code로 **반복적인 행정 업무**를 자동화하�
 | ki-minutes | 회의록 작성 | 🛠 준비 중 |
 
 ## 설계 원칙
-- **credential 0**: 메일/행정 코어는 KIST Dooray **세션 쿠키**로 동작 → 토큰·비번을 skill에 넣지 않는다.
+- **credential 격리**: 개인 Dooray API key는 **코드·repo에 절대 넣지 않고** 본인 로컬에만 둔다(skill 텍스트엔 credential 0).
 - **개인화는 런타임 조회 + 로컬 config**: 폴더 ID 등 사람마다 다른 값은 실행 때 자동 조회. 개인 설정은 `~/.claude/kiki/`(repo 밖).
 - **모든 쓰기는 confirm 후**: 되돌리기 어려운 작업은 제안만 자동, 실행은 사용자 확인.
 - 자세한 규약: [`shared/security_policy.md`](shared/security_policy.md).
