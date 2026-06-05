@@ -57,6 +57,16 @@ kiki/
 - **javascript_tool 함정**: REPL 이라 **top-level `await` 불가** → `(async()=>{ ... })()` async IIFE 로 감싼다. 카드 금액 `USEAMT` 는 `{hi,lo}` 객체(`.hi`). XHR 후킹은 브라우저 안에서(사용자 F12 불요).
 - **토큰 = `kiki.env` 공유**(skill 별 `.env` 폐기, `ki-rpa.env`→`kiki.env` 통합 권장): 모든 ki-* 가 `~/.claude/kiki/kiki.env` 한 파일. 설치 시 없으면 **빈 템플릿 자동생성**(파일 못 만드는 사용자 우회). 입력 (A)본인 파일작성(노출0) / (B)채팅 기입→skill 자동저장(노출 1회 경고).
 
+### ki-budget 에서 추가 확보 (2026-06-02) — NEXACRO 그리드 조회 디버깅 (ki-inspect 등 *조회* skill 직결)
+- ⭐ **그리드 조회는 보조 파라미터가 집계 레벨을 바꾼다**: 예실대비표 `getMainList`(bdg_2030)는 `BUDGYEAR='9999'`(전체/누적 — 실제 연도 넣으면 **빈 응답**) + `BUDGSBJCD`(과제) + **`ACCCLSCD`(회계분류코드, `getBdgInfo` 에서 취득)** 3개라야 카테고리 소계(`LEV='1'`, 예산총액 A·잔액 D 포함)가 온다. ACCCLSCD 빠지면 세부항목(`LEV='2'`, 집행액만)만 와서 "A/D 없다"고 오인하기 쉽다. → **빈/부분 응답이면 추측 말고, XHR 후킹으로 캡처한 *화면 request body의 실제 파라미터 값* 을 그대로 재현**(전체조회 상수 `9999`·필수 보조키 `ACCCLSCD` 가 숨어 응답 범위를 좌우).
+- ⭐ **"응답에 값이 없다"고 속단 금지 — raw 역검색**: 카테고리 예산총액이 fetch 응답에 없는 줄 알았으나, 캡처 raw 에서 예상 금액을 문자열 grep 하니 같은 `getMainList` LEV1 행 `LASTBUDGAMT` 에 있었다(파라미터 부족으로 LEV2 만 받았던 것). **화면이 표시하는 값은 거의 backend 응답에 있다**(client 계산으로 단정 X) → 원하는 값(예상 수치)을 raw 응답에서 검색해 endpoint·Dataset·컬럼·행 역추적.
+- **같은 라벨이 여러 레벨 행에 중복 → 레벨 필터 필수**: `BUDGITEMNM`("33:연구활동비1")이 소계(LEV1)와 세부(LEV2)에 모두 붙어 `LEV==='1'` 안 거르면 첫 매칭(세부값) 오집계 + 호출마다 값이 흔들린다. 집계 그리드는 **레벨/소계 구분(LEV·항목코드 유무)부터 파악**.
+- **팝업 backend 는 팝업 window 에 XHR 후킹**: 예실대비표는 별도 팝업 window 라 부모 탭 후킹으론 못 잡음 → `window.open` 후킹으로 팝업 포획 + 생성 즉시 그 window 의 `XMLHttpRequest.prototype` 후킹 → 팝업 모든 `.do`(endpoint+body+resp) 캡처. **F12 요청 전에 후킹으로 이미 잡힌 것부터 분석**(화면 1회 열면 전부 잡힘).
+- **[BLOCKED] 회피 = 구조만 추출**: body/resp 에 `authTk`·`_ga`·`WMONID`·쿠키 섞이면 출력 차단 → 값 빼고 **Dataset id·컬럼명·LEV 분포** 같은 구조만(또는 특정 금액 1개만) 반환.
+- **조회 전용 skill 은 토큰·dooray 불요**: 예산은 SSO 세션 fetch + 로컬 엑셀(`openpyxl`)만 → `kiki.env`·`dooray_drive.py` 불필요. 쓰기 없는 skill 이 가장 단순. (단 `ki-inspect` 소액검수는 *제출/저장*이 있어 ki-rpa 패턴 + 쓰기 confirm 필요.)
+- **빌드는 plan → fetch 실증부터**: plan 승인 직후 첫 작업으로 오늘자 실데이터 end-to-end(fetch→엑셀+채팅표) 실증 → 가정(fetch 됨)을 즉시 검증, 안 되는 부분만 DOM fallback 확정. **출력 양식은 핵심 먼저 보여주고 사용자 피드백으로 다듬어 references 에 박제**(예: 카테고리 잔액만 + 직접비 우측열).
+- 화면코드: `bdg_2030`(예실대비표) = `getBdgInfo`(과제 메타 + ACCCLSCD) → `getMainList`(카테고리). 컬럼 1:1 매핑·예산항목 코드 전체: `skills/ki-budget/references/budget_fetch_spec.md`.
+
 ## 빌드 이력
 - 2026-06-04: ki-mail 초판(본 세션). 코어 `ki_mail_ops.js` = 기존 `spam_report_snippet.js` 패키지화 + `ensureFolder`/`createRule`/단건POST/기간조회.
 - 2026-06-04: 폴더 자동생성/삭제 확정(`POST /mail-folders/create-path` 배열 `[{name,order}]` / `DELETE /mail-folders/{id}`) → `ki_mail_ops` v1.1. `ensureFolder` 자동생성 + `deleteFolder` 추가.
