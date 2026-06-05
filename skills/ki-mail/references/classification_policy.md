@@ -98,6 +98,7 @@
 | `mrs-k.or.kr` | 한국재료학회 |
 | `nanokorea.net` | 나노코리아 |
 | `kontrs.or.kr` | 나노기술연구협의회 (KoNTRS) |
+| `cleantechnol@pukyong.ac.kr` | 청정기술학회 사무국 (정확주소) |
 
 ### 시약 (시약·기자재 업체)
 | 발신 | 업체 |
