@@ -63,6 +63,14 @@ ki-mail 과 달리 ki-rpa 는 **업로드에 Dooray 개인 토큰**이 필요하
 5. **사용 예**: `회의비 처리하자` / `이번달 회의비 회의록 만들어줘`
 > 카드·과제·사전결재 조회는 통합정보 SSO 세션(토큰 불요). 회의록 출력 기본 경로 `C:\kiki\dining\<yymmdd>\`, 회의내용 작성용 과제보고서는 `C:\kiki\dining\project_report\`.
 
+## ki-budget (예산 조회·리포트) — 추가 준비
+조회·로컬저장 전용이라 **Dooray 토큰 불요**(통합정보 SSO 세션만). 엑셀 생성에 python `openpyxl`.
+1. **python 라이브러리**: `pip install openpyxl`.
+2. **설치**: `Copy-Item -Recurse "kiki\skills\ki-budget" "$env:USERPROFILE\.claude\skills\ki-budget"`
+3. **첫 실행** `ki-budget 설정해줘` → 본인 과제 자동조회 → 추적 과제 선택(과제번호+명) → 개인집계 여부(공동과제 본인지분, 적요 이름) → 추적 카테고리 → 저장 폴더 → 오늘 날짜 1회 시험수집.
+4. **사용 예**: `예산 수집해줘` / `내 과제 예산 정리해줘` / `예산 잔액 표로 보여줘`
+> 통합정보(p.kist.re.kr) SSO 로그인 세션 필요(토큰·비번 없음). 포털 제출/변경 없는 **조회 전용**. 출력 기본 `C:\kiki\budget\yymmdd.xlsx`(채팅창에도 표로 함께 출력).
+
 ## 트러블슈팅
 - **"로그인 해달라"고 뜸** → Chrome에서 `kist.gov-dooray.com` 로그인 후 재시도(세션 만료).
 - **브라우저 연결 안 됨** → Claude in Chrome 확장 연결 확인.

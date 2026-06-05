@@ -1,0 +1,22 @@
+{
+  "_help": "ki-budget 개인설정 예시. 실제 config 는 ~/.claude/kiki/ki-budget.config.json (repo 밖). 개인 이름/과제번호/할당액은 여기(로컬)에만 둔다 — skill 텍스트엔 0.",
+
+  "user_name": "(본인 이름) — 과책(PI) 판별용. 과제 pi==user_name 이면 과책, 아니면 참여(개인집계·인건비 상세 권한 제한 가능)",
+
+  "projects": [
+    {"_help": "Q1에서 고른 추적 대상 과제만. role 은 본인 기준(주관/공동/참여).",
+     "acccd": "", "name": "", "pi": "", "role": ""}
+  ],
+
+  "track_categories": ["재료비", "시설장비비", "활동비1", "활동비2", "내부인건비2", "학생인건비"],
+
+  "show_direct_subtotal": true,
+
+  "personal_share": [
+    {"_help": "(optional) 공동과제 본인 지분. filter_names=집행내역 적요에 잡을 이름(연구자/행정원/혼합, 복수). merge_act2_into_act1=활동비2를 활동비1 풀에 합산.",
+     "acccd": "", "filter_names": [], "allocations": {"재료비": 0, "활동비1": 0, "내부인건비2": 0}, "merge_act2_into_act1": true}
+  ],
+
+  "output_dir": "C:\\kiki\\budget",
+  "filename_pattern": "{yymmdd}.xlsx"
+}

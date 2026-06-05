@@ -3,7 +3,7 @@
   "user_name": "홍길동",
   "card_holder": { "name": "홍길동", "empno": "00XXXX" },
   "projects": [
-    { "acccd": "26E0331", "name": "e-Chemical 제조 기술", "code": "E", "pre_approval": true },
+    { "acccd": "26E0001", "name": "예시 연구과제(E유형·주관)", "code": "E", "pre_approval": true },
     { "acccd": "26I0123", "name": "국제공동 예시과제", "code": "I", "pre_approval": false }
   ],
   "upload_via_rpa": true,

@@ -72,7 +72,7 @@
     var cols = ['SRCHKND', 'SRCHVAL', 'SRCHPROCESS'];
     var xml = await post('/mis/rdm/rdm2011/doSearchMain.do', nexBody('rdm_2011', 'doSearchMain', ds('ds_search', cols, { SRCHKND: 'anyThing', SRCHPROCESS: '0' })));
     return parseRows(xml).filter(function (o) { return o.ACCCD; }).map(function (o) {
-      var mm = String(o.ACCCD).match(/\d+([A-Za-z])/);   // 26E0331 -> E, 2N48010 -> N
+      var mm = String(o.ACCCD).match(/\d+([A-Za-z])/);   // 숫자 뒤 첫 영문 = 분류코드 (26E0001 -> E, 2N00009 -> N)
       var code = mm ? mm[1].toUpperCase() : '';
       return { acccd: o.ACCCD, name: o.PROJNM, pi: o.KORNM, projCode: code, preApprovalExempt: (code === 'I' || code === 'S' || code === 'K') };
     });

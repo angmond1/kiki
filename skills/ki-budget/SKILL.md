@@ -1,0 +1,69 @@
+---
+name: ki-budget
+description: KIST 과제 예산 수집·리포트 자동화 skill (kiki 패키지). 통합정보 예실대비표(bdg_2030)를 좌표 없이 fetch 직접조회해 과제별 카테고리 예산총액/집행/잔액을 수집, 로컬 엑셀 리포트 + 세션 채팅 표로 출력한다. 공동과제는 본인 지분만 집계(optional). 사용자가 "예산 수집", "예산 조회/정리해줘", "과제 예산 현황", "예실대비표", "예산 리포트", "ki-budget", "내 과제 예산 정리", "예산 잔액" 등을 요청할 때 사용. 조회·로컬 저장 전용(포털 제출/변경 없음).
+---
+
+# ki-budget — KIST 과제 예산 수집·리포트
+
+통합정보 예실대비표를 **fetch 직접조회**(좌표·해상도·모니터 무관)로 수집해 엑셀 + 채팅 표로 낸다. **조회 전용**(쓰기 없음).
+
+## 정보 5분류 (개인정보 격리)
+- **내장(A)**: fetch 코어·컬럼 매핑·검산·엑셀 렌더러·표 양식·직접비 합산·개인지분 로직 → skill.
+- **런타임조회(B)**: 본인 과제·예산·집행내역·`authTk` → 실행 때.
+- **환경준비(C)**: §1.
+- **config(D)**: 본인 이름·추적 과제/카테고리·개인집계·출력폴더 → `~/.claude/kiki/ki-budget.config.json`.
+- **격리(E)**: 특정인 이름·사번·계정번호·할당액·개인경로 → skill 텍스트에 0.
+
+## 1. 전제 (각자 본인 PC — 이것이 인증, 토큰 없음)
+1. **Claude Code** + **Claude in Chrome (MCP)** 확장 설치·연결(`list_connected_browsers` 확인).
+2. **Chrome에 본인 KIST 통합정보(`p.kist.re.kr:8081`) SSO 로그인** + 과제별관리(`rdm_2011`) 한 번 열어 `authTk` 활성. (사내망)
+- 안 되면 "로그인/연결 안내"로 친절 실패(크래시 X).
+
+## 2. 실행 준비 (매 작업/설정 시작)
+1. `tabs_context_mcp` → 통합정보 탭 확인, 없으면 새 탭 + navigate `http://p.kist.re.kr:8081/nxui/kistis/indexQ.jsp?target=mis.rdm::rdm_2011.xfdl&menuParam=sysCd%3DCUS`.
+2. `document.title==="과제별관리"` + `window.application.authTk` 존재 확인. (없으면 로그인 요청)
+   - ⚠️ `location.href`/쿠키 반환은 Chrome MCP 보안에 막힘 → 그 필드 빼고 반환.
+3. `scripts/portal_ops.js` Read → `javascript_tool` 로 inject (`window.kiBudget`).
+
+## 3. 부트스트랩 (`ki-budget 설정해줘`, 첫 1회) — 순차 질문
+- **(자동)** 준비(§2) → `kiBudget.queryProjects()` 로 본인 참여 과제 전체 조회.
+- **Q1 — 수집 과제 선택**: `과제번호 + 과제명`(+ PI·역할) 목록 출력 → "앞으로 예산 추적할 과제만 고르세요"(참여 전부 아님). 본인이 PI 아닌 과제(`pi != user_name`)엔 **`ⓘ 과책 아님 — 인건비 상세는 권한 제한`** 라벨.
+- **Q2 — 개인집계 여부**: "공동과제에서 본인 사용분만 따로 집계할 과제가 있나요?(없으면 건너뜀)"
+  - Q2a 과제 → Q2b **적요 이름목록**("본인 사용분을 적요의 어떤 이름으로? 연구자명(복수)/행정원명/혼합 가능") → Q2c 할당 기준액 → **Q2d "활동비2를 활동비1에 합산? 따로?"**(`merge_act2_into_act1`).
+- **Q3 — 추적 카테고리**: 기본 6개[재료비·시설장비비·활동비1·활동비2·내부인건비2·학생인건비], 가감.
+- **Q4 — 저장**: "엑셀을 로컬 폴더에 저장합니다. 기본 `C:\kiki\budget\` 에 `yymmdd.xlsx`. 이대로/다른 폴더·파일명?"
+- **(저장)** `~/.claude/kiki/ki-budget.config.json`.
+- **(첫 시험 수집)** "설정 완료. 오늘 날짜 기준으로 1회 시험 수집합니다" → 아래 작업 1회 실행(엑셀 + 채팅 표)으로 동작 확인.
+
+## 4. 작업 (`예산 수집해줘` / `ki-budget`)
+1. 준비(§2) + portal_ops inject.
+2. 대상 = config `projects`(또는 사용자 지정 일부).
+3. **과제별 fetch**: 각 acccd → `kiBudget.queryBudgetTable(acccd)` → `categories{표시명:{A,exec,pendingDone,pendingProg,D,rate}}` + `direct{A,D}`.
+   - **검산** `A == D + exec + pendingDone + pendingProg` 불일치 시 경고.
+   - **과책 아닌 과제**: 과제 전체 카테고리 A/D는 정상 조회됨. 단 개인집계용 집행내역(적요)·인건비 상세는 권한 제한 가능 → 보고에 명시.
+4. **개인집계**(config `personal_share` 과제, optional): 집행내역 적요에 `filter_names` 포함 건 합산(완료+계류). `merge_act2_into_act1` 적용. → `references/budget_fetch_spec.md` 의 집행내역 경로.
+5. **JSON 스냅샷**: `~/.claude/kiki/ki-budget/data/yymmdd.json` (메타는 직전 복사, 카테고리/직접비/개인집계 오늘 값).
+6. **엑셀**: `python scripts/make_report.py <json> <output_dir>/yymmdd.xlsx`. 검증(openpyxl). Excel 열림 시 `PermissionError` → 닫아달라 안내 후 재시도.
+7. **보고 — 엑셀 + 채팅 표(항상)**: `references/budget_report_format.md` 양식.
+   - 채팅 표 = **카테고리 잔액만 + 맨 우측 직접비(잔액/총액)** (백만원 약식).
+   - 엑셀 = 카테고리 총액/잔액 + 한 칸 띄움 + 직접비(잔액/총액).
+   - + 직전 스냅샷 대비 diff(예산 재분류·집행 진행) + 과책아님 과제 표기. **엑셀만 저장하고 침묵 금지.**
+
+## 5. ⚠️ DOM fallback UX (fetch 실패 시 — 침묵 금지)
+순수 fetch가 표준(2026-06-02 실증). 만약 fetch가 빈 응답/실패하면 화면(DOM) 우회 — 해상도가 사람마다 달라 느릴 수 있으므로:
+- 우회 진입 시 **즉시 안내**: "⚠️ 이 PC에서는 직접조회(fetch)가 안 돼 화면(DOM) 방식으로 우회합니다. 해상도와 무관하게 동작하도록 화면을 읽는 중이니 잠시(약 30초~1분) 기다려 주세요 — 멈춘 게 아닙니다."
+- 진행 중 단계 메시지("예실대비표 여는 중…", "3/6 과제 수집 중…"). 좌표 고정값 금지(`zoom` 위치탐색). 완료·실패 모두 보고.
+
+## 6. 안전 규칙
+- **조회·로컬 엑셀쓰기 전용** — 포털 제출/변경/결재 없음 → 자동. 토큰 불필요(SSO 세션).
+- 이름·사번·계정번호·할당액은 **로컬 config 에만**. 출력/로그에 authTk·쿠키 섞이면 핵심 필드만.
+- git push 등은 사용자 요청 시에만.
+
+## config (`~/.claude/kiki/ki-budget.config.json`)
+`ki-budget.config.example.json` 참고. 키: `user_name`(과책 판별) / `projects`(선택 과제) / `track_categories` / `show_direct_subtotal` / `personal_share`(과제+filter_names+allocations+merge_act2_into_act1) / `output_dir` / `filename_pattern`.
+
+## 참고
+- [references/budget_fetch_spec.md](references/budget_fetch_spec.md) — bdg_2030 fetch endpoint·컬럼 1:1 매핑·예산항목 코드·함정.
+- [references/budget_report_format.md](references/budget_report_format.md) — 채팅 표/엑셀 양식·직접비·개인집계·검산.
+- [shared/kist_portal.md](../../shared/kist_portal.md) — 통합정보 fetch 공통(authTk·parseRows·좌표 fallback).
+- [shared/security_policy.md](../../shared/security_policy.md) — C1~C5.
