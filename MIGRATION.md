@@ -12,7 +12,8 @@ kiki/
   README.md  INSTALL.md  MIGRATION.md(이 파일)  SKILL_BUILDING_GUIDE.md  .gitignore
   shared/   security_policy.md · dooray_wapi.md · dooray_api_guide.md · kist_portal.md(통합정보 NEXACRO fetch 공통)   # 형제 공통 규약
   skills/   ki-mail/ (SKILL.md + references/{classification_policy,wapi_reference} + scripts/ki_mail_ops.js + config 예시)
-            ki-rpa/ · ki-dining/ · ki-budget/ (SKILL.md + references/{budget_fetch_spec,budget_report_format} + scripts/{portal_ops.js,make_report.py} + config 예시) · (+ ki-inspect/ 예정)
+            ki-rpa/ · ki-dining/ · ki-budget/ (SKILL.md + references/{budget_fetch_spec,budget_report_format} + scripts/{portal_ops.js,make_report.py} + config 예시)
+            ki-inspect/ (SKILL.md + references/{mcs0003_fields,asset_classification,fam0711_fx,evidence_rules,screen_codes,code_tables} + scripts/{convert_evidence,rename_evidence}.py + config 예시) — 소액검수, NEXACRO **form 직접제어**(제출 화면)
 ```
 
 ## skill 빌드 상태
@@ -22,7 +23,7 @@ kiki/
 | **ki-rpa** | ✅ 빌드 완료 | 좌표0 fetch(카드내역 getList / 과제 doSearchMain / 이름→사번 chkPopup) + 비목 통합 + Dooray 폴더 이름검색·구조파악·업로드·아카이브 + 파일변환(한글/Office COM). 인증: 통합정보=SSO세션+authTk / Dooray=토큰 |
 | **ki-dining** | ✅ 빌드 완료 | 카드(법인+연구비) 회의비 추출 + 사전결재 `fam_0100` 매칭(`getListByBonbu` 본부조회→클라 필터) + 별지1호 **회의록 hwp 생성**(pyhwpx 셀치환·**WPF 보안팝업 Alt+N watcher**) + 두레이 업로드. 인증: 통합정보=SSO / 두레이=토큰(`kiki.env`) |
 | **ki-budget** | ✅ 빌드 완료 | 좌표0 fetch(과제 `doSearchMain` / 예실대비표 `getBdgInfo`→`getMainList`, ★`BUDGYEAR=9999`+`ACCCLSCD`가 카테고리 LEV1 집계 트리거·화면 1:1 검증) + 카테고리 A/집행(CTRLPERFAMT)/계류완료(CTRLCAUSAMT)/계류진행(TEMPAMT)/잔액(BALNAMT) + 직접비 소계(BUDGITEMCLSNM=직접비) + 개인지분(적요 이름필터) + `make_report`(총액/잔액 + 한칸 띄움 + 직접비 잔액/총액). 인증: 통합정보=SSO세션. **조회·로컬저장 전용**(토큰 불요) |
-| ki-inspect | 🛠 prototype(별도세션 2026-06-05) | 소액검수 `mcs_0003` — NEXACRO **form 직접제어**(set_value/setColumn, fetch insert 미시도) + 자산/비자산 **보수적 판정**(wiki 7-1) + 외화=`fam_0711` USEAMT + 증빙 전처리. 위치 `C:\claude-kist1\.claude\skills\ki-inspect`. kiki 합류 시 fetch insert 캡처·config 위치 통일 검토. ↓'ki-inspect 노하우' |
+| **ki-inspect** | ✅ 빌드 완료(2026-06-05) | 소액검수 `mcs_0003` — NEXACRO **form 직접제어**(제출 화면이라 fetch insert 대신 form 제어가 정석; 좌표 0) + 자산/비자산 **보수적 판정**(wiki 7-1) + 외화=`fam_0711` USEAMT + 증빙 전처리. config·문서 kiki 규약 합류. 검증 TODO: 실전 end-to-end. ↓'ki-inspect 노하우' |
 
 ## 공통 규약 (형제 모두 준수 — `shared/security_policy.md`)
 - C1 개인 credential·식별자·개인학습 skill 텍스트 금지
@@ -68,7 +69,7 @@ kiki/
 - 화면코드: `bdg_2030`(예실대비표) = `getBdgInfo`(과제 메타 + ACCCLSCD) → `getMainList`(카테고리). 컬럼 1:1 매핑·예산항목 코드 전체: `skills/ki-budget/references/budget_fetch_spec.md`.
 
 ### ki-inspect 에서 추가 확보 (2026-06-05) — 소액검수 *쓰기* skill·NEXACRO form 직접제어·자산판정·외화확정
-ki-inspect(소액검수신청 `mcs_0003`)는 *조회*가 아니라 **제출(insert)** skill — ki-budget/dining 의 조회 fetch 와 다르다. 이 세션은 Chrome MCP **NEXACRO form 직접제어**로 prototype 완성(`C:\claude-kist1\.claude\skills\ki-inspect`, fetch insert 미시도). kiki 합류 시 아래 그대로 재사용.
+ki-inspect(소액검수신청 `mcs_0003`)는 *조회*가 아니라 **제출(insert)** skill — ki-budget/dining 의 조회 fetch 와 다르다. ⭐ **제출 화면은 fetch insert 대신 NEXACRO form 직접제어가 정석**: form 객체 접근이라 좌표 0(kiki 철학 유지)인데다, 복잡한 insert body(PRCT+ASST/NOT_ASST 수십필드) 캡처 불요·사용자 화면검토 후 저장 안전·첨부는 어차피 수동이다(fetch insert 는 잘못된 데이터 직접 DB 입력 위험). `skills/ki-inspect/` 합류 완료(config·문서 kiki 규약). 아래 그대로 재사용.
 - **검수창 입력 = NEXACRO form 직접제어**(fetch insert 대안): 팝업(`window.open` 별도창) 포획 → `window._popupWin.application.popupframes.mcs_0003_pop2.form` → `form.<comp>.set_value()` / `form.<ds>.setColumn(0,'COL',v)`. **좌표 무관**(form 객체). ⚠️ 저장(신청버튼)·**파일첨부는 사용자**(팝업 별도창이라 MCP 파일첨부 불가, CDP `setFileInputFiles` 거부; 결재성 저장은 본인 confirm). fetch insert(`insertPrctInfo`) 쓰려면 신청 시 XHR 후킹으로 endpoint+body 캡처 필요(미확보).
 - **dataset 3종**(`radio2` 자산구분 N/Y): 공통 `ds_main_PRCT_INFO`(CCK_DTM 신청일시·LABT_CD·BD_CD·ROOM_NO·FNSH_PTT_USER 지급신청자·PRCT_USER 검수신청자=로그인 자동) / 비자산 `ds_main_NOT_ASST_INFO` / 자산 `ds_main_ASST_INFO`. ⚠️ 물품을 `ds_rqstGrid`(구가이드)에 넣으면 **화면 공란** — NOT_ASST/ASST 가 정답.
 - ⛔ **승인번호 input06→`RLTDMGRNO` 입력 금지**: DB 10자, 24자 세금계산서 승인번호 넣으면 `ORA-12899`. KIST 자체관리라 비운다.

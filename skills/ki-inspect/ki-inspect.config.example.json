@@ -1,0 +1,24 @@
+{
+  "_comment": "ki-inspect 사용자 설정 템플릿. 이 파일을 ~/.claude/kiki/ki-inspect.config.json 으로 복사해 본인 값을 채우세요(형제 skill 과 같은 repo 밖 네임스페이스). config 는 로컬 전용(git 업로드 금지).",
+  "user": {
+    "name": "",
+    "emp_no": "",
+    "phone": ""
+  },
+  "location": {
+    "region_code": "LABT_00",
+    "_region_note": "본원=LABT_00 / 강릉=LABT_01 / 전북=LABT_02 (code_tables.md)",
+    "building_code": "",
+    "_building_note": "지역별 BD_xxx (code_tables.md)",
+    "room": ""
+  },
+  "payment_admin": {
+    "name": "",
+    "_note": "지급신청 담당 연구행정원 이름. 검수창 지급신청자 자동검색에 사용."
+  },
+  "inspect_folder": "C:\\kiki\\inspect",
+  "projects": [
+    {"account_no": "", "title": ""}
+  ],
+  "_projects_note": "통합정보 프로젝트(연구관리) 화면에서 자동 수집된 참여 과제(과제번호+과제명). 자산 검수 시 지급계정 선택지. '과제 갱신' 시 재수집."
+}
