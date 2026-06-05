@@ -85,6 +85,7 @@
 | `kribb.re.kr` | 한국생명공학연구원 (KRIBB) 뉴스 |
 | `pr@kist.re.kr` | KIST 홍보 뉴스 |
 | `sema.or.kr` | 과학기술인공제회 (SEMA) |
+| `ssm@kontrs.or.kr` | KoNTRS 안내 (정확주소 — `kontrs.or.kr` 학회보다 우선) |
 
 ### 학회 (화학·재료·나노 — 해당 분야 공통)
 | 도메인 | 학회 |
