@@ -56,6 +56,7 @@ description: |
 3. **건별 과제·비목 확정 (사용자와 함께)** — 각 증빙에 대해:
    - 과제: config 캐시 목록에서 선택(과제명으로 말해도 매핑).
    - 비목: **3단 조회** — ① `references/expense_category.md`(자주 쓰는 것·판단 원칙)로 1차 제안 → ② 애매하면 `references/expense_category_table.md`(전체 41비목·증빙·한도·집행가능 lookup)에서 정확히 찾기 → ③ 그래도 모호하면 `references/dooray_wiki.md`로 wiki 실시간 검색 → **사용자 확정**. (소모성 우선·외화 환산금지 등 규칙 적용)
+   - **증빙·검수·반려 점검**: `references/payment_request_manual.md`(재무팀 공식 매뉴얼)로 해당 비목의 **필수 증빙**(거래명세서 항목·온라인 배송지·결제대행 별도전표), **선행 검수**(100만원↑ 모바일검수 / 50만원↑ 정보화기기 / 소액물품 300만↑ 구매요구), **집행 한도·반려 예방**(회의비 1인5만·심야금지, 이어폰10만 등 한도, 계정책임자·부서협조 누락) 확인 → 미충족이면 사용자에게 보완 안내. 애매하면 매뉴얼 원문 링크로 최신 확인.
    - 카드 종류: **법인/연구비** 확인(법인=`CARDTYPECD` 5, 연구비 3).
 4. **카드 건 승인번호 조회** — `window.kiRpa.queryCards({fromDt,toDt,cardType,empno,custnm})` → 거래처·금액으로 매칭해 `CARDAPPRNO` 확보. **외화는 임의 환산 말고** `USEAMT`(원화청구액) 그대로. (세금계산서·회의비는 승인번호 없음)
    - ⭐ **fetch 실패 시 좌표 fallback 자동 시도** (authTk 없음 / 빈 결과 / HTTP 에러): `references/kist_portal_fetch.md` 의 좌표 절차(화면 캡처 + `zoom` 으로 칸 위치를 찾아 입력·Enter·조회버튼·grid 읽기)로 **재시도**. **시도 순서 = fetch → 좌표, "어떻게든 성공"이 목표.** 둘 다 실패할 때만 화면을 캡처해 사용자에게 보여주고 안내(조용히 멈추지 말 것). 과제목록 조회도 동일.
@@ -82,6 +83,7 @@ description: |
 - **토큰은 config 아닌 `ki-rpa.env`.** 민감정보(카드번호 등) 저장 금지.
 
 ## 참고 문서
+- `references/payment_request_manual.md` — ⭐ **재무팀 공식 지급신청 매뉴얼**(Dooray Wiki 원문 스냅샷 + 빠른참조). 비목별 증빙·검수·집행기준·반려사항·계정코드·과세/국외소득 + 첨부양식 10 file_id + 원문 링크. 증빙·검수·반려 점검의 1차 권위(규정 개정 시 원문 링크로 최신 확인).
 - `references/expense_category.md` — 비목 매핑·증빙·한도·파일명·외화·RPA운영 통합(1차 판단).
 - `references/kist_portal_fetch.md` — 통합정보 fetch backend 명세(endpoint·ds_search·authTk·함정·좌표 fallback).
 - `references/dooray_folder.md` — 행정원 폴더 조회(링크/이름검색·본부약어·캐시·성능).
