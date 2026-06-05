@@ -1,7 +1,9 @@
-# 한글(hwp) 회의록 자동 생성 — 환경·함정
+# (옵션) 한글(hwp) 회의록 자동 생성 — 환경·함정
 
-## 전제 (설치 시 점검)
-회의록은 `.hwp` → **아래아한글 필수**(MS Word 불가). 필요:
+> 2026-06-05~ **회의록 master = 엑셀** (→ `meeting_log_excel.md`). 본 hwp 자동화는 `log_format: xlsx_and_hwp` (보관 선호 사용자 옵션)일 때만 사용. fam_0704 직접 자동작성 워크플로(권장)에서는 hwp 양산 불필요.
+
+## 전제 (설치 시 점검 — 저장 모드 2 일 때만)
+회의록 hwp 동봉 시 `.hwp` → **아래아한글 필수**(MS Word 불가). 필요:
 1. 아래아한글 설치
 2. `HwpObject` COM 등록 (보통 한글 설치 시 자동; 레지스트리 `HKCR\HWPFrame.HwpObject`)
 3. python 패키지: `pyhwpx`, `pywin32`, `pywinauto`

@@ -3,12 +3,26 @@
   "user_name": "홍길동",
   "card_holder": { "name": "홍길동", "empno": "00XXXX" },
   "projects": [
-    { "acccd": "26E0001", "name": "예시 연구과제(E유형·주관)", "code": "E", "pre_approval": true },
-    { "acccd": "26I0123", "name": "국제공동 예시과제", "code": "I", "pre_approval": false }
+    { "acccd": "26E0001", "name": "예시 연구과제(E유형·주관)", "code": "E", "pre_approval": true, "bimok": "33_523" },
+    { "acccd": "26I0123", "name": "예시 민간수탁(I — 사전결재 면제, 비목 17-448)", "code": "I", "pre_approval": false, "bimok": "17_448" },
+    { "acccd": "26B0007", "name": "예시 민간수탁 후속(B — 사전결재 면제, 비목 17-448)", "code": "B", "pre_approval": false, "bimok": "17_448" }
   ],
-  "upload_via_rpa": true,
-  "agent_folder_url": "https://kist.gov-dooray.com/drive/.../  (담당 행정원 2.회의비 폴더 링크)",
+  "log_format": "xlsx_only",
+  "log_root": "D:\\GoogleDrive\\내 드라이브\\01\\06.명세서",
+  "hwp_output_root_optional": "C:\\kiki\\dining",
+  "upload_via_rpa": false,
+  "agent_folder_url": "https://kist.gov-dooray.com/drive/.../  (담당 행정원 2.회의비 폴더 링크, RPA 사용 시)",
   "receipt_path": "C:\\Users\\me\\Desktop\\receipts",
   "output_dir": "C:\\kiki\\dining",
-  "project_report_dir": "C:\\kiki\\dining\\project_report"
+  "project_report_dir": "C:\\kiki\\dining\\project_report",
+  "_notes": {
+    "pre_approval_exempt_codes": ["I", "S", "B", "F", "부서운영비"],
+    "bimok_17_448_codes": ["S", "I", "F", "B", "K", "G"],
+    "amount_per_person": 50000,
+    "amount_includes": "식대+음료(액체 다과) 합산",
+    "log_format_options": {
+      "xlsx_only": "엑셀만 — 기본 권장 (Claude 는 항상 엑셀만 조회)",
+      "xlsx_and_hwp": "엑셀 + 별지1호 hwp 동봉 — 보관 선호 사용자"
+    }
+  }
 }
