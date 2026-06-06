@@ -81,6 +81,8 @@ description: |
 ## 참고 문서
 - `references/payment_request_manual.md` — ⭐ **재무팀 공식 지급신청 매뉴얼**(Dooray Wiki 원문 스냅샷 + 빠른참조). 비목별 증빙·검수·집행기준·반려사항·계정코드·과세/국외소득 + 첨부양식 10 file_id + 원문 링크. 증빙·검수·반려 점검의 1차 권위(규정 개정 시 원문 링크로 최신 확인).
 - `references/expense_category.md` — 비목 매핑·증빙·한도·파일명·외화·RPA운영 통합(1차 판단).
+- `references/rpa_payment_filing.md` — ⭐ **RPA 지급신청 운영 사양**(재무팀 wiki 「7.RPA 지급신청 안내」 정제). RPA 대상(카드+**세금계산서**)/비대상(회의비·전문가활용·전화료·전기료·도서비·용역·공사)·파일명(카드/세금계산서 국세청승인번호/`_통장사본`/복수`(1)(2)`)·계좌 OCR+자주사용계좌·수행시간(10/15/22시,1건4분)·결재선(신청자→계정책임자전결)·결과(성공=폴더파일삭제/실패=잔존+메일)·실패사례 + 전화료/전문가활용 RPA. **세금계산서도 RPA 대상**(계좌 실명검증을 RPA OCR가 우회).
+- `references/tax_invoice_payment.md` — ⭐ **세금계산서 직접 지급신청서 자동작성**(fam_0701 일반 → fam_0702 부모탭 JS: 영수증함 매핑·적요·계정 popBudgList·사용구분·검수 연결·통장표기 KIST_·**행추가 묶음**). **WIP**: 진입~검수·통장표기·다건 묶음까지 자동 실증, 🔴 **계좌 실명검증(결재상신 필수) 통과법 미해결**(2026-06-07) → end-to-end 상신 성공 후 활성. §0 "반복 금지 TOP" 먼저 읽기. (RPA 폴더 업로드 경로와 별개의 '직접 작성' 경로)
 - `references/kist_portal_fetch.md` — 통합정보 fetch backend 명세(endpoint·ds_search·authTk·함정·좌표 fallback).
 - `references/dooray_folder.md` — 행정원 폴더 조회(링크/이름검색·본부약어·캐시·성능).
 - `references/dooray_wiki.md` — 비목·규정 wiki 실시간 검색.
