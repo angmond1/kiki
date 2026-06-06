@@ -32,7 +32,8 @@ codex 설치 세부사항은 [CODEX.md](CODEX.md)
 ## 필요 환경
 claude 또는 chatgpt 유료 계정,  
 claude desktop app https://claude.com/download  
-또는 claude code cli https://code.claude.com/docs/ko/quickstart#native-install-recommended 필요
+또는 claude code cli https://code.claude.com/docs/ko/quickstart#native-install-recommended 필요  
+
 codex desktop app 또는 codex cli 필요.
 
 claude desktop app 설정에서 아래기능 허용  
