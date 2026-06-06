@@ -1,0 +1,25 @@
+{
+  "_comment": "kk-dining 고유 설정만. 실제 파일은 ~/.claude/kiki/kk-dining.config.json (repo 밖).",
+  "_common": "이름·사번·카드책임자·참여과제(분류코드 code 포함)는 공통 ~/.claude/kiki/kiki.config.json 에서 읽는다. 토큰은 ~/.claude/kiki/kiki.env 의 DOORAY_TOKEN. 사전결재 면제·회의비 비목은 과제 분류코드(code)로 자동 판정(project_code.md) — 과제별로 저장하지 않음. 상세 ../_shared/personal_config.md.",
+
+  "log_format": "xlsx_only",
+  "log_root": "C:\\kiki\\dining\\meeting_log",
+  "_log_root": "회의록 엑셀 루트. 클라우드 동기화 폴더로 바꿔도 됨(예: 본인 드라이브 동기화 경로).",
+  "hwp_output_root_optional": "C:\\kiki\\dining",
+  "upload_via_rpa": false,
+  "_upload_via_rpa": "true 면 회의록을 dooray 드라이브에 올려 RPA 처리(행정원 폴더 = kiki.config payment_admin.folder_url). 기본 false = fam_0704 직접 자동작성.",
+  "receipt_path": "C:\\Users\\me\\Desktop\\receipts",
+  "output_dir": "C:\\kiki\\dining",
+  "project_report_dir": "C:\\kiki\\dining\\project_report",
+
+  "_notes": {
+    "pre_approval_exempt_codes": ["I", "S", "B", "F", "부서운영비"],
+    "bimok_17_448_codes": ["S", "I", "F", "B", "K", "G"],
+    "amount_per_person": 50000,
+    "amount_includes": "식대+음료(액체 다과) 합산",
+    "log_format_options": {
+      "xlsx_only": "엑셀만 — 기본 권장 (Claude 는 항상 엑셀만 조회)",
+      "xlsx_and_hwp": "엑셀 + 별지1호 hwp 동봉 — 보관 선호 사용자"
+    }
+  }
+}

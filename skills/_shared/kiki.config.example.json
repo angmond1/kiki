@@ -1,0 +1,37 @@
+{
+  "_note": "kiki 공통 개인설정 — 모든 kk-* skill 이 공유한다. 이 파일을 ~/.claude/kiki/kiki.config.json 으로 복사해 본인 값을 채우세요(repo 밖, git 업로드 금지). 토큰은 여기 두지 말고 ~/.claude/kiki/kiki.env 에. skill 고유 설정은 각 ~/.claude/kiki/kk-<skill>.config.json.",
+
+  "user": {
+    "name": "",
+    "_name": "본인 성함 — 발의자/과책(PI) 판별/카드책임자 기본값. (kk-budget·kk-dining·kk-inspect·kk-pay 공통)",
+    "emp_no": "",
+    "_emp_no": "사번(6자리). 검수신청자·발의자·카드책임자 자동대조. 개인 식별자라 로컬에만. (kk-inspect·kk-pay·kk-dining)",
+    "phone": "",
+    "_phone": "내선/휴대폰. (kk-inspect 검수신청)"
+  },
+
+  "card_holder": {
+    "name": "",
+    "empno": "",
+    "_note": "회의비·지급신청 카드책임자(보통 본인). 카드영수증조회(fam_0711) 조회 키. 본인이면 user 와 동일하게. (kk-pay·kk-dining·kk-inspect)"
+  },
+
+  "payment_admin": {
+    "name": "",
+    "folder_url": "",
+    "_note": "지급신청 담당 연구행정원 이름 + (RPA 업로드 시) dooray 드라이브 폴더 링크. (kk-inspect·kk-pay·kk-dining)"
+  },
+
+  "location": {
+    "region_code": "LABT_00",
+    "_region": "본원=LABT_00 / 강릉=LABT_01 / 전북=LABT_02.",
+    "building_code": "",
+    "room": "",
+    "_note": "검수신청자 소속/위치. (kk-inspect)"
+  },
+
+  "projects": [
+    {"acccd": "", "name": "", "pi": "", "code": "", "role": ""}
+  ],
+  "_projects": "참여 과제 캐시 — queryProjects 로 자동수집 후 사용자 확인. acccd=과제번호 / name=과제명 / pi=책임자 / code=분류코드(영문 1자, project_codes.md) / role=주관·공동·참여. 여러 skill 공유(검수 지급계정·예산 추적·회의비 계정·지급신청 과제). '과제 갱신' 시 재수집."
+}

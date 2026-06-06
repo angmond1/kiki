@@ -1,0 +1,9 @@
+kiki — KIST 행정 자동화 skill 패키지
+
+Copyright (c) KIST.
+
+KIST 내부용. 초대받은 KIST 구성원이 본인 계정으로 설치·사용한다.
+외부 배포·재공개는 하지 않는다(private repo).
+
+개인 credential·토큰·식별자는 코드·repo에 포함하지 않으며,
+각 사용자의 로컬(~/.claude/kiki/)에만 둔다.

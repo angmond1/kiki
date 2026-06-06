@@ -1,0 +1,19 @@
+{
+  "_help": "kk-budget 고유 설정만. 실제 config 는 ~/.claude/kiki/kk-budget.config.json (repo 밖).",
+  "_common": "본인 이름(과책 PI 판별)·참여과제는 공통 ~/.claude/kiki/kiki.config.json 에서 읽는다(user.name, projects). 여기는 예산 추적 설정만. 상세 ../_shared/personal_config.md.",
+
+  "track_projects": [],
+  "_track_projects": "예산 추적할 과제 acccd 목록만 (kiki.config.json projects 중 일부 선택). 비우면 전체.",
+
+  "track_categories": ["재료비", "시설장비비", "활동비1", "활동비2", "내부인건비2", "학생인건비"],
+
+  "show_direct_subtotal": true,
+
+  "personal_share": [
+    {"_help": "(optional) 공동과제 본인 지분. filter_names=집행내역 적요에 잡을 이름(연구자/행정원/혼합, 복수). merge_act2_into_act1=활동비2를 활동비1 풀에 합산.",
+     "acccd": "", "filter_names": [], "allocations": {"재료비": 0, "활동비1": 0, "내부인건비2": 0}, "merge_act2_into_act1": true}
+  ],
+
+  "output_dir": "C:\\kiki\\budget",
+  "filename_pattern": "{yymmdd}.xlsx"
+}

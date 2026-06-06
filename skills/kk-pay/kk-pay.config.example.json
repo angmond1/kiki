@@ -1,0 +1,16 @@
+{
+  "_note": "kk-pay 고유 설정만. 실제 config 는 ~/.claude/kiki/kk-pay.config.json (repo 밖).",
+  "_common": "이름·사번·카드책임자·담당 행정원(폴더 링크)·참여과제는 공통 ~/.claude/kiki/kiki.config.json 에서 읽는다(card_holder, payment_admin, projects). 토큰은 ~/.claude/kiki/kiki.env. 상세 ../_shared/personal_config.md.",
+
+  "uploadScope": { "card": true, "taxInvoice": false, "meeting": false },
+  "_uploadScope": "RPA 처리 범위. 카드는 보통 true. 세금계산서/회의비는 부서별로.",
+
+  "separateFolders": null,
+  "_separateFolders": "세금계산서/회의비를 별도 폴더에 올리는지(true) 카드와 같은 폴더(false). 행정원 폴더 구조 자동파악으로 채움.",
+
+  "receiptFolder": "",
+  "_receiptFolder": "PC 영수증 저장 폴더 경로 (사람마다 다름).",
+
+  "moveOrCopy": null,
+  "_moveOrCopy": "업로드 완료 후 처리완료 폴더로 'move' | 'copy' | 'keep'. 첫 2~3회 묻고 일관되면 학습 저장."
+}
