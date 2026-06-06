@@ -47,7 +47,7 @@ https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn
 chatgpt 사용자는 codex desktop app 또는 codex cli 필요.  
 https://openai.com/ko-KR/codex/  
 
-codex desktop app 설정에서 아래기능 허용
+codex desktop app 설정에서 아래기능 허용  
 설정 -> MCP 서버 -> 서버 추가 -> chrome-devtools  
 
 dooray drive 제어시 dooray API Key 필요  
