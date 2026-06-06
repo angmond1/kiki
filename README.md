@@ -10,6 +10,7 @@
 KIST 포탈/dooray 제어 claude skill 모음.
 
 
+
 ## 구성
 | skill | 용도 | 기능 |
 |-------|------|------|
@@ -31,22 +32,21 @@ claude code 대화창에 아래 문구 붙여넣기
 
 
 ## 필요 환경
-- claude 유료 계정
-- claude desktop app 설정에서 다음기능 허용
-  - 설정 -> 데스크톱 앱 -> browser use -> 모든 브라우저 작업 허용
-  - 설정 -> chrome의 claude 설정 -> 사이트 권한 -> 확장 프로그램 허용
+claude 유료 계정
+claude desktop app 설정에서 다음기능 허용
+- 설정 -> 데스크톱 앱 -> browser use -> 모든 브라우저 작업 허용
+- 설정 -> chrome의 claude 설정 -> 사이트 권한 -> 확장 프로그램 허용
 
-- 포탈 로그인된 chrome 브라우저 환경에서 실행
-  - chrome 웹스토어의 claude 확장 프로그램 설치 필수
-   https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn
+포탈 로그인된 chrome 브라우저 환경에서 실행
+- chrome 웹스토어의 claude 확장 프로그램 설치 필수
+  https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn
 
-- dooray drive 제어시 dooray API Key 필요
-  https://kist.gov-dooray.com/setting/api/token
+dooray drive 제어시 dooray API Key 필요
+https://kist.gov-dooray.com/setting/api/token
 
 
 
 ## 문의
 이동기 / 청정에너지연구센터 e-chemical 연구팀
-
 [dnklee@kist.re.kr]
 
