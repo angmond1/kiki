@@ -263,10 +263,59 @@ btoa(unescape(encodeURIComponent(F.someFn.toString())))   // base64 추출
 각 팝업 form 의 `gfn_msg` / `gfn_showMsg` / `gfn_confirm` 를 작업 직전 no-op(`return true`) override. 단 마지막 검증 결과 확인용으로 `window.__lastMsg` 에 저장하는 패턴 권장:
 ```js
 window.__lastMsg = null;
+F.__o_gfn_msg = F.gfn_msg;   // ⚠️ 원본 백업 필수
 F.gfn_msg = function(){ window.__lastMsg = Array.from(arguments).map(String).join(' '); return true; };
 ```
+> ⚠️⚠️ **원복 필수 (kk-pay 실측 트랩)**: 사용자에게 **저장/결재상신을 넘기기 전 반드시 원복** — `F.gfn_msg = F.__o_gfn_msg;` (gfn_showMsg·gfn_confirm 도 동일). 안 하면 결재상신의 **검증 메시지·확인창이 전부 삼켜져 "버튼 눌러도 반응 없이 안 넘어감"** 으로 한참 헤맴. 되도록 애초에 전역 무력화하지 말고, 막을 confirm 만 한정 처리.
+
+## 첨부 자동화 (2026-06-07 ★ codex 실증 — 패턴 C)
+**공통 가이드**: [`../../_shared/nexacro_file_upload.md`](../../_shared/nexacro_file_upload.md) **§5 패턴 C** (`extUp._input_node` 직접 노출 — 가장 직접적·정공법).
+회의비 결재의 **회의록 팝업 `pop_fam_0703_02`** 가 실제 첨부 자리. 본 fam_0704_02 화면이 아니라 그 안의 회의록 팝업에서 첨부.
+
+### 첨부 영역 (회의록 팝업 form `C`)
+- **`fileDiv1`** = 서명록 첨부
+- **`fileDiv2`** = 증빙 첨부 (카드영수증·거래명세서)
+- **`fileDiv3`** = 사전결재문서 첨부
+
+### 절차 (§5 패턴 C 그대로, 회의록 팝업 한정 값)
+```js
+const C = window.application.popupframes.pop_fam_0703_02.form;
+const FU = C.fileDiv2;                  // 증빙 첨부 영역(예시). 서명록은 fileDiv1, 사전결재는 fileDiv3.
+
+// 1) extUp._input_node 노출 — 공통가이드 §5-1
+const input = FU.extUp._input_node;
+input.id = "kk_file_input";
+Object.assign(input.style,{position:"fixed",left:"20px",top:"20px",width:"260px",height:"40px",opacity:"1",display:"block",zIndex:"2147483647",background:"white"});
+if (!document.body.contains(input)) document.body.appendChild(input);
+
+// 2) 자동화 도구로 그 input 에 파일 직접 주입 (Playwright setInputFiles / chrome MCP upload_file)
+//    → #kk_file_input 타깃, 절대경로
+
+// 3) 서버 저장 — gfn_upload 호출 (회의비 RQST_NO 합성식 + FLE_TP)
+const rqst = C.CONFERENCENO + "-" + C.ds_param.getColumn(0,"CARDUSEMGRNO");   // ★ 회의비 한정 합성식
+C.fileDiv2.gfn_upload("", "fn_endFileCallBack1", "ds_file", "RQST_NO="+rqst, "02");
+// FLE_TP: "02" = 증빙. 서명록/사전결재는 다른 값 (첫 시도시 확인 후 박을 것).
+// 콜백 fn_endFileCallBack1 = 저장까지 한번에. 첨부만 분리하려면 fn_endFileCallBack(숫자없는 쪽).
+```
+
+### 성공 확인 (`C.fileDiv2.ds_files`)
+- `tmHeader=S` → 서버 저장됨 / `I` 선택만 / `D` 삭제예정
+- `FLE_TP=02` → 증빙
+- `FLE_PATH` / `NEW_FLE_NM` → 서버 저장 경로·파일명
+
+### 첨부 대상 (meeting_form.md 참고)
+- **fileDiv2 (증빙)**: 카페·마트·편의점·호텔 결제건의 영수증 jpg + 거래명세서.
+- **fileDiv3 (사전결재)**: 사전결재 필요건의 내부결재문서 PDF.
+- **fileDiv1 (서명록)**: 참석자 서명록 (별도 양식, 필요시).
+- 회의록 자체는 fam_0704 본화면 저장 시 hwpx 가 다른 경로로 들어감 — 첨부 영역 아님.
+
+### 주의
+- 영역별로 같은 input 컴포넌트가 따로 있으므로 fileDiv1/2/3 각각 §5-1 ~ §5-3 반복.
+- 작업 후 input 의 id/스타일 원복 (공통가이드 §5-5).
+- **신청(결재상신)은 사용자 confirm** 후.
 
 ## 안전 규칙
 - **bt_save(임시저장) → bt_approval(결재상신) 사이 사용자 confirm 필수**(irreversible).
 - 결재상신은 실제 지급 결재 제출 = 되돌리려면 결재 회수 필요. 마지막 단계에서 한 번 더 확인.
 - 결재선 확정은 **별도 gw 창 → 사용자 직접** (Claude in Chrome 제어 불가, 캡처로 확인 가능).
+- **첨부 임시 트리거 버튼**은 사용 후 반드시 `.remove()` (공통가이드 §2-6).

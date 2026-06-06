@@ -4,7 +4,7 @@
 
 ## 화면 구조
 - 진입: 소액검수신청(mcs_0003) — `http://p.kist.re.kr:8081/nxui/kistis/indexQ.jsp?target=mis.mcs::mcs_0003.xfdl&menuParam=sysCd%3DCUS` → 제목 "검수신청관리"(리스트) → 우상단 "검수신청"(`button1`) → 팝업 `mcs_0003_pop2`("소액검수신청")
-- 팝업은 **window.open 별도 창**(Chrome MCP 탭그룹 밖). 부모 탭에서 `window._popupWin` 참조로 제어한다. 팝업 스크린샷·파일첨부는 불가(부모 탭만 캡처, 첨부는 사용자).
+- 팝업은 **window.open 별도 chrome page**(부모 탭과 다른 page). 부모 탭에서 `window._popupWin` 으로 호출하고 form 객체는 `application.popupframes.mcs_0003_pop2.form` 으로도 접근 가능. **파일첨부는 자동화 가능** (별도 page 패턴 — §파일첨부 참조). 부모 탭 스크린샷은 팝업 내용 안 잡힘(별도 page) → 필요하면 그 page 를 select 한 뒤 캡처.
 - dataset 3종:
   - `ds_main_PRCT_INFO` — 공통정보 (신청일시·지역·건물·호실·지급신청자·검수신청자)
   - `ds_main_NOT_ASST_INFO` — **비자산** 물품정보
@@ -93,3 +93,35 @@
 - **승인번호(input06→RLTDMGRNO) 입력 금지** — DB 10자, 24자 넣으면 `ORA-12899`. KIST 자체관리 칸이라 비운다.
 - **신청일시(input9) 공휴일 회피** — calendaredit 에 휴일값 set → 네이티브 모달 → 페이지 frozen(CDP 45초 타임아웃, 사용자가 모달 닫아야 복구). 한국 공휴일표 확인 또는 사용자에게 날짜 확인.
 - **비자산은 묶음**("외 N종" 1행), **자산은 품목별 개별 등록**(자산번호 부여). 한 거래에 자산·비자산 섞이면 분리 신청.
+
+## 파일첨부 자동화 (2026-06-07 ★ codex 실증 — 패턴 B)
+공통 가이드: [`../../_shared/nexacro_file_upload.md`](../../_shared/nexacro_file_upload.md) **§4 패턴 B**(별도 chrome page).
+mcs_0003_pop2 는 `window.open` 으로 **부모 탭과 다른 chrome page** 라, A 패턴(부모에 임시 버튼 + extUp.addFiles()) 은 **실패한다** — chooser 가 부모 page 에서 발생해 팝업 form 에 안 묶임.
+
+대신 ↓ 순서로:
+1. **별도 page 선택**: DevTools `list_pages` → URL 에 `popup.html?formname=mis.mcs::mcs_0003_pop2.xfdl&framename=mcs_0003_pop2` 식별 → `select_page <pageId>`.
+2. **실제 "파일추가" 버튼 UID 찾기**: 그 page 에서 `take_snapshot` → 내부에 `btn_selectFiles` 이미지 + "파일추가" 텍스트 가진 버튼 노드의 uid (세션마다 다름 — 예: `8_305`).
+3. **그 UID 에 upload_file 직접**:
+   ```
+   chrome_devtools.upload_file({ uid: "<uid>", filePath: "D:\\…\\파일.pdf" })
+   ```
+   파일별 반복 (mcs_0003 실증).
+4. **첨부 확인** (그 page 의 console 에서):
+   ```js
+   (() => {
+     const form = window.application?.popupframes?.mcs_0003_pop2?.form
+               || window.application?.mainframe?.ChildFrame?.form;
+     const ds = form?.fileDiv1?.ds_files;       // ★ 컴포넌트 = fileDiv1 (kk-pay 는 importFileUpload)
+     const out = [];
+     for (let i=0; i<ds.getRowCount(); i++) out.push({
+       idx:i, name:ds.getColumn(i,"FLE_NM"),
+       tmHeader:ds.getColumn(i,"tmHeader"),     // I=선택만 / S=서버반영 / D=삭제예정
+       size:ds.getColumn(i,"FLE_SZ"), prog:ds.getColumn(i,"PROG")
+     });
+     return out;
+   })()
+   ```
+- **컴포넌트명**: `fileDiv1` (확정, 2026-06-07).
+- **자산·비자산 1건 = 첨부 1셋**(세금계산서/거래명세서 PDF + 물품사진 JPG). 자산·비자산 섞인 거래는 분리 신청이라 첨부도 각각.
+- 사용자에게 첨부 파일 절대경로·개수를 표로 보여주고 confirm 후 진행.
+- **신청(저장) 버튼은 사용자 confirm** 후 — 첨부까지 자동, 신청만 사용자.

@@ -14,9 +14,10 @@
 
 **🚨 이번 세션 실수 TOP — 반복 금지 (상세는 각 절):**
 1. ⚠️ **적요·사용구분은 "맨 마지막"에** — `doDecision`(계정)·검수 dblclick·사용구분 변경이 `COMDSCCONT`(적요)·`RQSTDETLCD`(사용구분)를 **자동 리셋**한다. 계정·검수 다 끝낸 뒤 설정(§4·§6). 적요는 dataset 아닌 **컴포넌트 `formDetail_Comdsccont`** 로.
-2. 🔴 **계좌 실명검증(`btn_accCstm00`)은 결재상신 필수** — 계좌번호 맞아도 미검증이면 "N번째 행의 계좌검증이 완료되지 않았습니다"로 상신 차단(통장사본 갈음 불가, **행마다**)(§8).
+2. 🔴 **계좌 실명검증(`btn_accCstm00`)은 결재상신 필수** — 계좌번호 맞아도 미검증이면 "N번째 행의 계좌검증이 완료되지 않았습니다"로 상신 차단(통장사본 갈음 불가, **행마다**)(§8). 🔵 **공휴일·주말에는 은행 실명검증 API 자체가 안 도는 것으로 추정** (2026-06-07 토요일 시도 시 통과 안 됨) → 공휴일/주말이면 사용자 안내 후 평일로 미루기. (평일 영업시간 외 가능 여부는 미확인.)
 3. ⚠️ **자동화 중 `gfn_msg`/`gfn_confirm` 무력화했으면 사용자에게 넘기기 전 반드시 원복** — 안 하면 저장/상신 검증 메시지가 삼켜져 "버튼 눌러도 안 넘어감"으로 한참 헤맴(미해결/TODO#3).
 4. ⚠️ **다건 행 전환은 `rqstGrid` row-click** 으로(`ds_rqstGrid.set_rowposition`은 상세내역이 안 바뀜 → 엉뚱한 행에 덮어씀). 전환 후 `ds_GNL.RQSTAMT`로 행 검증, 다건 적요는 저장 직전 화면 행별 확인(§10).
+5. ✅ **첨부 자동화 가능** (codex 해법, 2026-06-07): NEXACRO `ExtFileUpload` 는 DOM input 이 없어 직접 `file_upload` 실패하지만, **`extUp.addFiles()` 호출하는 임시 DOM 버튼**을 팝업에 만들고 그 버튼에 `file_upload` → 네이티브 chooser 를 DevTools 가 가로채 파일 주입. **첨부만** 원하면 콜백 `fn_endFileCallBack` (숫자 없는 쪽), `fn_endFileCallBack1` 은 `doSave("S")` 까지 이어짐(§9-1).
 
 공통 walk 헬퍼:
 ```js
@@ -124,12 +125,73 @@ fire(disp,'onkillfocus',{fromobject:disp,fromreferenceobject:disp});   // killfo
   ```
 - ❌ **계좌번호 검증요청 `btn_accCstm00`** = 은행 실명검증 → **네이티브 alert** → 탭 CDP frozen(45초, 사용자가 확인 눌러야 복구). **화면에서 사용자가 처리 권장.**
   - **2026-06-06 미해결**: alert "계좌정보를 다시 한 번 확인해주시기 바랍니다". 추정 원인: 예금주명 표기(전각 괄호 `（주）` 등) / 입금은행 코드 / 자주사용계좌 미등록 / 실명DB 불일치. → 사용자 화면 검증 + 원인 파악 후 보강.
-  - 🔴 **계좌검증 = 결재상신 필수 (2026-06-07 확정)**: 계좌번호가 통장사본과 일치해도 `btn_accCstm00` 실명검증을 **완료(검증완료 플래그)** 하지 않으면 결재상신 시 **「N번째 행의 계좌검증이 완료되지 않았습니다」** 메시지로 차단된다. **통장사본 대조만으론 갈음 불가.** 묶음(다건)이면 메시지가 행을 지정("1번째 행…") → **행마다 계좌검증 필요**. ⇒ 실명검증 alert("계좌정보를 다시 확인") 통과법 규명이 이 skill 의 최우선 미해결 과제.
+  - 🔴 **계좌검증 = 결재상신 필수 (2026-06-07 확정)**: 계좌번호가 통장사본과 일치해도 `btn_accCstm00` 실명검증을 **완료(검증완료 플래그)** 하지 않으면 결재상신 시 **「N번째 행의 계좌검증이 완료되지 않았습니다」** 메시지로 차단된다. **통장사본 대조만으론 갈음 불가.** 묶음(다건)이면 메시지가 행을 지정("1번째 행…") → **행마다 계좌검증 필요**.
+  - 🔵 **공휴일·주말 불가** (2026-06-07 토요일 시도 시 통과 안 됨, alert "계좌정보를 다시 한 번 확인해주시기 바랍니다"). → 작성·저장은 언제든 가능하지만 **계좌검증·상신은 평일에**. 공휴일/주말이면 사용자 안내 후 평일로 미루기. (평일 영업시간 외 가능 여부는 미확인.)
   - 💡 **예금주명(`dpstOrNm`)은 자동채움값 신뢰 말고 통장사본/거래명세서 표기에 정확히 맞출 것** (실명검증 mismatch 1순위 의심): 매핑 자동값이 `（주）○○`(전각 괄호·*주식회사*)인데 실제는 *유한회사*거나 통장/거래명세서엔 접두 없는 `○○`로 적힌 사례 → 검증요청 전 `dpstOrNm` 을 통장 예금주와 글자 그대로 일치시켜 시도.
 
-## 9. 첨부 → 저장 → 결재상신 (사용자)
-- 첨부 `btn_selectFiles`(파일추가): **세금계산서 + 거래명세서** PDF. **자동화 불가 → 사용자가 직접**(이유 3중: fam_0702 별도 창=MCP 탭그룹 밖 / 파일 input 은 브라우저 보안상 스크립트로 값 설정 불가, `file_upload` 도구도 그룹 내 탭만 / 파일추가는 OS 네이티브 창). (그림 1.5M 이하 / PDF 10p 미만)
-- 저장(임시저장) → 신청관리번호. **결재상신** → gw 전자결재. **결재선 = 계정책임자(`ds_GNL.RDSBJEMPNM`) + 발의자(본인).** 모두 사용자 confirm.
+## 9. 첨부 → 저장 → 결재상신
+
+### 9-1. 첨부 자동화 (2026-06-07 ★ codex 해법 — 패턴 A)
+> 공통 가이드: [`../../_shared/nexacro_file_upload.md`](../../_shared/nexacro_file_upload.md) **§3 패턴 A** (NEXACRO popupframe, 같은 chrome page 안 — 부모 page 에 임시 버튼 + `extUp.addFiles()`).
+> 아래는 **fam_0702 화면 특화** — 컴포넌트명 `importFileUpload`, 행별 `RQST_NO` 등 fam_0702 특정 값.
+> ※ fam_0702 는 NEXACRO popupframe 이라 패턴 A. kk-inspect mcs_0003_pop2 는 `window.open` 별도 page 라 패턴 B (다른 방법).
+- fam_0702 의 첨부 UI = NEXACRO `ExtFileUpload`(`f.importFileUpload`). **DOM `<input type=file>` 없음** → `file_upload` 직접 호출 실패. 그래서 한동안 "사용자 수동"으로 분류했지만 ↓ 방법으로 자동화 가능.
+- **핵심 아이디어**: `addFiles()`를 호출하는 **임시 DOM 버튼**을 팝업 문서에 만들고 → 그 버튼을 자동화도구의 `file_upload`로 클릭 → 버튼 onclick 이 `extUp.addFiles()` 호출 → **네이티브 파일창**이 뜨는 그 순간을 **DevTools `Page.handleFileChooser`** 가 가로채 지정 파일을 주입. → 좌표 0, 사용자 무개입.
+- (예전 §9 의 "자동화 불가" 3가지 이유는 **input type=file 만 노린 file_upload 한정**의 얘기였고, codex 의 임시버튼 우회는 같은 file_chooser 이벤트를 띄워 같은 DevTools 후크로 처리하기에 통한다.)
+
+```js
+// 1) fam_0702 팝업 문서에서 실행 — 임시 트리거 버튼 주입
+const f = window.application?.popupframes?.fam_0702?.form
+       || window.application?.mainframe?.ChildFrame?.form;
+let btn = document.getElementById("kk_pay_upload_trigger");
+if (!btn) {
+  btn = document.createElement("button");
+  btn.id = "kk_pay_upload_trigger";
+  btn.textContent = "파일추가 트리거";
+  Object.assign(btn.style,{position:"fixed",zIndex:"2147483647",left:"20px",top:"20px",width:"180px",height:"36px"});
+  btn.onclick = () => f.importFileUpload.extUp.addFiles();   // ★ ExtFileUpload.addFiles() — 네이티브 chooser
+  document.body.appendChild(btn);
+}
+// 2) 자동화 도구의 file_upload 를 이 임시 버튼(#kk_pay_upload_trigger)에 호출 → chooser 가로채기로 파일 주입.
+//    파일 여러 개면 한번에 가능(NEXACRO 가 multi-file 받음). 파일별로 반복도 OK.
+```
+
+- **행별 첨부** — 묶음(다건)은 **현재 행이 누구냐**에 따라 첨부가 그 행의 `RQST_NO` 로 붙는다. `ds_rqstGrid.set_rowposition` **만으론 부족**(detail 안 바뀜 — §10) → 반드시 `rqstGrid_oncellclick` 까지 태워야 `saveUploadFile()` 이 호출되며 그 행의 첨부 목록이 로드됨.
+  ```js
+  f.ds_rqstGrid.set_rowposition(row);
+  f.rqstGrid_oncellclick(rqstGrid, ei);   // ei.row=row, ei.cell=0, ei.col=0
+  // 이 시점 이후에 임시버튼 클릭(=file_upload) → 그 row 의 RQST_NO 에 첨부됨
+  ```
+
+- **첨부 상태 확인** — `f.importFileUpload.ds_files` 의 컬럼 `tmHeader`(상태) · `FLE_NM` · `RQST_NO`:
+  - `I` = 파일 **선택**만 됐고 서버 전송 전
+  - `S` = 서버 첨부 **반영 완료**
+  - `D` = 삭제 예정
+
+- **서버 반영 호출** — *첨부만* 하고 지급신청서는 저장하지 않으려면 콜백을 잘 골라야 한다.
+  - ⚠️ `fn_endFileCallBack1` 은 끝에 `doSave("S")` 까지 이어진다 → 첨부+저장 동시 원할 때만.
+  - **첨부만** 원하면 아래처럼 `fn_endFileCallBack` (숫자 없는 쪽):
+  ```js
+  const rqstNo = f.ds_rqstGrid.getColumn(f.ds_rqstGrid.rowposition, "RQST_NO");
+  f.gfn_setColumn(0, f.ds_main, "pgmId", "FAM_9999");
+  f.gfn_setColumn(0, f.ds_main, "PGM_ID", "FAM_9999");
+  f.gfn_setColumn(0, f.ds_main, "RQST_NO", rqstNo);
+  f.gfn_setColumn(0, f.ds_main, "bfFocusRowRqstNo", rqstNo);
+  f.importFileUpload.gfn_upload("", "fn_endFileCallBack", "ds_file", "RQST_NO=" + rqstNo, "");
+  ```
+
+- **잘못 붙은 파일 삭제** — 현재 행에서 `removeFile(rowIndex)` 후 `gfn_upload(fn_endFileCallBack)` 재호출로 서버 반영.
+  ```js
+  f.importFileUpload.removeFile(rowIndex);
+  f.importFileUpload.gfn_upload("", "fn_endFileCallBack", "ds_file", "RQST_NO=" + rqstNo, "");
+  ```
+
+- **임시버튼 청소**: 작업 끝나면 `document.getElementById("kk_pay_upload_trigger")?.remove();` 로 제거(사용자 화면 어지럽힘 방지).
+- **제약**: 그림 1.5M 이하 / PDF 10p 미만.
+
+### 9-2. 저장 → 결재상신
+- `bt_save`(저장, 임시저장) → `RQST_NO`(신청관리번호) 생성. 행마다 RQST_NO 부여 — 첨부는 RQST_NO 단위라 **저장 후 첨부**가 자연스럽다(저장 전 첨부도 가능하지만 새 행이면 일단 저장 권장).
+- `bt_approval`(결재상신) = 내부에서 저장+검증+상신 통합 → gw 전자결재. **결재선 = 계정책임자(`ds_GNL.RDSBJEMPNM`) + 발의자(본인).** 사용자 confirm.
 
 ## 10. 여러 건 묶기 (행추가)
 **동일 계정**이면 한 신청서에 최대 5건. 1건 완료 후:
@@ -146,8 +208,10 @@ var rg=f.ds_rqstGrid; rg.set_rowposition(rg.getRowCount()-1);   // 새 행
 - ⚠️⚠️ **다건 적요 함정 (실측, 미해결)**: 행 전환을 `ds_rqstGrid.set_rowposition(N)` 으로 하면 **상세내역(ds_GNL)·적요 컴포넌트가 안 바뀐다**(현재 행 유지) → 그 상태로 적요 set 하면 **엉뚱한 행에 덮어씀**. 행 전환은 **`rqstGrid` 그리드 row-click**(`rqstGrid_oncellclick`, `ei.row=N`, **set_rowposition 먼저 금지**)으로 하고 **매 전환 후 `ds_GNL.RQSTAMT`(금액)로 올바른 행인지 검증**. 단 전환해도 적요 컴포넌트가 새 행 값으로 reload 안 되는 경우가 있고, 저장이 grid(ds_rqstGrid) vs 행별 detail(ds_GNL) 중 무엇을 쓰는지 불확실 → **다건이면 적요만은 저장 직전 화면에서 행별로 직접 확인·입력 권장**. (단건은 §4대로 맨 마지막 1회 set 으로 충분.)
 
 ## 미해결 / TODO
-1. 🔴 **계좌 실명검증 = 결재상신 필수**(§8, 최우선) — 통장사본 대조 갈음 **불가** 확정(미검증 시 "N번째 행의 계좌검증이 완료되지 않았습니다"로 상신 차단). `btn_accCstm00` 실명검증 alert("계좌정보를 다시 확인") **통과법 규명이 핵심** (사용자 조사 중 → 알려주면 자동화 보강).
+1. 🔴 **계좌 실명검증 = 결재상신 필수**(§8, 최우선) — 통장사본 대조 갈음 **불가** 확정(미검증 시 "N번째 행의 계좌검증이 완료되지 않았습니다"로 상신 차단). `btn_accCstm00` 실명검증 alert("계좌정보를 다시 확인") **통과법 규명이 핵심**.
+   - 🔵 **공휴일·주말에는 실명검증 API 자체가 안 도는 것으로 추정** (2026-06-07 토요일 시도 시 통과 안 됨). **월요일 평일 재시도** 후 결과로 가설 확정 — 정상 통과되면 §8 의 "alert 통과법 미해결" 항목은 *통과법이 아니라 공휴일 제약*으로 정리하면 됨.
 2. ✅ 버튼 확정: **저장=`bt_save`**, **결재상신=`bt_approval`**(저장+검증+상신 통합 — handler hasSave=true·hasValid=true). 미저장 상태에서 결재상신 누르면 내부 저장+검증 후 진행.
 3. ⚠️⚠️ **gfn_msg/gfn_confirm 억제 트랩 (중요)**: 배치 자동화 중 확인창이 멈춤 유발해 `f.gfn_msg=f.gfn_confirm=function(){return true}` 로 무력화하면, **사용자에게 저장/상신 넘기기 전 반드시 원복**(`f.gfn_msg=f.__o_gfn_msg` …). 안 하면 결재상신의 **검증 메시지·확인창이 전부 삼켜져 "버튼 눌러도 반응 없이 안 넘어감"** → 원인 못 찾고 한참 헤맴(실측). 되도록 애초에 전역 무력화하지 말고, 막을 confirm 만 한정 처리.
 4. 다건 **적요·사용구분 리셋/행전환** 함정(§4·§6·§10) — 다건 적요는 저장 직전 화면 행별 확인 권장.
-5. end-to-end 상신 성공 실증 후 SKILL.md 의 세금계산서 'WIP/준비중' 해제 + 커밋.
+5. ✅ **첨부 자동화** (해결, 2026-06-07 codex 해법) — `ExtFileUpload.extUp.addFiles()` 호출 임시 DOM 버튼 + `file_upload`로 chooser 가로채기. 첨부전용 콜백 `fn_endFileCallBack`(숫자없는 쪽), 행별 첨부는 `rqstGrid_oncellclick` 으로 행 전환 선행. §9-1 참고. → 실제 라이브 검증만 남음.
+6. end-to-end 상신 성공 실증 후 SKILL.md 의 세금계산서 'WIP/준비중' 해제 + 커밋.

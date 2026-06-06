@@ -76,7 +76,8 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 - credential(토큰)·사번·실명은 skill·repo에 0건. 토큰은 `kiki.env`(repo 밖).
 
 ## 참고
-- `references/fam_0704_automation.md` — **NEXACRO 부모탭 JS 완전자동 11단계** (DOC_CLS / 식비팝업 / 카드매핑 / popBudgList 콜백 / 통장표기 killfocus / 회의록 / 사전결재 연동 / 저장 / 결재상신).
+- `references/fam_0704_automation.md` — **NEXACRO 부모탭 JS 완전자동 11단계** (DOC_CLS / 식비팝업 / 카드매핑 / popBudgList 콜백 / 통장표기 killfocus / 회의록 / 사전결재 연동 / **첨부**(회의록 팝업 `pop_fam_0703_02` 의 `fileDiv1`서명록/`fileDiv2`증빙/`fileDiv3`사전결재, 패턴 C = `extUp._input_node` 직접 노출) / 저장 / 결재상신). gfn_msg 원복 트랩 포함.
+- `../_shared/nexacro_file_upload.md` — ⭐ **NEXACRO `ExtFileUpload` 첨부 자동화 공통 가이드**(2026-06-07 codex 실증, A/B/C 3 패턴). kk-pay·kk-dining·kk-inspect 공유. **C(정공법, `extUp._input_node` 직접) 우선 시도** 권장.
 - `references/meeting_log_excel.md` — 회의록 엑셀 9컬럼 관리 표준 (처리일 1파일).
 - `references/meeting_form.md` — (옵션) hwp 별지1호 양식·셀매핑·인원·증빙·중복.
 - `references/project_code.md` — 분류코드·비목·면제(I·S·B·F·부서운영비)·발의자.

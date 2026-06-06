@@ -1,22 +1,22 @@
 ---
 name: kk-inspect
-description: KIST 통합정보시스템 소액검수신청(검수신청관리, mcs_0003)을 반자동 처리하는 skill. 거래명세서·세금계산서·카드영수증(법인/연구비카드) 증빙을 파악해 품목·금액·수량을 추출하고, 자산/비자산을 보수적으로 판정하고, 외화결제는 카드영수증조회(fam_0711)에서 확정 원화를 조회하고, Chrome MCP로 검수창에 자동 입력한 뒤 사용자가 첨부·신청하도록 안내한다. "검수신청", "소액검수", "물품검수", "검수 올려줘/처리해줘", 증빙 폴더 경로 제시, 법인카드/연구비카드 결제건 검수, 세금계산서 검수 등의 상황에서 반드시 사용. KIST 연구원이면 누구나 자기 config로 사용 가능. 대상은 100~300만원 물품 및 무형(SW/외화) 결제.
+description: KIST 통합정보시스템 소액검수신청(검수신청관리, mcs_0003)을 반자동 처리하는 skill. 거래명세서·세금계산서·카드영수증(법인/연구비카드) 증빙을 파악해 품목·금액·수량을 추출하고, 자산/비자산을 보수적으로 판정하고, 외화결제는 카드영수증조회(fam_0711)에서 확정 원화를 조회하고, Chrome MCP로 검수창에 자동 입력·파일첨부한 뒤 사용자가 최종 신청(저장)만 confirm 하도록 안내한다. "검수신청", "소액검수", "물품검수", "검수 올려줘/처리해줘", 증빙 폴더 경로 제시, 법인카드/연구비카드 결제건 검수, 세금계산서 검수 등의 상황에서 반드시 사용. KIST 연구원이면 누구나 자기 config로 사용 가능. 대상은 100~300만원 물품 및 무형(SW/외화) 결제.
 ---
 
 # kk-inspect — KIST 소액검수신청 자동화
 
-KIST 통합정보시스템의 **소액검수신청 (검수신청관리, `mcs_0003`)** 을 반자동 처리한다. 증빙을 파악해 검수창에 입력까지 자동으로 하고, 최종 첨부·신청은 사용자가 한다. KIST 연구원이면 누구나 자기 `~/.claude/kiki/kk-inspect.config.json`(repo 밖)으로 쓸 수 있게 설계됐다 — skill 본체에는 어떤 개인정보도 들어있지 않다.
+KIST 통합정보시스템의 **소액검수신청 (검수신청관리, `mcs_0003`)** 을 반자동 처리한다. 증빙을 파악해 검수창에 입력·파일첨부까지 자동으로 하고, 최종 신청(저장)만 사용자가 confirm 한다. KIST 연구원이면 누구나 자기 `~/.claude/kiki/kk-inspect.config.json`(repo 밖)으로 쓸 수 있게 설계됐다 — skill 본체에는 어떤 개인정보도 들어있지 않다.
 
 ## ⛔ 안전장치 (항상 지킬 것)
 이 규칙들은 KIST 포털 정책과 직결되니 예외 없이 지킨다.
-- **신청(저장)·파일첨부는 사용자 본인이** 한다. skill은 입력·검증·안내까지만. (포털은 팝업이 별도 창이라 파일첨부 자동화가 기술적으로 불가하고, 결재성 저장은 본인 confirm이 원칙이다.)
+- **신청(저장)은 사용자 본인** confirm 후. 결재성 저장은 본인 원칙. **파일첨부는 자동화 가능** (2026-06-07 codex 실증): mcs_0003_pop2 는 `window.open` 별도 chrome page → 공통 가이드 [`../_shared/nexacro_file_upload.md`](../_shared/nexacro_file_upload.md) **§4 패턴 B** (DevTools `list_pages`→`select_page`→`take_snapshot`→실제 "파일추가" 버튼 uid 에 `upload_file` 직접). 컴포넌트 = `fileDiv1`. 상세: `references/mcs0003_fields.md` "파일첨부 자동화" 절.
 - **개인정보는 `~/.claude/kiki/kk-inspect.config.json`(repo 밖, 형제 skill 공유 네임스페이스)에만** 둔다. 이름·사번·연락처·행정원 등은 config에서 읽고, 화면·로그·이 skill 파일에 적지 않는다.
 - 계좌·카드번호 등 금융정보는 사용자가 직접. skill이 입력하지 않는다.
 - **화면은 한글이름(코드)** 로 부른다 — 소액검수신청(mcs_0003), 카드영수증조회(fam_0711). 내부 코드만 단독으로 쓰지 않는다. (`references/screen_codes.md`)
 - 형제 공통 규약 `../_shared/security_policy.md` 준수 — credential·개인식별자 skill 텍스트 금지, 모든 쓰기 confirm 후, config·token 은 `~/.claude/kiki/`(repo 밖)+gitignore.
 
 ## 환경 전제
-- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) 연결 + **통합정보 SSO 로그인**(`p.kist.re.kr`, 본인 로그인·Claude 자동로그인 금지) + python `Pillow`(+ pdf→jpg 시 `PyMuPDF`). **조회·입력은 자동, 저장·첨부는 사용자.**
+- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) 연결 + **통합정보 SSO 로그인**(`p.kist.re.kr`, 본인 로그인·Claude 자동로그인 금지) + python `Pillow`(+ pdf→jpg 시 `PyMuPDF`). **조회·입력·첨부는 자동(codex 해법, `../_shared/nexacro_file_upload.md`), 최종 신청은 사용자 confirm.**
 - 공통 개인정보(이름·사번·연락처·위치·담당 행정원·참여과제)는 `~/.claude/kiki/kiki.config.json` 에서 읽는다 → `../_shared/personal_config.md`.
 
 ---
@@ -61,8 +61,9 @@ kk-inspect 고유(`kk-inspect.config.json`): **검수 파일 폴더**(기본 `C:
 ### 2-6. 확인 요청
 입력값(품명·금액·수량·취득일·지급신청자 등)을 표로 정리해 **"맞는지 확인"** 을 요청한다.
 
-### 2-7. 첨부 + 신청 (사용자)
-첨부할 파일을 명확히 안내한다 — 세금계산서/거래명세서 PDF + 물품 사진 JPG (또는 카드명세서 jpg + 영수증). 파일 형식은 png/jpeg면 미리 jpg로 변환(`scripts/convert_evidence.py`)하고, 무의미한 파일명은 개명(`scripts/rename_evidence.py`)한다. 그 뒤 사용자가 **파일추가 + 신청 버튼**을 직접 누르게 하고, **신청완료를 눌렀는지 확인**한다. (저장 성공 시 팝업이 자동으로 닫힌다.)
+### 2-7. 첨부 + 신청
+- **첨부**: 세금계산서/거래명세서 PDF + 물품 사진 JPG (또는 카드명세서 jpg + 영수증). png/jpeg는 미리 jpg로 변환(`scripts/convert_evidence.py`), 무의미한 파일명은 개명(`scripts/rename_evidence.py`). → **자동 첨부** 가능 ([`../_shared/nexacro_file_upload.md`](../_shared/nexacro_file_upload.md), 별도 window 처리). 사용자에게 파일 절대경로·개수·대상 행을 표로 보여주고 confirm 후 진행.
+- **신청 버튼**: 결재성 동작이라 **사용자가 직접** 누르고 **신청완료** 확인. (저장 성공 시 팝업 자동 닫힘.)
 
 ### 2-8. 다음 건
 결제건이 더 있으면 2-1로 돌아가 순차 처리한다. 검수창 팝업은 한 건 저장 시 닫히므로 다음 건은 팝업 열기부터 다시 한다.
