@@ -35,7 +35,7 @@ claude desktop app https://claude.com/download
 또는 claude code cli https://code.claude.com/docs/ko/quickstart#native-install-recommended 필요  
 
 chatgpt 사용자는 codex desktop app 또는 codex cli 필요.  
-https://openai.com/index/openai-codex/  
+https://openai.com/ko-KR/codex/  
 
 claude desktop app 설정에서 아래기능 허용  
 설정 -> 데스크톱 앱 -> browser use -> 모든 브라우저 작업 허용  
