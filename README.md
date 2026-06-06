@@ -7,7 +7,7 @@
 
 # KIST 행정 자동화 스킬 패키지 
 
-KIST 포탈/dooray 제어 claude skill 모음.  
+KIST 포탈/dooray 제어 claude, codex(chatgpt) skill 모음. 
 
 
 ## 구성
@@ -22,16 +22,18 @@ KIST 포탈/dooray 제어 claude skill 모음.
 
 
 ## 설치
-claude code 대화창에 아래 문구 붙여넣기  
+claude code, codex 대화창에 아래 문구 붙여넣기  
 "https://github.com/angmond1/kiki 설치해줘"  
 세부사항은 [INSTALL.md](INSTALL.md)  
 
-> **Codex 사용자**: skill 본문은 Claude 기준이지만 도구 이름·경로만 바꾸면 Codex 에서도 동작합니다 → [docs/CODEX.md](docs/CODEX.md)  
+codex 설치 세부사항은 [CODEX.md](CODEX.md)  
 
 
 ## 필요 환경
-claude 유료 계정  
-claude desktop app https://claude.com/download 또는 claude code cli https://code.claude.com/docs/ko/quickstart#native-install-recommended 필요
+claude 또는 chatgpt 유료 계정,  
+claude desktop app https://claude.com/download  
+또는 claude code cli https://code.claude.com/docs/ko/quickstart#native-install-recommended 필요
+codex desktop app 또는 codex cli 필요.
 
 claude desktop app 설정에서 아래기능 허용  
 설정 -> 데스크톱 앱 -> browser use -> 모든 브라우저 작업 허용  
@@ -43,7 +45,6 @@ https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn
 
 dooray drive 제어시 dooray API Key 필요  
 https://kist.gov-dooray.com/setting/api/token  
-
 
 
 ## 문의
