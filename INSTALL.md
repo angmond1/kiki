@@ -54,14 +54,17 @@ ki-mail 과 달리 ki-rpa 는 **업로드에 Dooray 개인 토큰**이 필요하
 
 > 통합정보(카드·과제) 조회는 Chrome 에 **KIST 통합정보(p.kist.re.kr) 로그인 세션**이 있어야 한다(토큰 불요, fetch 가 세션+authTk 로 동작).
 
-## ki-dining (회의비) — 추가 준비
-회의록을 **.hwp** 로 만들기 때문에 **아래아한글**이 필수다(MS Word 불가). RPA 업로드 부서는 Dooray 토큰을 쓴다.
-1. **아래아한글** 설치 + python 패키지 `pip install pyhwpx pywin32 pywinauto`.
-2. **Dooray 토큰**(RPA 업로드 부서만): `~/.claude/kiki/kiki.env` 의 `DOORAY_TOKEN=...` — **모든 kiki skill 이 공유**(repo 밖, gitignore). 발급 https://kist.gov-dooray.com/setting/api/token. (메일 등으로 제출하는 부서는 토큰 불요)
-3. **설치**: `Copy-Item -Recurse "kiki\skills\ki-dining" "$env:USERPROFILE\.claude\skills\ki-dining"`
-4. **첫 실행** `ki-dining 설정해줘` → 이름 → 카드책임자 → 참여과제 확인 → 사전결재 면제(I·S·K) 확인 → "Dooray 드라이브 RPA 처리? 예/아니요" → (예면)토큰·행정원 폴더 → 한글 환경 점검 → 영수증/출력/과제보고서 폴더 안내.
-5. **사용 예**: `회의비 처리하자` / `이번달 회의비 회의록 만들어줘`
-> 카드·과제·사전결재 조회는 통합정보 SSO 세션(토큰 불요). 회의록 출력 기본 경로 `C:\kiki\dining\<yymmdd>\`, 회의내용 작성용 과제보고서는 `C:\kiki\dining\project_report\`.
+## ki-dining (회의비, v2 2026-06-05~) — 추가 준비
+v2 는 **회의록 엑셀 master + fam_0704_02 지급신청서 직접 자동작성·결재상신**(NEXACRO 부모탭 JS). hwp 보관은 옵션. 아래아한글은 옵션 모드(`xlsx_and_hwp`)일 때만 필요.
+1. **필수 python 패키지**: `pip install openpyxl` (엑셀 master).
+2. **(옵션, 저장 모드 `xlsx_and_hwp` 일 때만)** 아래아한글 + `pip install pyhwpx pywin32 pywinauto` (별지1호 hwp 동봉용).
+3. **Dooray 토큰**(RPA 업로드 부서만, v2 는 보통 불요 — fam_0704 직접 자동작성하므로): `~/.claude/kiki/kiki.env` 의 `DOORAY_TOKEN=...` — **모든 kiki skill 이 공유**(repo 밖, gitignore). 발급 https://kist.gov-dooray.com/setting/api/token.
+4. **설치**: `Copy-Item -Recurse "kiki\skills\ki-dining" "$env:USERPROFILE\.claude\skills\ki-dining"`
+5. **첫 실행** `ki-dining 설정해줘` → 이름 → 카드책임자 → 참여과제 확인 → **사전결재 면제(`I·S·B·F·부서운영비`)** 확인 → **저장 모드** (1=`xlsx_only` 기본 / 2=`xlsx_and_hwp` 보관 선호) → "Dooray 드라이브 RPA 처리? 예/아니요" (v2 기본=아니요) → (예면)토큰·행정원 폴더 → 환경 점검(Chrome MCP·openpyxl, 모드 2면 한글·COM) → 영수증/엑셀출력/과제보고서 폴더 안내.
+6. **사용 예**: `회의비 처리하자` / `이번달 회의비 정리해줘` (→ 회의록 엑셀 작성 + fam_0704 직접 자동작성·임시저장·결재상신)
+> 카드·과제·사전결재 조회 + fam_0704 자동작성·임시저장·결재상신 모두 통합정보 SSO 세션(토큰 불요, NEXACRO 부모탭 JS 좌표 0).
+> 회의록 엑셀 기본 경로: `D:\GoogleDrive\내 드라이브\01\06.명세서\{YYYY.MM}\{yymmdd}_회의록.xlsx` (지급신청 처리일, 같은날 모든 건 1파일에 행 추가). 회의내용 작성용 과제보고서는 `C:\kiki\dining\project_report\`. (옵션 hwp 출력은 `C:\kiki\dining\<yymmdd>\`)
+> **결재상신 후 결재선 확정·최종 상신**은 별도 gw 전자결재 창(ngw.kist.re.kr) → 사용자 직접. Claude 는 계정책임자 정보 자동 추출해 안내 문구 출력.
 
 ## ki-budget (예산 조회·리포트) — 추가 준비
 조회·로컬저장 전용이라 **Dooray 토큰 불요**(통합정보 SSO 세션만). 엑셀 생성에 python `openpyxl`.
