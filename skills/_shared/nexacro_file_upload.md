@@ -206,6 +206,18 @@ f.ds_rqstGrid.set_rowposition(row);
 f.rqstGrid_oncellclick(rqstGridComp, ei);  // ei.row=row, ei.cell=0, ei.col=0
 ```
 
+## 8-1. 첨부/저장 후 화면 클릭 막힘 (NEXACRO modal layer — tool 무관)
+첨부·저장(`gfn_upload`/`doSave`) 후 **빈 NEXACRO modal layer 가 화면 전체를 덮어** 이후 클릭(시간칸·그리드 등)이 안 먹는 경우가 있다. 임시 input 때문이 아니라 저장 후 남은 modal 레이어가 클릭을 가로채는 것 (2026-06-07 codex 실증, Claude 도 동일).
+- 진단: `document.elementFromPoint(500,300)` → 반환이 `..._form_modalPopDiv` / `...modalPopDivScrollableInnerContainerElement(_inner)` 류면 그 레이어가 가로챔.
+- 해결: 그 레이어들에 `pointer-events:none !important` 주입:
+```js
+let s = document.getElementById("kk-clickfix-style")
+     || document.head.appendChild(Object.assign(document.createElement("style"),{id:"kk-clickfix-style"}));
+s.textContent = `[id*="_form_modalPopDiv"], [id*="modalPopDivScrollableInnerContainerElement"] { pointer-events:none !important; }`;
+// 적용 후 elementFromPoint 가 실제 입력칸/그리드를 반환하면 정상.
+```
+- ⚠️ 특정 화면 modal 만 노릴거면 id prefix 를 그 팝업명으로(`#pop_fam_0703_02_form_modalPopDiv` 등) 좁혀 적용.
+
 ## 9. 안전·예의
 - A 패턴 **임시 버튼은 사용자 화면에 보인다** → 작업 후 반드시 `.remove()`.
 - 잘못된 파일 붙으면 §6 으로 삭제 가능하지만, **확인 후 첨부**가 원칙(절대경로·개수·대상 행을 사용자에게 한번 보여주고 confirm 후 진행).

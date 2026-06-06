@@ -26,6 +26,8 @@ claude code 대화창에 아래 문구 붙여넣기
 "https://github.com/angmond1/kiki 설치해줘"  
 세부사항은 [INSTALL.md](INSTALL.md)  
 
+> **Codex 사용자**: skill 본문은 Claude 기준이지만 도구 이름·경로만 바꾸면 Codex 에서도 동작합니다 → [docs/CODEX.md](docs/CODEX.md)  
+
 
 ## 필요 환경
 claude 유료 계정  
