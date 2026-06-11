@@ -12,7 +12,8 @@
 dooray_token.txt
 
 # 로컬 전용 유지보수 노트 (배포 X — 메인테이너 세션 온보딩용, repo 에 올리지 않음)
-CLAUDE.md
+# ⚠️ 배포용 CLAUDE.md(= 사용자/에이전트 설치·실행 지침)는 추적함. 메인테이너 노트만 .local 로 분리해 제외.
+CLAUDE.local.md
 
 # 임시 작업 파일 (조회 캐시·테스트 스크립트)
 _tmp/

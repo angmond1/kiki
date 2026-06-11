@@ -12,6 +12,24 @@
 | 공통 문서 | `~/.codex/skills/_shared` | repo 의 `skills/_shared` 그대로 |
 | 개인 설정·토큰 | `~/.codex/kiki/` | **repo 밖** (아래 §3) |
 
+설치(복사) 예 — repo 폴더 안에서:
+```bash
+# macOS / Linux
+mkdir -p ~/.codex/skills ~/.codex/kiki
+cp -R skills/_shared ~/.codex/skills/_shared
+cp -R skills/kk-mail ~/.codex/skills/kk-mail            # 원하는 kk-* 나열 (또는 skills/kk-* 전체)
+cp skills/_shared/kiki.config.example.json ~/.codex/kiki/kiki.config.json
+cp skills/_shared/kiki.env.example ~/.codex/kiki/kiki.env
+```
+```powershell
+# Windows (PowerShell)
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills","$env:USERPROFILE\.codex\kiki" | Out-Null
+Copy-Item -Recurse "skills\_shared" "$env:USERPROFILE\.codex\skills\_shared"
+Copy-Item -Recurse "skills\kk-mail" "$env:USERPROFILE\.codex\skills\kk-mail"
+Copy-Item "skills\_shared\kiki.config.example.json" "$env:USERPROFILE\.codex\kiki\kiki.config.json"
+Copy-Item "skills\_shared\kiki.env.example" "$env:USERPROFILE\.codex\kiki\kiki.env"
+```
+
 - Codex Desktop 은 시작 시 skill 목록을 로드 → **새 skill 설치 후 Codex 재시작**으로 인식 확인.
 - (Claude 는 `~/.claude/skills/` + `~/.claude/kiki/`. 경로만 다르고 내용 동일.)
 
