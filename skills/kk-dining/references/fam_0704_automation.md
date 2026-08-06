@@ -160,21 +160,42 @@ C.rd_UseType_onitemchanged.call(C, rdUseType, {fromobject:rdUseType, postvalue:"
 ```
 
 #### 9-c) 참석자 (datagrid 행추가)
-- 내부 = `C.ds_datagrid1` (KORNM/PAYNO/DEPTNM)
-- 외부 = `C.ds_datagrid2` (OUTNAME/OUTCOMPANY)
+- 내부 = `C.ds_datagrid1` (KORNM/PAYNO/DEPTNM) — ⚠️ **해당 계정의 참여연구원만 등록 가능** (2026-08-01~)
+- 외부/미참여자 = `C.ds_datagrid2` (OUTNAME/OUTCOMPANY/**`PROJJOINYN`**)
+
+##### ⭐ 2026-08-01 규정변경 — 참여연구원 여부 (실증 2026-08-07)
+- **KIST 소속이어도 해당 계정의 참여연구원이 아니면 내부에 넣을 수 없다.** 서버가 검증해 거부하며 행이 삭제된다.
+  거부 메시지: `본 계정의 참여연구원이 아닙니다. 내부인원은 참여연구원만 등록 가능합니다.`
+- 참여연구원이 아닌 KIST 인원은 **외부/미참여자(`ds_datagrid2`)에 회사명 `한국과학기술연구원`** 으로 넣는다.
+- `ds_datagrid2` 에 **`PROJJOINYN`(참여연구원 여부) 필수선택** 컬럼 신설. 코드표 = `C.ds_codeFAM006`
+  (`""`=선택 / **`N`=N(미참여)** / `Y`=Y(참여)). 미지정이면 저장·상신 검증에서 막힌다.
+- 사전결재 인원수는 **내부+외부 합계**로 맞춘다 (내부에서 빠진 인원을 외부로 옮기면 총원 유지).
+
+##### 내부 등록 (이름 → 사번 자동조회)
+`setColumn` 만으로는 조회가 돌지 않는다. **`ds_datagrid1_oncolumnchanged` 를 정식 이벤트 객체로 호출**해야 서버가
+이름으로 사번·부서·참여연구원 여부를 채운다. 성공하면 `PAYNO`·`DEPTNM`·`RSCHR_REG_NO` 가 자동으로 붙는다.
 
 ```js
+// ⚠️ 인자 순서 = (obj, id, row, col, colid, newvalue, oldvalue) — newvalue/oldvalue 를 바꿔 넣으면
+//    빈 이름으로 조회되어 행이 조용히 삭제된다 (2026-08-07 실측 함정).
 const r1 = C.ds_datagrid1.addRow();
-C.ds_datagrid1.setColumn(r1,"KORNM","홍길동");
-C.ds_datagrid1.setColumn(r1,"PAYNO","000000");
-C.ds_datagrid1.setColumn(r1,"DEPTNM","○○연구센터");
+C.ds_datagrid1.setColumn(r1, "KORNM", "홍길동");
+C.ds_datagrid1_oncolumnchanged.call(C, C.ds_datagrid1,
+  new nexacro.DSColChangeEventInfo(C.ds_datagrid1, "oncolumnchanged", r1, 2, "KORNM", "홍길동", ""));
+// 서버 왕복 3~4초 대기 후 PAYNO 확인 → 없으면 참여연구원 아님 → 외부로 강등
+```
 
-["김철수","이영희","박민수","정지원","최유리","강현우","윤서연"].forEach(nm=>{
+##### 외부/미참여자 등록
+```js
+[{nm:"김철수", org:"○○대학교"}, {nm:"이영희", org:"한국과학기술연구원"}].forEach(p=>{
   const r2 = C.ds_datagrid2.addRow();
-  C.ds_datagrid2.setColumn(r2,"OUTNAME",nm);
-  C.ds_datagrid2.setColumn(r2,"OUTCOMPANY","○○대학교");
+  C.ds_datagrid2.setColumn(r2,"OUTNAME",p.nm);
+  C.ds_datagrid2.setColumn(r2,"OUTCOMPANY",p.org);
+  C.ds_datagrid2.setColumn(r2,"PROJJOINYN","N");   // ★ 필수 (2026-08-01~)
 });
 ```
+> 💡 권장 흐름: 내부 후보를 하나씩 시도 → `PAYNO` 미해결이면 그 이름을 외부(`한국과학기술연구원`)로 자동 강등.
+> 사전결재 연동(9-d)은 **내부 참석자가 1명 이상 있어야** 통과한다 (`1번째행의 내부참석자 정보를 선택하셔야 합니다`).
 
 #### 9-d) 사전결재 연동 (`button00_onclick` → `fam_0100_pop2`)
 **USETYPE 미선택이면 modal 경고** → 9-b 먼저.
@@ -297,6 +318,12 @@ C.fileDiv2.gfn_upload("", "fn_endFileCallBack1", "ds_file", "RQST_NO="+rqst, "02
 // FLE_TP: "02" = 증빙. 서명록/사전결재는 다른 값 (첫 시도시 확인 후 박을 것).
 // 콜백 fn_endFileCallBack1 = 저장까지 한번에. 첨부만 분리하려면 fn_endFileCallBack(숫자없는 쪽).
 ```
+
+### ⚠️ 회의록 `저장` 만으로는 첨부가 서버에 안 붙는다 (2026-08-07 실측)
+화면에서 `파일추가`로 파일을 고르고 **회의록 `저장`을 눌러도** `tmHeader` 가 `I`(선택만)에 머물고,
+팝업을 닫았다 다시 열면 **`ds_files` 가 비어 파일이 유실**된다. 회의록 저장은 회의 정보만 저장한다.
+→ 첨부 직후 **반드시 `gfn_upload` 를 호출**해 서버 반영시키고 `tmHeader=S` 를 확인할 것.
+사용자가 직접 첨부하는 경우에도 마찬가지이므로, 첨부 후 `tmHeader` 를 점검해 `I` 면 `gfn_upload` 를 대신 호출한다.
 
 ### 성공 확인 (`C.fileDiv2.ds_files`)
 - `tmHeader=S` → 서버 저장됨 / `I` 선택만 / `D` 삭제예정

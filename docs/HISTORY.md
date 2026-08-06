@@ -49,6 +49,7 @@ kiki/
 재사용 패턴(NEXACRO 부모탭 JS 완전자동·fetch backend 직접호출·form 직접제어·hwp 자동화·과제분류코드·데이터 master·임시저장↔결재상신 분리·killfocus 동기화 등)은 전부 **[DEVELOPMENT.md](DEVELOPMENT.md)** 에 통합. skill 별 화면·필드 캡처 상세는 각 skill 의 `references/`.
 
 ## 빌드 이력 (요약)
+- **2026-08-07**: kk-dining — **2026-08-01 참여연구원 규정변경 반영**. 내부 참석자는 해당 계정 참여연구원만 가능(서버검증·거부 시 행 삭제), 미참여 KIST 인원은 외부/미참여자에 회사명 `한국과학기술연구원`. `ds_datagrid2.PROJJOINYN` 필수선택 신설(코드표 `ds_codeFAM006`: `N`=미참여/`Y`=참여). 내부 등록은 `ds_datagrid1_oncolumnchanged` 를 `nexacro.DSColChangeEventInfo(obj,id,row,col,colid,**newvalue,oldvalue**)` 순서로 호출해야 이름→사번 조회가 동작(인자 순서 뒤바꾸면 행이 조용히 삭제되는 함정). 첨부는 회의록 `저장` 만으로 서버 반영되지 않아 `gfn_upload` 호출 필수(`tmHeader` I→S 확인). 실사용 7건 처리로 실증.
 - **2026-06-06**: 통합 관리 — 위 '공통화 정리' (rename / 공통 추출 / 환경 통일 / 문서 분리 / 개인정보 제거).
 - **2026-06-05**: kk-dining v2 — fam_0704_02 직접 자동작성·결재상신(옛 hwp 양산·두레이 업로드 폐기). 회의록 엑셀 master. NEXACRO 부모탭 JS 완전자동(→ DEVELOPMENT §4).
 - **2026-06-05**: kk-inspect — 소액검수 `mcs_0003` form 직접제어(7건 실증). 자산 보수판정(wiki 7-1)·외화 `fam_0711` USEAMT.

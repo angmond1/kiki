@@ -47,9 +47,11 @@
 | 금액 | (자동) RQSTAMT | — |
 | 장소(거래처) | (자동) CUSTNM | input_conferencePlace, ds_SAVE.CONFERENCEPLACE |
 | 처리계정 | (자동) BUDGSBJCD (popBudgList) | output3 (자동) |
-| 내부참석자 | — | ds_datagrid1 (KORNM/PAYNO/DEPTNM) |
-| 외부참석자 | — | ds_datagrid2 (OUTNAME) |
-| 외부참석자 소속 | — | ds_datagrid2 (OUTCOMPANY) |
+| 내부참석자 | — | ds_datagrid1 (KORNM/PAYNO/DEPTNM) — **해당 계정 참여연구원만** |
+| 외부참석자 | — | ds_datagrid2 (OUTNAME) + **PROJJOINYN=`N`** |
+| 외부참석자 소속 | — | ds_datagrid2 (OUTCOMPANY) — KIST 미참여자는 `한국과학기술연구원` |
+
+⚠️ **2026-08-01~**: KIST 소속이어도 그 계정 참여연구원이 아니면 내부에 못 넣는다 → 외부참석자 칸에 성명, 소속 칸에 `한국과학기술연구원`. 엑셀 6·7·8열을 채울 때 이 기준으로 나눈다. (→ `project_code.md`)
 | 회의목적(전체) | COMDSCCONT 적요 = `일시:.../장소:.../회의제목:.../홍길동 외 N명` | input_conferencePerpose(첫줄=제목) + textarea_conferenceContent(상세 내용) |
 
 ## 파이썬 헬퍼 (`scripts/meeting_log_xlsx.py`)
