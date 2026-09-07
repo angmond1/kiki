@@ -123,6 +123,8 @@ F.import2.common_onkillfocus.call(F.import2, disp, {fromobject:disp, fromreferen
 F.ds_rqstGrid.setColumn(0,"COMDSCCONT",
   "일시: 2026-04-30 / 장소: ○○식당 / 회의제목: 연구 진행상황 논의 / 홍길동 외 7명");
 ```
+⚠️ **`외 N명` 의 N = 총 참석인원 − 1** (발의자 본인 제외. 8명이면 `외 7명`, 11명이면 `외 10명`).
+⚠️⚠️ **회의록 저장·사전결재(button00) 연동 시 시스템이 적요를 자동 재생성**하며 `외 N명` 을 잘못 계산할 수 있음(11명인데 `외 9명` 실측) → **10) 임시저장 직전 최종 적요 `외 N명` 재검증** 후 틀리면 `COMDSCCONT` 재설정.
 
 ### 9) 회의록 작성 팝업 (회의비/업무추진비류 작성)
 ```js
@@ -346,3 +348,12 @@ C.fileDiv2.gfn_upload("", "fn_endFileCallBack1", "ds_file", "RQST_NO="+rqst, "02
 - 결재상신은 실제 지급 결재 제출 = 되돌리려면 결재 회수 필요. 마지막 단계에서 한 번 더 확인.
 - 결재선 확정은 **별도 gw 창 → 사용자 직접** (Claude in Chrome 제어 불가, 캡처로 확인 가능).
 - **첨부 임시 트리거 버튼**은 사용 후 반드시 `.remove()` (공통가이드 §2-6).
+
+## 2026-08-01 규정 변경 반영 + 해외 회의비 첨부 실증 (2026-09-07)
+- **사전결재 폐지(8/1~)**: 5-d/9-d 사전결재 연동 단계 생략 가능. `doSave` 의 "사전결재문서 첨부 후 저장가능" 검증은 주석 처리(연동 `priorRole=Y` 시만 PRI_CONFER_NO 검사).
+- **외부참석자 `PROJJOINYN` 필수(8/1~)**: `doChkJoinPeople` 가 `cardusetime>="20260801"` 이면 `ds_datagrid2` 각 행 `PROJJOINYN` 검사 → 외부 협력자 `'N'`, 과제 참여연구원 `'Y'`. (`g2.setColumn(r,"PROJJOINYN","N")`)
+- ⚠️ **참석자 grid 비동기 로드 레이스**: `btn_Conference` 후 서버가 참석자 목록을 뒤늦게 로드해 3초 안에 채운 행을 **빈 결과로 덮어씀**. → 팝업 open 후 **6초 대기** 후 채우고 **저장 직전 rowcount 재검증**.
+- **최소참석인원**: 합 ≥ ⌈RQSTAMT÷50,000⌉ (469,680 → 10명 이상) 강제.
+- **첨부 코드 확정**(`fn_callBack` 소스): fileDiv1 `"01"`/`fn_endFileCallBack` · fileDiv2 `"02"`/`fn_endFileCallBack1` · fileDiv3 `"03"`/`fn_endFileCallBack2`. RQST_NO=`CONFERENCENO+"-"+CARDUSEMGRNO` → **회의록 1차 `doSave`(번호 발급) 후 첨부**. `file_upload` 다중 path 1회 OK(ds_files 누적) → count 검증 → `gfn_upload` → `tmHeader=S` 확인 → input id/style 원복. 영역별 input 은 각각 `extUp._input_node`.
+- **해외 회의비**: **fileDiv2(증빙 02) = 영수증 jpg + 카드사용내역서(해외이용내역, 환율 증빙) + 식비반납 수입의뢰서 + 해외출장신청서** (⭐ 출장신청서도 증빙에 — fileDiv3 사전결재문서 아님, 2026-09-07 사용자 확정). fileDiv3 은 비움. 금액 fam_0711 `USEAMT`, 회의시간 현지시간, 출장계정≠회의비계정이면 적요에 공동계정 사유. 저장 시 "해외출장시 식비공제 확인바랍니다" 는 안내(저장됨).
+- ⭐ **해외 가맹점 = 거래처구분 콤보에서 "거래처명" 선택** (2026-09-07 사용자 확정): 해외 카드건은 가맹점번호(국내 사업자)가 없어 `CUSTCD` 가 비고, fam_0704 `bt_save` 검증 `CUSTCLSCD!='2' && (CUSTCD||CUSTNM 빈)` 에 걸려 "N번째 신청내역의 거래처 관련 항목을 입력해 주시기 바랍니다". → 거래처구분을 **"거래처명"**(거래처코드 없이 거래처명만 쓰는 구분. 검증식상 CUSTCD 면제 코드는 '2' — 첫 실행 때 콤보 innerdataset 라벨로 '2'=거래처명인지 확인)으로 바꾸고 거래처명 입력: 행별 `doGetDesp()` → `combo_custcls.set_value(코드)` + `F.switch1_RAWCARD_combo_custcls_onitemchanged.call(F,cb,{postvalue:코드,prevalue:'3'})` + `formDetail_Custnm.set_value(거래처명)`+`_onkillfocus` + `ds_rqstGrid.setColumn(i,'CUSTCLSCD',코드)`/`'CUSTNM'` 후 통장표기 재동기화 → 저장 통과. 국내 카드는 기본 '3'(가맹점 자동매핑) 그대로.
