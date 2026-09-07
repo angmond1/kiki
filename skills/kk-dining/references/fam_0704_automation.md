@@ -29,8 +29,14 @@ const F = window.application.popupframes.fam_0704_02.form;
 const intro = F.imp_pop_fam_intro;
 const tgt = intro.form || intro;
 tgt.bt_close_onclick.call(tgt, tgt.bt_close, new nexacro.ClickEventInfo(tgt.bt_close,'onclick',false,false,false,false,0,0,0,0,0,tgt.bt_close,''));
-// 확인: intro.visible === false
+// ⚠️⚠️ 반드시 검증: intro.visible === false 가 될 때까지 (2026-09-08 사용자 지적 — 호출만 하고 검증 안 해 팝업이 남음)
+if (intro.visible !== false) {
+  // 1) 팝업 form 안의 "확인" 버튼을 찾아 그 onclick 핸들러 재호출
+  (function walk(c){ (c.components||[]).forEach(cp=>{ if((cp._type_name||'').indexOf('Button')>=0 && /확인|닫기/.test(String(cp.text||''))){ const h=tgt[cp.name+'_onclick']; if(h) h.call(tgt, cp, new nexacro.ClickEventInfo(cp,'onclick',false,false,false,false,0,0,0,0,0,cp,'')); } walk(cp); }); })(tgt);
+  // 2) 그래도 남으면 screenshot 으로 하단 "확인" 버튼 좌표 산출 후 computer left_click (고정 좌표 금지)
+}
 ```
+> 이 팝업 = **2026-08-01 개정 "회의비 집행 예산항목 / 식비 사용기준" 안내**(사전결재 폐지 대상 한정·미참여자 참석 필수·다과 규정). 원문 요약 → `meeting_form.md`, `project_code.md`.
 
 ### 3) 카드매핑 (영수증함 → 신청내역)
 영수증함 = `F.ds_datagrid1` (9건 수준, 음식점·카페만 회의비). 컬럼: `CUSTNM`/`CARDAPPRNO`/`USEAMT`/`CARDUSEYMD`/`USETIME`/`CARDNO`.
@@ -356,4 +362,5 @@ C.fileDiv2.gfn_upload("", "fn_endFileCallBack1", "ds_file", "RQST_NO="+rqst, "02
 - **최소참석인원**: 합 ≥ ⌈RQSTAMT÷50,000⌉ (469,680 → 10명 이상) 강제.
 - **첨부 코드 확정**(`fn_callBack` 소스): fileDiv1 `"01"`/`fn_endFileCallBack` · fileDiv2 `"02"`/`fn_endFileCallBack1` · fileDiv3 `"03"`/`fn_endFileCallBack2`. RQST_NO=`CONFERENCENO+"-"+CARDUSEMGRNO` → **회의록 1차 `doSave`(번호 발급) 후 첨부**. `file_upload` 다중 path 1회 OK(ds_files 누적) → count 검증 → `gfn_upload` → `tmHeader=S` 확인 → input id/style 원복. 영역별 input 은 각각 `extUp._input_node`.
 - **해외 회의비**: **fileDiv2(증빙 02) = 영수증 jpg + 카드사용내역서(해외이용내역, 환율 증빙) + 식비반납 수입의뢰서 + 해외출장신청서** (⭐ 출장신청서도 증빙에 — fileDiv3 사전결재문서 아님, 2026-09-07 사용자 확정). fileDiv3 은 비움. 금액 fam_0711 `USEAMT`, 회의시간 현지시간, 출장계정≠회의비계정이면 적요에 공동계정 사유. 저장 시 "해외출장시 식비공제 확인바랍니다" 는 안내(저장됨).
+- ⚠️ **`doNew` 직후 `ds_rqstGrid` 는 이미 빈 행 1개**(CUSTNM 없음)를 갖는다 → "행이 있으면 매핑 스킵" 같은 가드는 오작동(2026-09-08 실측: 매핑 없이 계정만 빈 행에 들어감). 매핑 여부 판정은 **rowcount 가 아니라 `CUSTNM`/`CARDUSEMGRNO` 채워짐**으로. 첫 카드는 그 빈 행(curRow 0)에 `doSetDesp`, 둘째부터 `bt_addRow`.
 - ⭐ **해외 가맹점 = 거래처구분 콤보에서 "거래처명" 선택** (2026-09-07 사용자 확정): 해외 카드건은 가맹점번호(국내 사업자)가 없어 `CUSTCD` 가 비고, fam_0704 `bt_save` 검증 `CUSTCLSCD!='2' && (CUSTCD||CUSTNM 빈)` 에 걸려 "N번째 신청내역의 거래처 관련 항목을 입력해 주시기 바랍니다". → 거래처구분을 **"거래처명"**(거래처코드 없이 거래처명만 쓰는 구분. 검증식상 CUSTCD 면제 코드는 '2' — 첫 실행 때 콤보 innerdataset 라벨로 '2'=거래처명인지 확인)으로 바꾸고 거래처명 입력: 행별 `doGetDesp()` → `combo_custcls.set_value(코드)` + `F.switch1_RAWCARD_combo_custcls_onitemchanged.call(F,cb,{postvalue:코드,prevalue:'3'})` + `formDetail_Custnm.set_value(거래처명)`+`_onkillfocus` + `ds_rqstGrid.setColumn(i,'CUSTCLSCD',코드)`/`'CUSTNM'` 후 통장표기 재동기화 → 저장 통과. 국내 카드는 기본 '3'(가맹점 자동매핑) 그대로.
