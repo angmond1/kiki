@@ -59,6 +59,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
     - 부모탭 JS(Claude in Chrome) → `application.popupframes` 통해 11단계 자동 (DOC_CLS="G" frozen 회피 → 식비안내 팝업 닫기 → 카드매핑 `doSetDesp("RAWCARD")` → 계정 필터 popBudgList → `doDecision()` 콜백 → 통장표기 `dpstDispNm` + **`common_onkillfocus` 동기화 필수** → 적요 → 회의록 팝업 입력[사용구분 `rd_UseType="3"` 기타(A이외)식대 + 사전결재 `button00_onclick` 연동 + 회의록 원본 복원 + `doSave()`] → fam_0704 `bt_save_onclick` 임시저장 → `bt_approval_onclick` 결재상신).
     - ⭐ **행추가(`bt_addRow`)로 한 상신에 최대 5건 묶기** (8건이면 5+3 분할). **같은날 식당+카페는 동일 상신건**에 묶음(=1행 처리).
     - 자세한 11단계 JS = → `fam_0704_automation.md`
+    - ⭐ **연구비카드 회의비**(카드 구분 '연구비', CARDTYPECD 3)는 `DOC_CLS="4"` → **`fam_0703_02`**. 영수증함·매핑·핸들러 이름과 행 전환 규칙이 다르고 통장표기가 없다 → **`fam_0703_automation.md` 절차서만 따른다**(§0 정찰 → 매핑 → 계정 → 적요 → 회의록·첨부 → **DESP_LIST 행별 검증** → 임시저장). 2026-09-08 실증.
 11. **결재선 안내** (사용자에게 출력):
     - 계정책임자 (= `ds_rqstGrid.RDSBJEMPNM`) 확인.
     - **계정책임자 == 발의자(본인)** → *"[안내] 사용자({본인})님이 이 과제({계정}) 계정책임자이므로, 결재선 책임연구원 칸에 이미 포함되어 있습니다. 그대로 상신하시면 됩니다."*
@@ -84,6 +85,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 
 ## 참고
 - `references/fam_0704_automation.md` — **NEXACRO 부모탭 JS 완전자동 11단계** (DOC_CLS / 식비팝업 / 카드매핑 / popBudgList 콜백 / 통장표기 killfocus / 회의록 / 사전결재 연동 / **첨부**(회의록 팝업 `pop_fam_0703_02` 의 `fileDiv1`서명록/`fileDiv2`증빙/`fileDiv3`사전결재, 패턴 C = `extUp._input_node` 직접 노출) / 저장 / 결재상신). gfn_msg 원복 트랩 포함.
+- `references/fam_0703_automation.md` — ⭐ **연구비카드 회의비(fam_0703_02) 전용 절차서** (정찰 스니펫 / 이름표 / closure curRow 행 전환 `goRow()` / 매핑→계정→적요 순서 / DESP_LIST 오염 검증·복구 / 저장 체크리스트 / 2026-09-08 버벅거림 13건→예방).
 - `../_shared/nexacro_file_upload.md` — ⭐ **NEXACRO `ExtFileUpload` 첨부 자동화 공통 가이드**(2026-06-07 codex 실증, A/B/C 3 패턴). kk-pay·kk-dining·kk-inspect 공유. **C(정공법, `extUp._input_node` 직접) 우선 시도** 권장.
 - `references/meeting_log_excel.md` — 회의록 엑셀 9컬럼 관리 표준 (처리일 1파일).
 - `references/meeting_form.md` — (옵션) hwp 별지1호 양식·셀매핑·인원·증빙·중복.

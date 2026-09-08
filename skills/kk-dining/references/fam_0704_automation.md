@@ -366,6 +366,7 @@ C.fileDiv2.gfn_upload("", "fn_endFileCallBack1", "ds_file", "RQST_NO="+rqst, "02
 - ⭐ **해외 가맹점 = 거래처구분 콤보에서 "거래처명" 선택** (2026-09-07 사용자 확정): 해외 카드건은 가맹점번호(국내 사업자)가 없어 `CUSTCD` 가 비고, fam_0704 `bt_save` 검증 `CUSTCLSCD!='2' && (CUSTCD||CUSTNM 빈)` 에 걸려 "N번째 신청내역의 거래처 관련 항목을 입력해 주시기 바랍니다". → 거래처구분을 **"거래처명"**(거래처코드 없이 거래처명만 쓰는 구분. 검증식상 CUSTCD 면제 코드는 '2' — 첫 실행 때 콤보 innerdataset 라벨로 '2'=거래처명인지 확인)으로 바꾸고 거래처명 입력: 행별 `doGetDesp()` → `combo_custcls.set_value(코드)` + `F.switch1_RAWCARD_combo_custcls_onitemchanged.call(F,cb,{postvalue:코드,prevalue:'3'})` + `formDetail_Custnm.set_value(거래처명)`+`_onkillfocus` + `ds_rqstGrid.setColumn(i,'CUSTCLSCD',코드)`/`'CUSTNM'` 후 통장표기 재동기화 → 저장 통과. 국내 카드는 기본 '3'(가맹점 자동매핑) 그대로.
 
 ## ⭐ 연구비카드 회의비 = fam_0703_02 (법인카드 fam_0704_02 와 다른 점, 2026-09-08 실증)
+> 📘 **그대로 따라 하는 전용 절차서 → `fam_0703_automation.md`** (정찰 → 행 전환 `goRow()` → 매핑→계정→적요 → 회의록·첨부 → DESP_LIST 검증 → 임시저장, 버벅거림 13건 예방표). 아래는 차이점 요약.
 - 진입: `f01.ds_search.setColumn(0,"DOC_CLS","4")` + `doNew("N")` → `popupframes.fam_0703_02`. 회의록 팝업은 동일 `pop_fam_0703_02`.
 - **영수증함 = `ds_rndGrid`**(`ds_datagrid1` 없음), **상세 = `ds_main_RNDCARD`**(RAWCARD 아님). 통장표기는 **계좌탭 미사용**(아래 참조 — 법인카드의 dpstDispNm+killfocus 절차 불필요).
 - **카드매핑 = `F.ds_rqstGrid.set_rowposition(i)` + `F.ds_rndGrid.set_rowposition(idx)` + `F.doSetDesp("rndGrid")`** — 인자가 `"rndGrid"`(`"RNDCARD"` 로 부르면 아무 분기도 안 타서 조용히 실패). 내부 `curRow` 는 `this.curRow` 가 아니라 `ds_rqstGrid.rowposition` 에서 잡음.
