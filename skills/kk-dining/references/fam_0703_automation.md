@@ -119,3 +119,4 @@ F.gfn_msg=F.__o_msg; F.gfn_confirm=F.__o_conf; delete F.__o_msg; delete F.__o_co
 | 11 | 식비안내 팝업 방치 | 닫기 호출만 하고 검증 X | `visible===false` 검증(사용자 지적) |
 | 12 | 컬럼명 추측(`EXPITEMCD`) | 실제는 `BUDGEXPCD` | `getColID` 로 목록 먼저 |
 | 13 | 행번호 하드코딩(popBudgList row 8/20 등) | 계정마다 행 위치 다름 | 코드(33/523)로 검색 |
+| 14 | **회의록 엑셀 미기록**(6월 이후 3개 처리일 누락, 2026-09-08 발견) | fam 자동작성에 집중해 SKILL 단계 9(엑셀 행 추가)를 건너뜀 | 임시저장 직후 `meeting_log_xlsx.append_row` 로 처리일 파일에 건별 행 추가 → 완료 보고에 엑셀 경로 포함. 누락 시 전사(jsonl)의 `CONFERENCEPERPOSE/CONTENT` 로 백필 가능 |
