@@ -28,6 +28,7 @@ description: |
 3. **코어 주입(1회)**: `scripts/kk_mail_ops.js`를 Read → `javascript_tool`로 inject.
    - 반환값이 `kk-mail-ops/1.0`이면 성공. 이후 `window.kkMail.*` 호출.
    - 페이지가 새로고침되면 `window.kkMail`이 사라지므로 재주입.
+   - ⚠️ **async 반환이 `{}`로 비면**(특히 `/mail` → 특정 메일 redirect 직후 탭에서 발생): `javascript_tool`이 Promise 결과를 회수 못 하는 현상. 결과를 `window.__x = ...`에 저장하고 마지막 식은 동기 마커(`"go";`)로 즉시 반환 → **다음 호출에서 `JSON.parse(JSON.stringify(window.__x))`로 동기 회수**(2-스텝). sync 반환(`1+1`)은 정상이라 이 우회로가 통한다. 쓰기(`reportSpam`/`moveMails`)도 같은 패턴으로 실행 후 결과 회수.
 
 ---
 
@@ -124,3 +125,4 @@ description: |
 - `../_shared/dooray_wapi.md` — wapi 공통(필수헤더·rate limit). `../_shared/security_policy.md` — 보안 규약.
 - `../_shared/dooray_api_guide.md` — Dooray **공식 API 가이드·토큰 발급·문제 해결 참조**(원문 링크 포함).
 - **호출 실패 시 순서**: `header.resultMessage` 확인 → `-200200`/빈 응답이면 필수헤더 점검(`dooray_wapi.md`) → 정확한 body 미상이면 **DevTools Network 캡처**(폴더 `create-path`도 이렇게 확정) → 공식 API(토큰) 문제면 `dooray_api_guide.md` + 원문 가이드 참조.
+- **async 결과가 `{}`로 빔** → Chrome `javascript_tool`이 Promise 반환을 비우는 현상(주로 `/mail` redirect 직후 탭). 결과를 `window.__x`에 저장 → 다음 `javascript_tool` 호출에서 `JSON.parse(JSON.stringify(window.__x))`로 동기 read (위 *실행 준비* 3 참고). sync 식 반환(`1+1`)은 정상이라 이 2-스텝이 통한다. 조회·쓰기·검증 모두 적용.

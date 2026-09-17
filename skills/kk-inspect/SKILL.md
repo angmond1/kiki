@@ -9,14 +9,14 @@ KIST 통합정보시스템의 **소액검수신청 (검수신청관리, `mcs_000
 
 ## ⛔ 안전장치 (항상 지킬 것)
 이 규칙들은 KIST 포털 정책과 직결되니 예외 없이 지킨다.
-- **신청(저장)은 사용자 본인** confirm 후. 결재성 저장은 본인 원칙. **파일첨부는 자동화 가능** (2026-06-07 codex 실증): mcs_0003_pop2 는 `window.open` 별도 chrome page → 공통 가이드 [`../_shared/nexacro_file_upload.md`](../_shared/nexacro_file_upload.md) **§4 패턴 B** (DevTools `list_pages`→`select_page`→`take_snapshot`→실제 "파일추가" 버튼 uid 에 `upload_file` 직접). 컴포넌트 = `fileDiv1`. 상세: `references/mcs0003_fields.md` "파일첨부 자동화" 절.
+- **신청(저장)은 사용자 본인** confirm 후. 결재성 저장은 본인 원칙. **파일첨부는 자동화 가능** (2026-06-07 codex + 2026-06-19 chrome-devtools-mcp 단일채널 실증): mcs_0003_pop2 는 `window.open` 별도 chrome page → 공통 가이드 [`../_shared/nexacro_file_upload.md`](../_shared/nexacro_file_upload.md) **§4 패턴 B + §4-6**. **★권장 = chrome-devtools-mcp 한 채널**(자체 격리 Chrome 에 KIST 1회 로그인 후 `navigate_page`/`select_page`/`take_snapshot`→`upload_file`). ⚠️ `upload_file` 은 **cwd workspace root 안 파일만** → 증빙이 밖(`D:\…`)이면 cwd 하위로 복사. 컴포넌트 = `fileDiv1`. 상세: `references/mcs0003_fields.md` "파일첨부 자동화" 절.
 - **개인정보는 `~/.claude/kiki/kk-inspect.config.json`(repo 밖, 형제 skill 공유 네임스페이스)에만** 둔다. 이름·사번·연락처·행정원 등은 config에서 읽고, 화면·로그·이 skill 파일에 적지 않는다.
 - 계좌·카드번호 등 금융정보는 사용자가 직접. skill이 입력하지 않는다.
 - **화면은 한글이름(코드)** 로 부른다 — 소액검수신청(mcs_0003), 카드영수증조회(fam_0711). 내부 코드만 단독으로 쓰지 않는다. (`references/screen_codes.md`)
 - 형제 공통 규약 `../_shared/security_policy.md` 준수 — credential·개인식별자 skill 텍스트 금지, 모든 쓰기 confirm 후, config·token 은 `~/.claude/kiki/`(repo 밖)+gitignore.
 
 ## 환경 전제
-- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) 연결 + **통합정보 SSO 로그인**(`p.kist.re.kr`, 본인 로그인·Claude 자동로그인 금지) + python `Pillow`(+ pdf→jpg 시 `PyMuPDF`). **조회·입력·첨부는 자동(codex 해법, `../_shared/nexacro_file_upload.md`), 최종 신청은 사용자 confirm.**
+- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) 연결 + **파일첨부엔 `chrome-devtools-mcp`(MCP) 필수**(별도 window 팝업 mcs_0003 은 이걸로만 첨부 — 미등록 시 입력까지만·첨부는 사용자 수동, `../_shared/nexacro_file_upload.md` §4-6) + **통합정보 SSO 로그인**(포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`, 본인 로그인·Claude 자동로그인 금지 · 2026-07 포탈주소 변경) + python `Pillow`(+ pdf→jpg 시 `PyMuPDF`). **조회·입력·첨부는 자동(codex 해법, `../_shared/nexacro_file_upload.md`), 최종 신청은 사용자 confirm.**
 - 공통 개인정보(이름·사번·연락처·위치·담당 행정원·참여과제)는 `~/.claude/kiki/kiki.config.json` 에서 읽는다 → `../_shared/personal_config.md`.
 
 ---

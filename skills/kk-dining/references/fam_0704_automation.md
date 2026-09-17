@@ -376,6 +376,6 @@ C.fileDiv2.gfn_upload("", "fn_endFileCallBack1", "ds_file", "RQST_NO="+rqst, "02
 - `doSave` 검증 순서: 회의비 작성(회의록 유무) → 계정 → 사용일자(예산기간 내) → 예산과목 → 금액·한도 → 거래처(`CUSTCLSCD!='2'` 이면 CUSTCD/CUSTNM 필수) → 적요 → 회의록 → `gfn_confirm("저장하시겠습니까?")` → `/mis/fam/fam0703/tmSave.do`(ds_main+ds_rqstGrid). 성공 메시지 **"저장 되었습니다."(띄어쓰기 있음)**, 지급신청번호는 `ds_temp_rtnValue` 첫 컬럼, `ds_main.PRGRSSTATCD`=12(임시저장), 행 `RQSTSEQNO` 1,2 부여. gfn_msg/gfn_confirm 오버라이드는 콜백 도착(≈5초) 후 반드시 복원.
 - CONFERENCENO 는 **지급신청서 단위 1개**(두 카드 공유), 카드별 구분은 `RQST_NO=CONFERENCENO-CARDUSEMGRNO`(첨부 키). 두 회의록은 각각 독립 저장·보존(행별 재열람으로 검증).
 - ⚠️ **매핑(doSetDesp)이 그 행의 예산항목/비목/책임자·적요(COMDSCCONT)를 초기화** → 순서는 반드시 **매핑 → 계정(popBudgList) → 적요**. (계정 먼저 잡고 매핑하면 33/523 이 지워짐.)
-- 계정 팝업: `ds_main_RNDCARD.setColumn(0,"BUDGSBJCD",계정)` + `openBudgPopup()`; 26N1250 은 예산항목 33 이 row 3, 비용 523 이 row 18 (법인 26E0331 의 8/20 과 다름 → 항상 코드로 검색).
+- 계정 팝업: `ds_main_RNDCARD.setColumn(0,"BUDGSBJCD",계정)` + `openBudgPopup()`; 예: 어느 연구비카드 계정은 예산항목 33 이 row 3·비용 523 이 row 18 이었고 다른 법인카드 계정은 8/20 — **계정마다 행번호가 달라 항상 코드로 검색**.
 - 거래처구분 핸들러 = `switch1_RNDCARD_combo_custcls_onitemchanged`, 거래처명 = `switch1_RNDCARD_formDetail_Custnm_onchanged`(killfocus 아님). **거래처구분 코드표(인라인 innerdataset)**: `""`=선택 / `0`=거래처코드 / `1`=직원번호 / **`2`=거래처명** / `3`=주민등록번호 / `4`=사업자등록번호(국내 가맹점 기본). 해외 가맹점은 `2` 거래처명.
 - 콤보 innerdataset 이 인라인이면 `cb.innerdataset` 은 문자열 id 이고 실체는 `cb[id]` (예 `cb["combo_custcls_innerdataset"]`), 컬럼명은 `codecolumn`/`datacolumn`.

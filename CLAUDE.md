@@ -52,7 +52,7 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
 - **"Claude in Chrome" 확장** 설치·연결 — Code/Desktop 공통 (웹스토어 `chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn`).
   - **Claude Code**: `https://code.claude.com/docs/en/chrome` 절차로 연결 → `list_connected_browsers` 확인.
   - **Claude Desktop**: 좌하단 이니셜 → Settings → "Claude in Chrome" connector ON.
-- **포털 로그인**: Dooray `kist.gov-dooray.com` / 통합정보 `p.kist.re.kr` 에 **사용자 본인이 Chrome 로그인**(Claude 가 대신 로그인하지 않는다).
+- **포털 로그인**: Dooray `kist.gov-dooray.com` / 통합정보 포탈 `e.kist.re.kr`(2026-07 변경, 업무화면은 `p.kist.re.kr:8081`) 에 **사용자 본인이 Chrome 로그인**(Claude 가 대신 로그인하지 않는다).
 
 ### Step 5 — 첫 실행 + 인식 확인
 재시작 후 `kk-<skill> 설정해줘`. **skill 부트스트랩이 응답하면 인식 성공.** 응답이 없으면(skill 미인식) → 재시작을 다시 하고(Step 3), `~/.claude/skills/kk-mail/SKILL.md` 존재를 확인한다.

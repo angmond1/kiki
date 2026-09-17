@@ -78,7 +78,7 @@
 
 ## 📎 첨부 양식 (10개) — Dooray Wiki 첨부
 
-다운로드: `dooray_client.download_wiki_attachment(wiki_id, page_id, file_id)` (`C:\claude-kist1\dooray_api\dooray_client.py`) 또는 원문 페이지에서 직접 내려받기.
+다운로드: Dooray 공식 API 의 wiki 첨부 다운로드(개인 토큰 필요 — `../../_shared/dooray_api_guide.md`) 또는 원문 페이지에서 직접 내려받기.
 wiki_id = `3538560283559420253`, page_id = `3579917185254662936`
 
 | 양식 | file_id |

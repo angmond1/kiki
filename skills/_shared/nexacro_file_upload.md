@@ -117,7 +117,51 @@ mcp__chrome_devtools.upload_file({ uid: "<found_uid>", filePath: "D:\\…\\파�
 - 하지만 첨부 받아야 할 NEXACRO form (`popupframes.mcs_0003_pop2.form.fileDiv1`) 의 실제 input 은 **별도 page 에 있다** → 부모에서 띄운 chooser 의 파일이 그 form 으로 안 들어감.
 - 그래서 B 패턴은 **page 를 그 팝업으로 전환한 뒤 그 page 의 실제 버튼에 직접** 거는 방법이 정답.
 
+### 4-6. chrome-devtools-mcp 로 패턴 B 실행 (★ 단일 채널 권장 — 2026-06-19 Claude 실증)
+Claude in Chrome(`javascript_tool`)은 입력은 되지만 **`window.open` 팝업이 tab group 밖이라 첨부가 안 된다**(파일은 chrome-devtools-mcp 의 `upload_file` 이라야 별도 page 에 직접 걸림). 그래서 mcs_0003 은 **처음부터 chrome-devtools-mcp 한 채널로** 입력·첨부·신청을 다 하는 게 깔끔하다.
+
+**방법 A — chrome-devtools-mcp 자체 Chrome 을 KIST 작업창으로**: chrome-devtools-mcp 는 자체 **격리 Chrome** 을 띄운다(`~/.cache/chrome-devtools-mcp/chrome-profile`, `--remote-debugging-pipe`, `--disable-extensions` → 평소 extension Chrome 과 **다른 인스턴스**, KIST 로그인 없음). `navigate_page` 로 `http://p.kist.re.kr:8081/` 를 열면 SSO 로그인 페이지 → **사용자가 그 창에서 1회 로그인**(프로필 persist, 이후 세션 유지, credential 은 사용자 직접). 이후 입력·첨부·신청 전부 chrome-devtools-mcp 도구로.
+
+도구 매핑 (Claude in Chrome → chrome-devtools-mcp):
+| 단계 | chrome-devtools-mcp |
+|---|---|
+| 화면 이동 | `navigate_page({type:'url',url})` + `wait_for({text:['검수신청관리']})` |
+| 팝업 열기 | `evaluate_script` 로 `button1`(`mainframe_ChildFrame_form_button1`) dispatchEvent click — **window.open 후킹 불필요**(새 page 가 `list_pages` 에 자동 등장) |
+| 팝업 page 선택 | `list_pages` → `popup.html?...mcs_0003_pop2.xfdl` → `select_page(pageId)` |
+| form 입력 | `evaluate_script` 로 `window.application.popupframes.mcs_0003_pop2.form...` (그 page 자체 window — 부모 `_popupWin` 불필요) |
+| 지급신청자 | 같은 form `btn_input26.click()` → `popupframes.empSchPopup.form`(ds_search.setColumn→btn_search→ds_empList→btn_confirm) |
+| 첨부 | `take_snapshot` → `btn_selectFiles`("파일추가") uid → `upload_file({uid,filePath})` 파일별 |
+| 신청 | 사용자(`btn_registration`) |
+
+**★ workspace root 제약 (필수 — 2026-06-19 발견)**: chrome-devtools-mcp 의 `upload_file` 은 **configured workspace roots(보통 세션 cwd) 안의 파일만** 허용. 밖(예 다른 드라이브의 증빙 폴더)이면 즉시 `Error: Access denied: ... is not within any configured workspace roots`. → **증빙을 cwd 하위 임시폴더로 복사한 뒤 그 경로로 `upload_file`**.
+```powershell
+$dst="<cwd>\_tmp\inspect_<case>"; New-Item -ItemType Directory -Force $dst | Out-Null
+Copy-Item "<원본폴더>\<파일패턴>" $dst -Force   # 파일명에 연속 공백 있으면 wildcard
+```
+- 파일명에 **연속 공백**(예 `9950x  MSI`) 이 있으면 정확 경로 매칭이 깨짐 → wildcard(`삼성9100*5070.jpg`) 로 복사하고 실제 `FullName` 으로 `upload_file`.
+- mcs_0003 실측: `upload_file` 후 `tmHeader=I`(클라이언트 선택). **신청 버튼 누르면 검수 저장과 함께 서버 업로드**(0%→100%) — `gfn_upload` 별도 호출 불필요.
+- 첨부 후 임시폴더는 정리(또는 inspect_folder 로 이관).
+
+**⚠️ `upload_file(btn_selectFiles)` 실패 시 fallback = 패턴 C (2026-07-03 Claude 실증)**: 새로 launch 된 Chrome 등에서 "파일추가" 버튼 uid 에 `upload_file` 하면 `Error: ... clicking it did not trigger a file chooser` 로 실패할 수 있다. 그땐 아래 **§5 패턴 C** 로 전환:
+1. `evaluate_script` 로 `form.fileDiv1.extUp._input_node`(type=file, multiple) 를 DOM 에 노출 — `input.id='kk_file_input'` + `removeAttribute('disabled')` + `display:block; opacity:1; z-index:2147483647` + `document.body.appendChild`.
+2. `take_snapshot` 으로 그 input 의 uid 확인(예 `6_398`; snapshot 은 `filePath` 로 저장 후 "파일 선택"/"선택된 파일 없음" grep 하면 토큰 절약).
+3. 그 uid 에 `upload_file` **파일별 반복** — HTML `input.files` 는 덮어써도 NEXACRO 가 change 마다 `ds_files` 에 **누적**하므로 여러 장도 순차 OK(매번 `ds_files.getRowCount()` 로 확인).
+4. 첨부 후 input 숨김: `display:none; opacity:0` + `removeAttribute('id')`.
+- mcs_0003 은 이 `_input_node`(패턴 C) 방식이 **버튼(패턴 B)보다 안정적**이라, 아예 처음부터 패턴 C 로 가도 된다.
+
+### 4-7. ⚠️ 첨부 후 개수 검증 필수 (2026-07-07 실전 — 마지막 파일 누락 반복)
+`upload_file` 은 HTML `input.change` → NEXACRO `ds_files` append 가 **비동기**라, **마지막 파일 직후 바로 `ds_files.getRowCount()` 를 읽으면 그 파일이 아직 반영 안 돼 누락**으로 보인다(특히 3MB+ 큰 이미지). 실전에서 4건 중 3건이 마지막 물품사진 1장씩 누락됐다.
+- **마지막 upload 후 `evaluate_script` 로 2-3초 대기**(`await new Promise(r=>setTimeout(r,2500))`) 후 `ds_files` 확인.
+- **첨부 끝나면 반드시 `count === 기대 개수` 검증**. 부족하면 누락 파일을 (input 재노출 후) 재업로드 — HTML input 은 덮어써도 `ds_files` 는 누적되므로 누락분만 다시 올리면 된다.
+- 사용자 **중단(interrupt)** 으로도 마지막 upload 가 끊길 수 있으니, 신청 전 count 검증은 예외 없이 수행.
+
 ---
+
+### 4-8. ⚠️ alert 후 input 요소 재생성 — uid 갱신 필수 (2026-09-08 실전, mcs_0003)
+`upload_file` 이 화면 검증 alert(예 `특수문자는 첨부파일에서 사용 불가능합니다` — 파일명에 `+` 등)를 유발하면, `handle_dialog` 로 닫은 뒤 NEXACRO 가 `extUp._input_node` 를 **새로 만든다**. 이전 snapshot 의 uid 는 detach 된 옛 요소를 가리켜 `upload_file` 은 성공을 반환하지만 `ds_files` 에 반영되지 않는다.
+- 판별: `document.getElementById('kk_file_input') === form.fileDiv1.extUp._input_node` 가 **false** 면 교체된 것.
+- 처리: 옛 요소 `remove()` → 새 `_input_node` 재노출(§5-1) → `take_snapshot` 재촬영 → **새 uid** 로 재업로드 → §4-7 개수 검증.
+- 예방: 파일명 특수문자(`+ & % # /`) 사전 제거 — `kk-inspect/references/evidence_rules.md`.
 
 ## 5. 패턴 C — `extUp._input_node` 직접 노출 (정공법, kk-dining 회의록 팝업 실증)
 대표: **kk-dining `pop_fam_0703_02`** (회의비/업무추진비 회의록 팝업).
@@ -229,6 +273,6 @@ s.textContent = `[id*="_form_modalPopDiv"], [id*="modalPopDivScrollableInnerCont
 | fam_0702 | kk-pay | **A** | `importFileUpload` | C 미시도 (재시도시 C 먼저) | ✅ codex 실증 2026-06-07 |
 | fam_0704_02 | kk-dining | (A 또는 C) | §2 로 확인 | 부모탭 화면 | 🔵 미실증 |
 | **pop_fam_0703_02** | kk-dining | **C** | `fileDiv1`(서명록)/`fileDiv2`(증빙)/`fileDiv3`(사전결재) | RQST_NO=`CONFERENCENO + "-" + ds_param.CARDUSEMGRNO`, FLE_TP=`"02"`(증빙) | ✅ codex 실증 2026-06-07 |
-| mcs_0003_pop2 | kk-inspect | **B** | `fileDiv1` | 별도 chrome page (`window.open`) | ✅ codex 실증 2026-06-07 |
+| mcs_0003_pop2 | kk-inspect | **B** | `fileDiv1` | 별도 chrome page (`window.open`) — **chrome-devtools-mcp 단일채널(§4-6) 권장**, `upload_file` 은 cwd workspace root 안 파일만(밖이면 복사) | ✅ codex 2026-06-07 / Claude(chrome-devtools) 2026-06-19 |
 
 새 화면에 적용할 때는 §1-1 (C 우선) → 안되면 §1-2 (A/B 판별) → §2 (컴포넌트명) 순으로 확인 후 이 표 갱신.

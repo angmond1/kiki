@@ -16,7 +16,7 @@ description: |
 영수증 폴더의 증빙을 → **건별로 과제·비목 확정**(사용자와) → 카드 건은 **fetch 로 승인번호 조회**(좌표 0) → **파일명 규칙 변환** → **담당 행정원 dooray 폴더에 업로드**(=RPA 자동 기안) → 처리완료 폴더로 정리. **모든 업로드·이동은 사용자 confirm 후.**
 
 ## 전제 (환경)
-- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) + **통합정보 SSO 로그인**(`p.kist.re.kr:8081`, 카드/과제 조회) + **Dooray 토큰**(`~/.claude/kiki/kiki.env` 의 `DOORAY_TOKEN`, 드라이브 업로드용) + (대부분 자동) 한글/MS Office(증빙 pdf 변환 COM).
+- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) + **통합정보 SSO 로그인**(포탈 `e.kist.re.kr` 로그인 → 업무화면 `p.kist.re.kr:8081`; 카드/과제 조회 · 2026-07 포탈주소 변경) + **Dooray 토큰**(`~/.claude/kiki/kiki.env` 의 `DOORAY_TOKEN`, 드라이브 업로드용) + (대부분 자동) 한글/MS Office(증빙 pdf 변환 COM).
 - 통합정보(카드·과제) = SSO 세션(토큰 불요) / dooray(업로드) = 개인 토큰. **별개 시스템·별개 인증.**
 - **공통 개인정보**(카드책임자·담당 행정원·참여과제·사번)는 `~/.claude/kiki/kiki.config.json` 에서 읽는다 → `../_shared/personal_config.md`.
 
@@ -26,6 +26,7 @@ description: |
 1. 브라우저 연결: `list_connected_browsers` / `select_browser`.
 2. **통합정보 화면 1개 확보**: `tabs_context_mcp` → `navigate` `http://p.kist.re.kr:8081/nxui/kistis/indexQ.jsp?target=mis.fam::fam_0711.xfdl&menuParam=sysCd%3DCUS` → 9초 대기(NEXACRO).
    - 로그인 페이지면(세션 만료) "KIST 통합정보에 로그인해 달라" 안내 후 중단.
+   - 🔴 **순서 고정: 새 브라우저·새 날·`about:blank`·정오 이후엔 먼저 `navigate('https://e.kist.re.kr')` 로 로그인 상태를 확인하고, 포털 메인이 뜬 뒤에만 fam_0711 딥링크**. 딥링크를 먼저 열면 `Your session has expired` alert + 무한 로딩(사용자가 반복 지적한 실수, 2026-09-12).
 3. **portal 코어 주입**: `scripts/portal_ops.js` Read → `javascript_tool` inject → `window.kkPay.ready()` true 확인(=`authTk` 확보). false면 화면 로드 재시도, 그래도 안 되면 조회는 **좌표 fallback**(워크플로 4의 fetch→좌표 순서)으로 전환.
 4. dooray 작업은 Bash 로 `scripts/dooray_drive.py`(토큰) 사용.
 
@@ -58,7 +59,11 @@ description: |
    - ⭐ **fetch 실패 시 좌표 fallback 자동 시도** (authTk 없음 / 빈 결과 / HTTP 에러): `references/kist_portal_fetch.md` 의 좌표 절차(화면 캡처 + `zoom` 으로 칸 위치를 찾아 입력·Enter·조회버튼·grid 읽기)로 **재시도**. **시도 순서 = fetch → 좌표, "어떻게든 성공"이 목표.** 둘 다 실패할 때만 화면을 캡처해 사용자에게 보여주고 안내(조용히 멈추지 말 것). 과제목록 조회도 동일.
 5. **파일명 규칙 변환** — `계정_항목_비목_카드승인번호_카드책임자]내용` (세금계산서는 승인번호 생략 / 카드영수증+주문내역이면 주문내역만 / 복수는 `(1)(2)`). 로컬에서 rename.
 6. **업로드 (confirm 후)** — `dooray_drive.upload(folder_id, path)`. 유형별 폴더(카드=root / 세금계산서·회의비=하위 또는 동일, 4번 분기대로). 업로드 = **RPA 자동 기안 트리거**임을 알리고 confirm.
-7. **처리완료 정리** — `archive_local(path, acccd, mode)` 로 `영수증폴더/지급신청완료/{과제번호}/` 이동/복사. mode 는 "그대로 둘까/복사/이동?" 첫 **2~3회만 묻고, 답이 일관되면 학습(config `moveOrCopy`)해 이후 자동.**
+7. **업로드 결과 웹 확인 (필수 — 텍스트 '완료'만 통보 금지)** — 업로드 직후 **행정원 폴더의 dooray 드라이브 웹페이지를 브라우저에 띄운다**: `navigate` → `https://kist.gov-dooray.com/drive/3311002956353796322/{folderId}` (projectId `3311002956353796322` 는 전 KIST 공통, `{folderId}` = 담당 행정원 폴더 id). 올라간 파일 목록을 사용자가 **눈으로 확인**하게 하고, 방금 올린 파일명이 다 보이는지 대조한다. (사용자 피드백 2026-07-07: "다 했다고만 하지 말고 dooray 드라이브 웹페이지를 띄워 보여줄 것")
+8. **처리완료 정리** — ⭐ **카드·세금계산서 모두: 실제 쓴 원본 증빙을 `영수증폴더/{월}/신청완료/…/{과제번호}/` 로 이동(move)** = 신청완료 사본은 **증빙으로 반드시 보존**하고, 원래 폴더에서는 이동으로 제거된다. 🔴 **신청완료 폴더의 파일을 삭제하지 말 것**(2026-09-12 오해로 카드 건 13개를 지웠다가 복원 — 사용자: "신청완료한 것 증빙으로 남겨둬야 해"). 다음 달에도 붙일 문서(변경요청서 등)만 원래 폴더에 남긴다. 과제별 분류 규칙:
+   - **카드**: `신청완료/{카드구분}/{과제}/` + 파일명 **RPA 업로드명 그대로**(`{계정}_{항목}_{비목}_{승인번호}_{카드책임자}]내용`). 업로드 안 한 물품사진·Npay 일괄전표는 root 유지.
+   - **세금계산서**: `신청완료/세금계산서/{과제}/` + **원본명 유지**(세금계산서+거래명세서 건별). 물품사진·zip 은 원본 거래처 폴더 유지.
+   - ⚠️ GoogleDrive 동기 폴더면 **폴더 통째 Move 금지 → 하위 폴더 만들고 `Move-Item -LiteralPath` 파일 단위 이동**(파일명 `]`·연속공백 주의), 안 그러면 `{월} (1)` 충돌 사본 발생. mode("그대로 둘까/복사/이동?")는 첫 **2~3회만 묻고, 답이 일관되면 학습(config `moveOrCopy`)해 이후 자동.**
 
 ---
 
@@ -82,7 +87,7 @@ description: |
 - `references/payment_request_manual.md` — ⭐ **재무팀 공식 지급신청 매뉴얼**(Dooray Wiki 원문 스냅샷 + 빠른참조). 비목별 증빙·검수·집행기준·반려사항·계정코드·과세/국외소득 + 첨부양식 10 file_id + 원문 링크. 증빙·검수·반려 점검의 1차 권위(규정 개정 시 원문 링크로 최신 확인).
 - `references/expense_category.md` — 비목 매핑·증빙·한도·파일명·외화·RPA운영 통합(1차 판단).
 - `references/rpa_payment_filing.md` — ⭐ **RPA 지급신청 운영 사양**(재무팀 wiki 「7.RPA 지급신청 안내」 정제). RPA 대상(카드+**세금계산서**)/비대상(회의비·전문가활용·전화료·전기료·도서비·용역·공사)·파일명(카드/세금계산서 국세청승인번호/`_통장사본`/복수`(1)(2)`)·계좌 OCR+자주사용계좌·수행시간(10/15/22시,1건4분)·결재선(신청자→계정책임자전결)·결과(성공=폴더파일삭제/실패=잔존+메일)·실패사례 + 전화료/전문가활용 RPA. **세금계산서도 RPA 대상**(계좌 실명검증을 RPA OCR가 우회).
-- `references/tax_invoice_payment.md` — ⭐ **세금계산서 직접 지급신청서 자동작성**(fam_0701 일반 → fam_0702 부모탭 JS: 영수증함 매핑·적요·계정 popBudgList·사용구분·검수 연결·통장표기 KIST_·**행추가 묶음**·**첨부**[ExtFileUpload `extUp.addFiles()` + 임시 DOM 버튼 + `file_upload` chooser 가로채기 — codex 해법, 2026-06-07]). 🔴 **계좌 실명검증은 결재상신 필수**(통장사본 갈음 불가, 행마다) + 🔵 **공휴일·주말은 안 됨**(은행 실명검증 API 미가동 추정, 평일 가능). 평일 영업시간 외 가능 여부는 미확인. **WIP**: 진입~검수·통장표기·다건 묶음·첨부까지 자동 가능, end-to-end 상신 성공 후 WIP 해제. §0 "반복 금지 TOP" 먼저 읽기. (RPA 폴더 업로드 경로와 별개의 '직접 작성' 경로)
+- `references/tax_invoice_payment.md` — ⭐ **세금계산서 직접 지급신청서 자동작성**(fam_0701 일반 → fam_0702: 영수증함 매핑·적요·계정 popBudgList·사용구분·검수 연결·통장표기 KIST_·행추가 묶음·첨부·계좌검증·상신까지 **2026-07-08 end-to-end 실증 완료** — WIP 해제). ⭐⭐ **`§0-0 실전 순서` + `§0-1 확인창(dialog) 처리` 먼저 읽기**. 핵심 6: ① **첨부 있으면 처음부터 chrome-devtools**(§0-0 1) ② **과제 다르면 신청서 분리 — `bt_reset` 금지→`bt_close` 후 `doNew`**(§0-0 5·§10) ③ **첨부 = chrome-devtools `upload_file`+`_input_node` adoptNode**(§9-1-A, gfn_upload 후 ds_files=0이면 재시도) ④ **계좌 실명검증 = `import2` divForm 컨텍스트, `TRANSFERSTAT_DESC='정상처리'`**(§8-0, 상신 필수·`Static00` 부정확) ⑤ 🔴 **저장·계좌검증 확인창은 fam_0702 *별도 page* 를 `select_page` 한 상태라야 `dialogAction`/`handle_dialog` 로 잡힌다**(§0-1 — 이거 몰라 한참 헤맴) ⑥ **결재상신은 사용자가 직접, 신청서 하나 완성될 때마다 상신 안내**(§0-0 9). (전각공백/괄호 예금주 통과, 공휴일 제약도 오인이었음.) (RPA 폴더 업로드 경로와 별개의 '직접 작성' 경로)
 - `references/kist_portal_fetch.md` — 통합정보 fetch backend 명세(endpoint·ds_search·authTk·함정·좌표 fallback).
 - `references/dooray_folder.md` — 행정원 폴더 조회(링크/이름검색·본부약어·캐시·성능).
 - `references/dooray_wiki.md` — 비목·규정 wiki 실시간 검색.

@@ -55,6 +55,7 @@ function parseRows(xml){var out=[],R=/<Row[^>]*>([\s\S]*?)<\/Row>/g,m;
 - `authTk` 빈값 = 통합정보 화면 미로드 → 화면 1개 navigate 후 9초 재시도.
 - 브라우저 자동화 **출력에 쿠키·세션값 섞이면 `[BLOCKED: Cookie/query string data]`** 로 차단 → 출력에서 `_ga`/`_fwb`/`WMONID`/`authTk` 등 제거하고 핵심 필드만 반환.
 - 일부 backend 는 화면 호출 순서/세션 상태에 의존해 **직접 fetch 가 빈 응답**(kk-pay `chkPopup` 사례, 화면 Enter 로는 동작) → 그땐 좌표 fallback 또는 config 우회.
+- **DOM 팝업 연쇄(자동화 브라우저)는 불안정** — fetch 안 되는 화면(예 예실대비표 → 집행내역 개인집계)을 DOM 팝업으로 우회할 때 3가지 함정: ① `(async()=>{})()` 결과가 `{}` 로 옴 → **전역 저장 후 동기 read**, ② 백그라운드 탭 **throttle** 로 느림 + *부분누락으로 틀린 값* → **Chrome foreground** 안내, ③ 팝업 **재오픈 시 빈 grid** → navigate 리셋 + **로딩 polling**(행>0 대기). 상세 kk-budget `budget_fetch_spec.md` §개인집계 DOM 안정화.
 
 ## 좌표 fallback (fetch 가 안 될 때 — "어떻게든 성공")
 fetch 실패해도 포기 말고 화면 캡처+좌표로 2차 시도:

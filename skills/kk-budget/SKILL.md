@@ -15,7 +15,7 @@ description: KIST 과제 예산 수집·리포트 자동화 skill (kiki 패키�
 - **격리(E)**: 특정인 이름·사번·계정번호·할당액·개인경로 → skill 텍스트에 0.
 
 ## 1. 전제 (환경)
-- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) + **통합정보 SSO 로그인**(`p.kist.re.kr:8081`, 과제별관리 `rdm_2011` 한 번 열어 `authTk` 활성, 사내망) + python `openpyxl`. **조회 전용 → 토큰 불요.**
+- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) + **통합정보 SSO 로그인**(포탈 `e.kist.re.kr` 로그인 → 업무화면 `p.kist.re.kr:8081`; 과제별관리 `rdm_2011` 한 번 열어 `authTk` 활성, 사내망 · 2026-07 포탈주소 변경) + python `openpyxl`. **조회 전용 → 토큰 불요.**
 - 공통 개인정보(이름·참여과제)는 `~/.claude/kiki/kiki.config.json` 에서 읽는다(`user.name` 과책 판별, `projects`) → `../_shared/personal_config.md`. 안 되면 "로그인/연결 안내"로 친절 실패(크래시 X).
 
 ## 2. 실행 준비 (매 작업/설정 시작)

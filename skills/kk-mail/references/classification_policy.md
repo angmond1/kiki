@@ -109,7 +109,7 @@
 | `sakr@merckgroup.com` | Merck |
 | `noreply@merckgroup.com` | Merck |
 | `help@sejinci.co.kr` | 세진씨아이 |
-| `dscsi@hanmail.net` | 시약 거래처 |
+| `reagent-vendor@example.com` | 소규모 시약 거래처(개인 도메인 예시 — 본인 거래처 주소로 교체) |
 
 ### ⭐ 같은 도메인, 두 용도 분기 (NRF·KEIT·KIAT 패턴)
 한 기관 도메인이 과제와 뉴스를 둘 다 보내면, **정확주소(뉴스)를 도메인(공고)보다 먼저** 분류한다:

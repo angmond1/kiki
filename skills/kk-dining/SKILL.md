@@ -17,7 +17,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 - **E 격리**: Dooray 토큰(`~/.claude/kiki/kiki.env`)·사번·참석자 실명. skill 텍스트엔 0건.
 
 ## 설치/부트스트랩 (`kk-dining 설정해줘`)
-**0. 환경 점검** — `../_shared/environment_setup.md` 0단계(Chrome+Claude in Chrome MCP·통합정보 로그인·python `openpyxl`, 저장모드 2면 한글·COM·`pyhwpx`).
+**0. 환경 점검** — `../_shared/environment_setup.md` 0단계(Chrome+Claude in Chrome MCP·통합정보 로그인[포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`, 2026-07 포탈주소 변경]·python `openpyxl`, 저장모드 2면 한글·COM·`pyhwpx`).
 **공통 식별정보는 `~/.claude/kiki/kiki.config.json` 에서 읽는다**(없으면 1회 수집·저장, 다른 skill 재사용). kk-dining 고유만 `kk-dining.config.json`. (`../_shared/personal_config.md`)
 
 1. **성함·카드책임자·참여과제** *(공통 `user`/`card_holder`/`projects`)* — kiki.config 에 없으면 묻는다. 카드책임자 본인 여부 확인 + 사번 1회(없으면 fam_0711 에서). 참여과제는 `queryProjects` 자동조회 → 분류코드 포함 확인.

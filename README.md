@@ -52,8 +52,13 @@ https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn
 - claude code: https://code.claude.com/docs/en/chrome 절차로 확장 연결  
 - claude desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" connector 켜기 (또는 browser use → 모든 브라우저 작업 허용)  
 
+파일첨부 자동화 — **chrome-devtools-mcp** (MCP · claude code/codex 공통 · 첨부 쓰는 skill 필수)  
+"Claude in Chrome" 만으론 일부 팝업(소액검수 등 **별도 창**)의 파일첨부가 안 된다. **claude code 에 chrome-devtools-mcp 를 MCP 로 등록**하면 자체 Chrome 으로 첨부까지 자동(브라우저 확장 아님 — MCP 서버 1개 + 시스템 Google Chrome, 그 Chrome 에 KIST 1회 로그인).  
+- claude code: `claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest` (또는 `.mcp.json`/plugin 등록)  
+- codex: 설정 → MCP 서버 → 서버 추가 → chrome-devtools (아래 chatgpt 안내와 동일)  
+
 포탈 로그인된 chrome 브라우저 환경에서 실행  
-대상 포탈(dooray `kist.gov-dooray.com` / 통합정보 `p.kist.re.kr`)에 본인이 로그인  
+대상 포탈(dooray `kist.gov-dooray.com` / 통합정보 포탈 `e.kist.re.kr`→업무화면 `p.kist.re.kr:8081`, 2026-07 포탈주소 변경)에 본인이 로그인  
 
 **chatgpt 사용자** — codex desktop app 또는 codex cli  
 https://openai.com/ko-KR/codex/  
