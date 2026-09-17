@@ -11,7 +11,7 @@
    - **★ 파일첨부 자동화 — `chrome-devtools-mcp`(MCP) 추가 등록** (kk-inspect 등 첨부 쓰는 skill 필수): "Claude in Chrome" 만으론 **별도 창 팝업**(소액검수 mcs_0003 등)의 파일첨부가 안 된다. claude code 에 `claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest`(또는 `.mcp.json`/plugin) 로 등록. **브라우저 확장이 아니라 MCP 서버 1개 + 시스템 Google Chrome** 이면 되고(그 자체 Chrome 에 KIST 1회 로그인), 절차는 `skills/_shared/nexacro_file_upload.md` §4-6.
 4. **Chrome에 본인 KIST 로그인**
    - Dooray: `https://kist.gov-dooray.com` (kk-mail)
-   - 통합정보: 포탈 로그인 `https://e.kist.re.kr`(2026-07 변경) → 업무화면 `http://p.kist.re.kr:8081` (kk-pay·kk-dining·kk-budget·kk-inspect)
+   - 통합정보: 포탈 로그인 `https://e.kist.re.kr`(2026-07 변경, 구 ekist.re.kr) → 업무화면 `http://p.kist.re.kr:8081` (kk-pay·kk-dining·kk-budget·kk-inspect)
    - ← 이게 인증이다. 대부분 별도 토큰·비번 없이 로그인 세션으로 동작.
 
 > 모든 skill 은 첫 실행 때 이 환경을 동일하게 점검한 뒤 진행한다(연결/로그인 안 돼 있으면 안내 후 멈춤).

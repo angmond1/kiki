@@ -57,7 +57,7 @@ skill 본문의 "Claude in Chrome" 도구를 Codex 의 Chrome DevTools 도구로
 
 - 이미 공통 config 에 있는 값은 재질문 안 함.
 - **토큰·카드번호·사번·실제 폴더 ID 는 skill 본문에 저장 금지.**
-- 통합정보(포탈 `e.kist.re.kr` 로그인 / 업무화면 `p.kist.re.kr:8081`, 2026-07 변경)는 **SSO 세션 + `window.application.authTk`** 로 동작 → 별도 API 토큰 불요.
+- 통합정보(포탈 `e.kist.re.kr` 로그인 / 업무화면 `p.kist.re.kr:8081`, 2026-07 변경 — 구 ekist.re.kr)는 **SSO 세션 + `window.application.authTk`** 로 동작 → 별도 API 토큰 불요.
 - Dooray 메일 = 브라우저 세션 쿠키 wapi (토큰 불요). Dooray Drive 업로드만 `DOORAY_TOKEN` 필요.
 
 ## 4. 통합정보 fetch 우선 원리 (공통)

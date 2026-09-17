@@ -58,7 +58,7 @@ https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn
 - codex: 설정 → MCP 서버 → 서버 추가 → chrome-devtools (아래 chatgpt 안내와 동일)  
 
 포탈 로그인된 chrome 브라우저 환경에서 실행  
-대상 포탈(dooray `kist.gov-dooray.com` / 통합정보 포탈 `e.kist.re.kr`→업무화면 `p.kist.re.kr:8081`, 2026-07 포탈주소 변경)에 본인이 로그인  
+대상 포탈(dooray `kist.gov-dooray.com` / 통합정보 포탈 `e.kist.re.kr`→업무화면 `p.kist.re.kr:8081`, 2026-07 포탈주소 변경 — 구 ekist.re.kr)에 본인이 로그인  
 
 **chatgpt 사용자** — codex desktop app 또는 codex cli  
 https://openai.com/ko-KR/codex/  
