@@ -58,7 +58,7 @@ kiki/
   - **kk-budget**: 개인집계 **적요+신청인 합산**(활동비2 누락 방지) + DOM 팝업 연쇄 안정화(async `{}`·throttle·재오픈 빈 grid).
   - **kk-inspect**: 검수일=내일(다음 영업일), 첨부 개수 검증, 특수문자 파일명 거부·input 재생성, 물품사진 파일명 규칙.
   - **kk-mail**: 걸러낸 메일 confirm 전 본문 표, async `{}` 2-스텝 우회.
-  - **설치·문서**: `CLAUDE.md`(Claude 설치 지침)·`CODEX.md`·`install.sh`(OS 분기)·`.gitattributes`·`tools/`(fresh-test·sync-check). 배포 전 개인정보 재스캔·익명화(과제번호·실명·거래처·문서번호·개인경로 0건).
+  - **설치·문서**: `CLAUDE.md`(Claude 설치 지침)·`CODEX.md`·`install.sh`(OS 분기)·`.gitattributes`·`tools/`(fresh-test·sync-check). 배포 전 개인정보 재스캔·익명화(과제번호·실명·거래처·문서번호·개인경로 0건). MCP **도구 이름 표기 규칙**(문서는 짧은 도구명, 서버 접두어는 버전·설치방식별 상이) 을 environment_setup 에 명시.
 - **2026-08-07**: kk-dining — **2026-08-01 참여연구원 규정변경 반영**. 내부 참석자는 해당 계정 참여연구원만 가능(서버검증·거부 시 행 삭제), 미참여 KIST 인원은 외부/미참여자에 회사명 `한국과학기술연구원`. `ds_datagrid2.PROJJOINYN` 필수선택 신설(코드표 `ds_codeFAM006`: `N`=미참여/`Y`=참여). 내부 등록은 `ds_datagrid1_oncolumnchanged` 를 `nexacro.DSColChangeEventInfo(obj,id,row,col,colid,**newvalue,oldvalue**)` 순서로 호출해야 이름→사번 조회가 동작(인자 순서 뒤바꾸면 행이 조용히 삭제되는 함정). 첨부는 회의록 `저장` 만으로 서버 반영되지 않아 `gfn_upload` 호출 필수(`tmHeader` I→S 확인). 실사용 7건 처리로 실증.
 - **2026-06-06**: 통합 관리 — 위 '공통화 정리' (rename / 공통 추출 / 환경 통일 / 문서 분리 / 개인정보 제거).
 - **2026-06-05**: kk-dining v2 — fam_0704_02 직접 자동작성·결재상신(옛 hwp 양산·두레이 업로드 폐기). 회의록 엑셀 master. NEXACRO 부모탭 JS 완전자동(→ DEVELOPMENT §4).

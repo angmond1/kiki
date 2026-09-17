@@ -34,7 +34,7 @@ Copy-Item "skills\_shared\kiki.env.example" "$env:USERPROFILE\.codex\kiki\kiki.e
 - (Claude 는 `~/.claude/skills/` + `~/.claude/kiki/`. 경로만 다르고 내용 동일.)
 
 ## 2. 도구 이름 어댑터 (핵심)
-skill 본문의 "Claude in Chrome" 도구를 Codex 의 Chrome DevTools 도구로 치환해 읽으면 된다.
+skill 본문의 "Claude in Chrome" 도구를 Codex 의 Chrome DevTools 도구로 치환해 읽으면 된다. 표의 `mcp__chrome_devtools.` 접두어는 MCP 서버 등록명이 `chrome_devtools` 일 때 기준 — 등록명이 다르면 접두어만 다르고 **도구명(list_pages·select_page·evaluate_script·upload_file …)은 동일**하다. (Claude 쪽도 서버 접두어가 버전·설치 방식마다 달라 문서는 도구명만 쓴다 — `skills/_shared/environment_setup.md` "도구 이름 표기 규칙".)
 
 | skill 본문(Claude) 의도 | Codex 도구 |
 |---|---|
