@@ -88,7 +88,7 @@ DevTools take_snapshot   # 또는 find / 접근성 트리
 
 ### 4-3. 그 UID 에 `upload_file` 직접
 ```
-upload_file({ uid: "<found_uid>", filePath: "<cwd>\_tmp\파일.pdf" })   // chrome-devtools-mcp 도구. 전체 이름은 mcp__<서버명>__upload_file (서버명은 설치방식별 상이 — environment_setup.md "도구 이름 표기 규칙"). 파일은 workspace root(cwd) 안이어야 함(§4-6)
+upload_file({ uid: "<found_uid>", filePath: "<cwd>\\_tmp\\파일.pdf" })   // chrome-devtools-mcp 도구. 전체 이름은 mcp__<서버명>__upload_file (서버명은 설치방식별 상이 — environment_setup.md "도구 이름 표기 규칙"). 파일은 workspace root(cwd) 안이어야 함(§4-6)
 ```
 한 파일씩 반복 (mcs_0003 실증). 복수 동시도 가능한지는 화면별 확인.
 
