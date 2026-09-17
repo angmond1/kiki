@@ -1,6 +1,6 @@
 # NEXACRO ExtFileUpload 첨부 자동화 (kiki 공통)
 
-> KIST 통합정보시스템(p.kist.re.kr:8081, NEXACRO) 의 **파일 첨부는 전부 `ExtFileUpload` 컴포넌트** 패턴. 첨부 자동화는 화면 "팝업 종류"에 따라 2가지 패턴 (A/B) 으로 갈린다.
+> KIST 통합정보시스템(p.kist.re.kr:8081, NEXACRO) 의 **파일 첨부는 전부 `ExtFileUpload` 컴포넌트** 패턴. 첨부 자동화는 팝업 종류·컴포넌트 구조에 따라 3가지 패턴 (A/B/C) 으로 갈린다.
 > 2026-06-07 codex 실증 — A: kk-pay fam_0702, B: kk-inspect mcs_0003_pop2, **C: kk-dining pop_fam_0703_02 — 사실상 가장 직접적·일반적인 정공법**(`extUp._input_node` = ExtFileUpload 내부 숨겨진 HTML input 을 노출 후 직접 주입). A/B 화면도 C 가 통할 가능성 큼(차후 검증).
 
 ## 0. 왜 그동안 안 됐고 왜 이제 되나
