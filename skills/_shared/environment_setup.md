@@ -15,7 +15,7 @@
 
 2. **대상 시스템 로그인 세션 확인** *(skill 별 대상이 다름 — 아래 표)*
    - 로그인 페이지가 뜨면(세션 만료) *"{시스템}에 로그인해 주세요"* 안내 후 중단. **Claude 가 대신 로그인하지 않는다.**
-   - **⚠️ 포탈 주소 변경 (2026-07-07)**: KIST 포탈/로그인 관문이 **`e.kist.re.kr`** 로 변경됐다(구 `p.kist.re.kr`·`ekist.re.kr`). 단 **통합정보시스템 NEXACRO 업무화면(검수·지급·회의비·예산)은 여전히 `p.kist.re.kr:8081/nxui/kistis/…` 그대로** (`e.kist.re.kr/nxui/…` 는 404). → **로그인/포탈 = `e.kist.re.kr`, 업무화면 = `p.kist.re.kr:8081`**.
+   - **⚠️ 포탈 주소 변경 (2026-07-07)**: KIST 포탈/로그인 관문이 **`e.kist.re.kr`** 로 변경됐다(구 `p.kist.re.kr`·`ekist.re.kr`). **근거·브라우저 설정** = wiki 데이터정보팀 「1-7 HTTPS 적용에 따른 브라우저 설정 안내」(2026-06-26): ① 공식 URL `https://e.kist.re.kr` 로 북마크 재설정 ② Chrome **팝업 차단 설정에 `https://p.kist.re.kr` 을 "팝업 전송 및 리디렉션 허용"에 추가** — NEXACRO 별도창 팝업(fam_0702·mcs_0003 등)이 이 설정 없으면 안 열린다; **chrome-devtools-mcp 의 자체 Chrome 프로필도 같은 허용 필요**(팝업이 안 뜨면 이것부터 의심) ③ HTTPS 접속이 안 되면 캐시·쿠키 삭제 후 브라우저 재시작. 단 **통합정보시스템 NEXACRO 업무화면(검수·지급·회의비·예산)은 여전히 `p.kist.re.kr:8081/nxui/kistis/…` 그대로** (`e.kist.re.kr/nxui/…` 는 404). → **로그인/포탈 = `e.kist.re.kr`, 업무화면 = `p.kist.re.kr:8081`**.
    - **⚠️ 업무화면 전 포탈 로그인부터 확인 (2026-07-07 실전, 표준 절차)**: **작업 시작 시(특히 새 세션·오래 미사용) 통합정보 업무화면(`indexQ.jsp` 등)으로 바로 navigate 하지 말 것** — 세션 만료면 `Your session has expired` alert 가 **반복**해서 뜨고(handle_dialog 로 닫아도 페이지가 또 띄움) 진행 불가. 먼저 **`e.kist.re.kr` 포탈 메인**으로 가 로그인 상태 확인(로그인돼 있으면 eKIST 메인에 본인 이름) → 그 뒤 업무화면 navigate. SSO 쿠키가 살아 있으면 `e.kist.re.kr → nsso → login.do → eKIST 메인` 이 **자동 로그인**(재입력 불필요)되는 경우도 많다.
 
    | skill | 로그인/포탈 (2026-07 변경) | 업무화면 · 인증 |

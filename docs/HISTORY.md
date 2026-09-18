@@ -50,6 +50,10 @@ kiki/
 재사용 패턴(NEXACRO 부모탭 JS 완전자동·fetch backend 직접호출·form 직접제어·hwp 자동화·과제분류코드·데이터 master·임시저장↔결재상신 분리·killfocus 동기화 등)은 전부 **[DEVELOPMENT.md](DEVELOPMENT.md)** 에 통합. skill 별 화면·필드 캡처 상세는 각 skill 의 `references/`.
 
 ## 빌드 이력 (요약)
+- **2026-09-18 (v0.2.1)**: **KIST wiki 반년(2026-03~09) 변경 조사·반영** — 공식 API 재크롤(373p) vs 4월 베이스라인 diff(신규 15·본문변경 50).
+  - 「2. 지급신청 매뉴얼」 **2026-09-15 개정** 반영(스냅샷 교체 + 빠른참조): 회의비 **사전내부결재 폐지(26.8.1 사용분~)·과제 미참여자 참석 필수·타기관 참여연구원=내부참석자** 명문화 / **시험분석결과서 첨부 필수**(전 과제) / **장비이용료=외부기자재임차료** / **사례비 5만원 초과 시 주민번호·주소 + 소득세 20%**(종전 12.5만·8%).
+  - 기획예산팀 **실행예산 변경 RPA**(경상운영비 계정, 양식 메일 → 13/17시 반영) / 구매·자산팀: 구매요구 소요 45일·1천만↑ 연구계획서, 용역계약 해넘김 시 기획예산팀 협조, 검수 담당·50만원 정보화기기 / 인사경영팀 **해외출장 FAQ 신설**(항공권 과제카드 → 카드 결제일 전 지급신청) / 국내전문가 1시간 상한 100만원 / 데이터정보팀 **HTTPS 적용 안내**(e.kist.re.kr 공식 URL, `p.kist.re.kr` 팝업 허용 — chrome-devtools 프로필 포함).
+  - 변경 없음 확인: 「7. RPA 지급신청 안내」(2025-11)·세금계산서 처리·법인/연구비카드·계정대체·수입의뢰·자산의 등록(7-1).
 - **2026-09-17 (v0.2.0 배포)**: 6~9월 누적 반영.
   - **포탈 주소 변경(2026-07)**: 로그인/포탈 = `e.kist.re.kr`, NEXACRO 업무화면은 `p.kist.re.kr:8081` 유지. **업무화면 딥링크 전 `e.kist.re.kr` 로그인 확인**을 표준 절차로(세션 만료 시 `Your session has expired` + 무한 로딩 → e.kist.re.kr 경유로 복구). CLAUDE/CODEX/INSTALL/README/environment_setup/각 SKILL 반영.
   - **NEXACRO 파일첨부 자동화** `_shared/nexacro_file_upload.md`: A(popupframe 임시버튼)·B(별도 page 실제버튼)·C(`extUp._input_node` 직접) 3패턴 + **chrome-devtools-mcp 단일채널**(§4-6, workspace root 제약·개수 검증·alert 후 uid 재생성). 첨부 있는 작업은 처음부터 chrome-devtools 로.
