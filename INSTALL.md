@@ -6,7 +6,7 @@
 
 ### 0-1. 계정·앱
 - **Claude** — Claude Code(CLI) 또는 Claude Desktop 앱. 둘 다 같은 `~/.claude/skills/` 를 쓴다. Desktop 만 쓰더라도 **CLI 를 함께 설치**해 두면 설치 스크립트·MCP 등록이 쉽다(https://code.claude.com/docs/ko/quickstart).
-- **권장 모델**: 설치·첫 설정·첫 1~2회 실사용은 **Opus 5**(Fable 5.1 가능하면 그것), 노력도 high. 익숙해지면 kk-mail·kk-budget 은 Sonnet 5(medium), kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high). **kk-dining · kk-pay 세금계산서 직접작성은 계속 Opus 5**(NEXACRO 폼 제어 함정이 많고 결재 직전 작업). Haiku 4.5 는 권장 안 함.
+- **권장 모델**: 설치·첫 설정·첫 1~2회 실사용은 **Opus 5**(Fable 5.1 가능하면 그것), 노력도 high. 익숙해지면 kk-mail·kk-budget 은 Sonnet 5(medium), kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high). **kk-dining · kk-pay 세금계산서 직접작성은 계속 Opus 5**(NEXACRO 폼 제어 함정이 많고 결재 직전 작업).
 
 ### 0-2. Google Chrome + "Claude in Chrome" 확장 (필수 — 평소 Chrome 창 제어)
 1. 설치: https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn
@@ -54,7 +54,7 @@ KIST 내부망에서 실행. KIST 밖(재택·출장)이면 **KIST VPN 접속 �
 
 ### 0-8. 아래아한글 · MS Office (선택)
 - 증빙이 hwp/docx/xlsx 일 때 pdf 변환(kk-pay), 회의록 hwp 저장 옵션(kk-dining)에만 쓴다. 대부분 KIST PC 에 설치돼 있다.
-- 없으면 skill 이 묻는다: docx/xlsx → **LibreOffice**(무료, https://www.libreoffice.org/download/) 설치 시 자동 변환 / hwp → **HOP**(Open HWP — 무료 오픈소스 한글 편집기, Windows `.msi` / macOS `brew install hop` / Linux `.deb`·`.rpm`·`.AppImage`, https://github.com/golbin/hop)으로 열어 **PDF 내보내기**(수동 — HOP 은 CLI/API 가 없어 자동 변환은 안 됨). 회의록 **hwp 자동생성은 Windows+아래아한글 전용**(엑셀 회의록은 모든 OS) — HOP 환경에선 엑셀 회의록으로 진행.
+- 없으면 skill 이 묻는다: docx/xlsx → **LibreOffice**(무료, https://www.libreoffice.org/download/) 설치 시 자동 변환 / hwp → **HOP**(Open HWP — 무료 오픈소스 한글 편집기, Windows `.msi` / macOS `brew install hop` / Linux `.deb`·`.rpm`·`.AppImage`, https://github.com/golbin/hop)으로 열어 **PDF 내보내기**(수동 — HOP 은 CLI/API 가 없어 자동 변환은 안 됨). 회의록 파일(kk-dining)은 **hwpx 로 한글 없이 생성**(모든 OS) — 열람만 한글 또는 HOP.
 
 > 모든 skill 은 첫 실행 때 이 환경을 동일하게 점검한 뒤 진행한다(연결/로그인 안 돼 있으면 안내 후 멈춤).
 
@@ -123,14 +123,14 @@ cp skills/_shared/token.txt.example ./token.txt
 |-------|------------|---------|---------|
 | **kk-mail** | — | `kk-mail 설정해줘` | `지난주 광고 스팸 골라줘` / `앞으로 nature.com 은 저널 폴더로` |
 | **kk-pay** | `Pillow` `requests` (+Windows 변환 시 `pywin32`) | `kk-pay 설정해줘` (토큰·행정원 폴더·영수증 폴더) | `이번달 영수증 지급신청 처리해줘` |
-| **kk-dining** | `openpyxl` (+ hwp 회의록 옵션 시 `pyhwpx pywin32 pywinauto`, Windows) | `kk-dining 설정해줘` (한글 저장 여부·업로드 여부) | `회의비 처리하자` |
+| **kk-dining** | `openpyxl` (hwpx 회의록 옵션은 추가 설치 없음) | `kk-dining 설정해줘` (hwpx 동봉 여부·업로드 여부) | `회의비 처리하자` |
 | **kk-budget** | `openpyxl` | `kk-budget 설정해줘` (추적 과제·카테고리) | `예산 수집해줘` / `예산 잔액 표로` |
 | **kk-inspect** | `Pillow` (+ pdf→jpg 시 `PyMuPDF`) | `kk-inspect 설정해줘` (위치·행정원·검수 폴더) | `이 폴더 증빙들 소액검수 올려줘` |
 
 > **쓰기 작업(업로드·제출·결재상신·검수 신청·파일 첨부)은 항상 본인 확인 후** 진행된다.
 
 ## 6. macOS / Linux
-- 설치 `install.sh`, 경로 `~/.claude/skills/`·`~/.claude/kiki/`·`~/kiki`. 기능 동일하되 **hwp 자동생성·hwp→pdf 변환은 Windows+아래아한글 전용**. docx/xlsx→pdf 는 LibreOffice 로 자동.
+- 설치 `install.sh`, 경로 `~/.claude/skills/`·`~/.claude/kiki/`·`~/kiki`. 기능 동일하되 **hwp→pdf 자동 변환(kk-pay 증빙)만 Windows+아래아한글 전용**(회의록 hwpx 생성은 모든 OS). docx/xlsx→pdf 는 LibreOffice 로 자동.
 
 ## 7. 트러블슈팅
 - **install.ps1 이 "running scripts is disabled"** → `powershell -ExecutionPolicy Bypass -File .\install.ps1`.

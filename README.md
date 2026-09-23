@@ -52,7 +52,6 @@ claude 유료 계정(claude code 또는 claude desktop) 또는 chatgpt 유료 �
 | kk-dining · kk-pay 세금계산서 직접작성 (계속) | Opus 5 | high |
 | 막힐 때 · 처음 보는 화면 | Fable 5.1 / Opus 5 | max |
 
-Haiku 4.5 는 권장하지 않습니다 — 포탈에 실제 결재를 올리는 작업이라 실수 비용이 토큰 절약보다 큽니다.  
 codex 도 같은 원칙: 설치·첫 사용은 가장 강한 추론 모델, 익숙해지면 표준 모델.  
 
 ### 2. Google Chrome + 확장 "Claude in Chrome" (필수)
@@ -99,8 +98,8 @@ KIST 안에서 실행합니다. 밖(재택·출장)이면 **KIST VPN** 에 먼�
 ⚠️ 토큰·API 키를 **채팅창에 직접 붙여넣지 마세요** — 대화 기록에 남아 타인에게 노출될 수 있습니다.  
 
 ### 8. 아래아한글 · MS Office (있으면 자동, 없어도 됨)
-증빙이 hwp/docx/xlsx 면 pdf 로 자동 변환하는 데 씁니다. 없으면 에이전트가 무료 대안(Office → LibreOffice, 한글 → **HOP** https://github.com/golbin/hop) 설치를 물어봅니다. HOP 은 열람·편집·PDF 내보내기용이고, 자동 변환·자동 생성은 아래아한글(Windows)에서만 됩니다.  
-회의록을 **한글 파일로도** 저장할지는 kk-dining 설정 때 물어봅니다(엑셀만 쓰는 부서는 아니요).  
+증빙이 hwp/docx/xlsx 면 pdf 로 자동 변환하는 데 씁니다. 없으면 에이전트가 무료 대안(Office → LibreOffice, 한글 → **HOP** https://github.com/golbin/hop) 설치를 물어봅니다. HOP 은 열람·편집·PDF 내보내기용입니다.  
+회의록을 **한글 파일(hwpx)로도** 저장할지는 kk-dining 설정 때 물어봅니다(엑셀만 쓰는 부서는 아니요). hwpx 는 **아래아한글 없이도 생성**되고, 열어볼 때만 한글 또는 HOP 이 필요합니다.  
   
 
 

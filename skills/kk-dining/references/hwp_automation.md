@@ -1,3 +1,5 @@
+> ⚠️ **구형(legacy, 2026-09-23 이후 미사용)** — 회의록 파일은 `scripts/make_dininglog_hwpx.py` 가 **아래아한글 없이 hwpx** 로 생성한다(모든 OS). 아래 한글 COM 자동화(pyhwpx·보안팝업 watcher)는 참고용으로만 보존.
+
 # (옵션) 한글(hwp) 회의록 자동 생성 — 환경·함정
 
 > 2026-06-05~ **회의록 master = 엑셀** (→ `meeting_log_excel.md`). 본 hwp 자동화는 `log_format: xlsx_and_hwp` (보관 선호 사용자 옵션)일 때만 사용. fam_0704 직접 자동작성 워크플로(권장)에서는 hwp 양산 불필요.

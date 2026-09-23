@@ -7,7 +7,7 @@
 ## 0. kiki 가 무엇인가 (한 줄)
 KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·`kk-inspect`). **로그인된 Chrome 을 "Claude in Chrome" 확장 + chrome-devtools-mcp 로 제어**해 포털/Dooray 를 다룬다. skill 은 `~/.claude/skills/` 에 두면 Claude Code·Desktop 이 인식한다(설치 후 **재시작 필요**).
 
-**권장 모델**: 설치·첫 설정·첫 1~2회 실사용 = **Opus 5**(Fable 5.1 가능하면) · 노력도 high. 이후 kk-mail·kk-budget 은 Sonnet 5, kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high), **kk-dining·kk-pay 세금계산서 직접작성은 Opus 5 유지**. Haiku 비권장. 사용자가 다른 모델로 설치를 시작했으면 이 권장을 한 줄로 알려주되 진행은 계속한다.
+**권장 모델**: 설치·첫 설정·첫 1~2회 실사용 = **Opus 5**(Fable 5.1 가능하면) · 노력도 high. 이후 kk-mail·kk-budget 은 Sonnet 5, kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high), **kk-dining·kk-pay 세금계산서 직접작성은 Opus 5 유지**. 사용자가 다른 모델로 설치를 시작했으면 이 권장을 한 줄로 알려주되 진행은 계속한다.
 
 ---
 

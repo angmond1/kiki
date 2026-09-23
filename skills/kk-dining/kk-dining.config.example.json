@@ -6,6 +6,7 @@
   "log_root": "{kiki_root}/dining/meeting_log",
   "_log_root": "회의록 엑셀 루트. 클라우드 동기화 폴더로 바꿔도 됨(예: 본인 드라이브 동기화 경로).",
   "hwp_output_root_optional": "{kiki_root}/dining",
+  "_hwp_output_root_optional": "hwpx 회의록 출력 루트(키 이름은 호환 위해 유지). 하위 <yymmdd>/ 에 저장.",
   "upload_via_rpa": false,
   "_upload_via_rpa": "true 면 회의록을 dooray 드라이브에 올려 RPA 처리(행정원 폴더 = kiki.config payment_admin.folder_url). 기본 false = fam_0704 직접 자동작성.",
   "receipt_path": "",
@@ -20,7 +21,7 @@
     "amount_includes": "식대+음료(액체 다과) 합산",
     "log_format_options": {
       "xlsx_only": "엑셀만 — 기본 권장 (Claude 는 항상 엑셀만 조회)",
-      "xlsx_and_hwp": "엑셀 + 별지1호 hwp 동봉 — 보관 선호 사용자"
+      "xlsx_and_hwpx": "엑셀 + 별지1호 hwpx 동봉(아래아한글 불요, 모든 OS) — 보관 선호 사용자. 구 xlsx_and_hwp 와 동일"
     }
   }
 }

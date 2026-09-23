@@ -97,5 +97,5 @@ echo "    (새 skill 은 재시작해야 인식됩니다. Desktop 은 Dock 아�
 echo "kiki 작업 폴더: $root   (엑셀·회의록·검수 파일은 여기 하위 budget/ dining/ inspect/ 에)"
 echo "토큰 파일     : $tok    (채팅창에 토큰을 붙여넣지 말고 이 파일에 저장)"
 echo "개인 config   : $cfg  (repo 에는 올라가지 않습니다)"
-echo "※ macOS/Linux 제한: 한글(hwp) 자동생성·hwp→pdf 변환은 Windows+아래아한글 전용(hwp 열람·PDF 내보내기는 HOP: brew install hop). 그 외 기능은 동일."
+echo "※ macOS/Linux 제한: hwp→pdf 자동 변환(kk-pay 증빙)만 Windows+아래아한글 전용. 회의록 hwpx 생성은 모든 OS(열람은 HOP: brew install hop). 그 외 기능은 동일."
 if [ "$unknown" -eq 1 ]; then echo "⚠️  일부 skill 이름을 찾지 못했습니다 — 철자를 확인하세요." >&2; exit 1; fi
