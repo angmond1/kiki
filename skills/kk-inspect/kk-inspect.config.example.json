@@ -2,6 +2,7 @@
   "_comment": "kk-inspect 고유 설정만. 실제 파일은 ~/.claude/kiki/kk-inspect.config.json (repo 밖).",
   "_common": "이름·사번·연락처·위치(지역/건물/호실)·담당 행정원·참여과제는 공통 ~/.claude/kiki/kiki.config.json 에서 읽는다(user, location, payment_admin, projects). 상세 ../_shared/personal_config.md.",
 
-  "inspect_folder": "C:\\kiki\\inspect",
+  "inspect_folder": "{kiki_root}/inspect",
+  "_kiki_root": "{kiki_root} = ~/.claude/kiki/kiki.config.json 의 kiki_root (기본 C:\\kiki / ~/kiki).",
   "_inspect_folder": "검수 증빙 파일 폴더(기본값). 완료 후 yymmdd 하위로 정리."
 }

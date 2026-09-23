@@ -10,7 +10,8 @@
 |---|---|---|
 | skill 본체 | `~/.codex/skills/kk-budget`, `kk-pay`, `kk-dining`, `kk-inspect`, `kk-mail` | repo 의 `skills/kk-*` 그대로 |
 | 공통 문서 | `~/.codex/skills/_shared` | repo 의 `skills/_shared` 그대로 |
-| 개인 설정·토큰 | `~/.codex/kiki/` | **repo 밖** (아래 §3) |
+| 개인 설정 | `~/.codex/kiki/` | **repo 밖** (아래 §3) |
+| 토큰 | `<kiki_root>/token.txt` (또는 `~/.codex/kiki/token.txt`) | kiki 폴더(기본 `C:\kiki` / `~/kiki`)에 `token.txt.example` 복사 |
 
 설치(복사) 예 — repo 폴더 안에서:
 ```bash
@@ -19,7 +20,7 @@ mkdir -p ~/.codex/skills ~/.codex/kiki
 cp -R skills/_shared ~/.codex/skills/_shared
 cp -R skills/kk-mail ~/.codex/skills/kk-mail            # 원하는 kk-* 나열 (또는 skills/kk-* 전체)
 cp skills/_shared/kiki.config.example.json ~/.codex/kiki/kiki.config.json
-cp skills/_shared/kiki.env.example ~/.codex/kiki/kiki.env
+cp skills/_shared/token.txt.example ./token.txt          # kiki 폴더(기본 ~/kiki)에 토큰 파일
 ```
 ```powershell
 # Windows (PowerShell)
@@ -27,10 +28,11 @@ New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills","$env:USERP
 Copy-Item -Recurse "skills\_shared" "$env:USERPROFILE\.codex\skills\_shared"
 Copy-Item -Recurse "skills\kk-mail" "$env:USERPROFILE\.codex\skills\kk-mail"
 Copy-Item "skills\_shared\kiki.config.example.json" "$env:USERPROFILE\.codex\kiki\kiki.config.json"
-Copy-Item "skills\_shared\kiki.env.example" "$env:USERPROFILE\.codex\kiki\kiki.env"
+Copy-Item "skills\_shared\token.txt.example" ".\token.txt"   # kiki 폴더(기본 C:\kiki)에 토큰 파일
 ```
 
 - Codex Desktop 은 시작 시 skill 목록을 로드 → **새 skill 설치 후 Codex 재시작**으로 인식 확인.
+- 사전 준비(Python 3 · Node.js · Google Chrome · chrome-devtools MCP · **KIST 사내망/VPN**)와 권장 모델은 [README](README.md) 「준비물」과 동일(git 불요 — ZIP/동료 폴더). Codex 는 브라우저 작업을 **chrome-devtools 자체 Chrome 창 하나**에서 하므로 그 창에서 포탈 `e.kist.re.kr`·Dooray 에 로그인한다(평소 Chrome 로그인은 넘어오지 않음, 매일 정오 세션 리셋). `~/.codex/kiki/kiki.config.json` 의 `kiki_root` 에 kiki 폴더를 적어두면 `token.txt`·기본 저장 폴더(`budget/ dining/ inspect/ _tmp/`)를 거기서 찾는다.
 - (Claude 는 `~/.claude/skills/` + `~/.claude/kiki/`. 경로만 다르고 내용 동일.)
 
 ## 2. 도구 이름 어댑터 (핵심)
@@ -52,7 +54,7 @@ skill 본문의 "Claude in Chrome" 도구를 Codex 의 Chrome DevTools 도구로
 | 파일 | 내용 |
 |---|---|
 | `~/.codex/kiki/kiki.config.json` | 이름·사번·카드책임자·담당 행정원·참여과제 등 공통 |
-| `~/.codex/kiki/kiki.env` | `DOORAY_TOKEN` |
+| `<kiki_root>/token.txt` (또는 `~/.codex/kiki/token.txt`, 구형 `~/.codex/kiki/kiki.env`) | Dooray 토큰 — `Dooray token:` 다음 줄. **채팅에 붙여넣지 말 것**(노출 위험 상시 경고) |
 | `~/.codex/kiki/kk-<skill>.config.json` | skill 별 고유 설정 |
 
 - 이미 공통 config 에 있는 값은 재질문 안 함.
@@ -101,8 +103,8 @@ s.textContent = `[id*="_form_modalPopDiv"], [id*="modalPopDivScrollableInnerCont
 
 ## 8. 실행 체크리스트
 1. Codex skill 목록에 `kk-*` 보이는지 (없으면 Codex 재시작).
-2. 통합정보·Dooray 로그인 세션 살아있는지.
-3. `~/.codex/kiki/kiki.config.json`·`kiki.env` 만 확인하고 재질문 최소화.
+2. 통합정보·Dooray 로그인 세션 살아있는지(chrome-devtools 창에서; KIST 사내망/VPN).
+3. `~/.codex/kiki/kiki.config.json`·`token.txt` 만 확인하고 재질문 최소화.
 4. 통합정보 조회는 **fetch 먼저**, 실패 시 화면 fallback (고정좌표 금지).
 5. NEXACRO 파일첨부는 visible 버튼이 아니라 **`extUp._input_node`** (또는 별도 page 의 실제 버튼) 사용 — `_shared/nexacro_file_upload.md`.
 6. 첨부 저장 후 `tmHeader`/`FLE_TP`/`FLE_PATH`/`NEW_FLE_NM` 로 서버 반영 확인.

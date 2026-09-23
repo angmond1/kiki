@@ -15,7 +15,7 @@ description: KIST 과제 예산 수집·리포트 자동화 skill (kiki 패키�
 - **격리(E)**: 특정인 이름·사번·계정번호·할당액·개인경로 → skill 텍스트에 0.
 
 ## 1. 전제 (환경)
-- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) + **통합정보 SSO 로그인**(포탈 `e.kist.re.kr` 로그인 → 업무화면 `p.kist.re.kr:8081`; 과제별관리 `rdm_2011` 한 번 열어 `authTk` 활성, 사내망 · 2026-07 포탈주소 변경) + python `openpyxl`. **조회 전용 → 토큰 불요.**
+- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — **평소 쓰는 Chrome 창**(Claude in Chrome 확장, 새 창·chrome-devtools 불필요) + **통합정보 SSO 로그인**(포탈 `e.kist.re.kr` 로그인 → 업무화면 `p.kist.re.kr:8081`; 과제별관리 `rdm_2011` 한 번 열어 `authTk` 활성) + KIST 사내망(밖이면 VPN). python `openpyxl` 은 **엑셀 저장 직전에** 확인·설치. **조회 전용 → 토큰 불요.**
 - 공통 개인정보(이름·참여과제)는 `~/.claude/kiki/kiki.config.json` 에서 읽는다(`user.name` 과책 판별, `projects`) → `../_shared/personal_config.md`. 안 되면 "로그인/연결 안내"로 친절 실패(크래시 X).
 
 ## 2. 실행 준비 (매 작업/설정 시작)
@@ -32,7 +32,7 @@ description: KIST 과제 예산 수집·리포트 자동화 skill (kiki 패키�
 - **Q2 — 개인집계 여부**: "공동과제에서 본인 사용분만 따로 집계할 과제가 있나요?(없으면 건너뜀)"
   - Q2a 과제 → Q2b **적요 이름목록**("본인 사용분을 적요의 어떤 이름으로? 연구자명(복수)/행정원명/혼합 가능") → Q2c 할당 기준액 → **Q2d "활동비2를 활동비1에 합산? 따로?"**(`merge_act2_into_act1`).
 - **Q3 — 추적 카테고리**: 기본 6개[재료비·시설장비비·활동비1·활동비2·내부인건비2·학생인건비], 가감.
-- **Q4 — 저장**: "엑셀을 로컬 폴더에 저장합니다. 기본 `C:\kiki\budget\` 에 `yymmdd.xlsx`. 이대로/다른 폴더·파일명?"
+- **Q4 — 저장**: "엑셀을 로컬 폴더에 저장합니다. 기본 `{kiki_root}\budget\`(예 `C:\kiki\budget\`, macOS/Linux `~/kiki/budget/`) 에 `yymmdd.xlsx`. 이대로/다른 폴더·파일명?"
 - **(저장)** `~/.claude/kiki/kk-budget.config.json`.
 - **(첫 시험 수집)** "설정 완료. 오늘 날짜 기준으로 1회 시험 수집합니다" → 아래 작업 1회 실행(엑셀 + 채팅 표)으로 동작 확인.
 
@@ -42,7 +42,7 @@ description: KIST 과제 예산 수집·리포트 자동화 skill (kiki 패키�
 3. **과제별 fetch**: 각 acccd → `kkBudget.queryBudgetTable(acccd)` → `categories{표시명:{A,exec,pendingDone,pendingProg,D,rate}}` + `direct{A,D}`.
    - **검산** `A == D + exec + pendingDone + pendingProg` 불일치 시 경고.
    - **과책 아닌 과제**: 과제 전체 카테고리 A/D는 정상 조회됨. 단 개인집계용 집행내역(적요)·인건비 상세는 권한 제한 가능 → 보고에 명시.
-4. **개인집계**(config `personal_share` 과제, optional): 집행내역 적요에 `filter_names` 포함 건 합산(완료+계류). `merge_act2_into_act1` 적용. → `references/budget_fetch_spec.md` 의 집행내역 경로.
+4. **개인집계**(config `personal_share` 과제, optional): 집행내역 **적요+신청인**에 `filter_names` 포함 건 합산(완료+계류). 팝업은 **좌표 클릭 말고 `scripts/exec_detail.js` 주입 후 `kkExe.init()/cats()/open(dsRow,'exec')/parse(names)/close()`** (셀클릭 핸들러 직접 호출 — 해상도·행위치 무관, 🔴 닫기는 `kkExe.close()` 로만). `merge_act2_into_act1` 적용. → `references/budget_fetch_spec.md` 의 집행내역 경로.
 5. **JSON 스냅샷**: `~/.claude/kiki/kk-budget/data/yymmdd.json` (메타는 직전 복사, 카테고리/직접비/개인집계 오늘 값).
 6. **엑셀**: `python scripts/make_report.py <json> <output_dir>/yymmdd.xlsx`. 검증(openpyxl). Excel 열림 시 `PermissionError` → 닫아달라 안내 후 재시도.
 7. **보고 — 엑셀 + 채팅 표(항상)**: `references/budget_report_format.md` 양식.
@@ -64,6 +64,7 @@ description: KIST 과제 예산 수집·리포트 자동화 skill (kiki 패키�
 `kk-budget.config.example.json` 참고. 키: `user_name`(과책 판별) / `projects`(선택 과제) / `track_categories` / `show_direct_subtotal` / `personal_share`(과제+filter_names+allocations+merge_act2_into_act1) / `output_dir` / `filename_pattern`.
 
 ## 참고
+- [scripts/exec_detail.js](scripts/exec_detail.js) — 집행/계류 내역 팝업 헬퍼(`window.kkExe`): 셀클릭 핸들러 직접 호출·금액컬럼 자동판별·합계행 제외·이름 경계검증.
 - [references/budget_fetch_spec.md](references/budget_fetch_spec.md) — bdg_2030 fetch endpoint·컬럼 1:1 매핑·예산항목 코드·함정.
 - [references/budget_report_format.md](references/budget_report_format.md) — 채팅 표/엑셀 양식·직접비·개인집계·검산.
 - [_shared/kist_portal.md](../_shared/kist_portal.md) — 통합정보 fetch 공통(authTk·parseRows·좌표 fallback).

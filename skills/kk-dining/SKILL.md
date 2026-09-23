@@ -5,36 +5,38 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 
 # kk-dining — KIST 회의비 처리
 
-카드로 결제한 회의비(식사·카페)를 골라 **사전결재와 매칭 → 회의록 엑셀 작성 → fam_0704 지급신청서 직접 자동작성·임시저장·결재상신**까지 처리한다. 조회는 통합정보 SSO 세션(토큰 불요), fam_0704 자동작성은 부모탭 JS(`Claude in Chrome`)로 NEXACRO 팝업 제어, (선택)아래아한글 hwp 동봉 보관·업로드는 사용자 옵션.
+카드로 결제한 회의비(식사·카페)를 골라 **사전결재와 매칭 → 회의록 엑셀 작성 → fam_0704 지급신청서 직접 자동작성·임시저장·결재상신**까지 처리한다. 조회는 통합정보 SSO 세션(토큰 불요), fam_0704 자동작성은 부모탭 JS 로 NEXACRO 팝업 제어 — 회의록 팝업 **첨부가 있으므로 Claude 전용 새 Chrome 창(chrome-devtools-mcp)에서 처음부터**(JS 는 `evaluate_script`; 첨부 없는 조회만 Claude in Chrome), (선택)아래아한글 hwp 동봉 보관·업로드는 사용자 옵션.
 
 > **2026-06-05 패러다임 전환**: 회의록 hwp 양산 → 두레이 업로드 → 행정원 수기 신청 (옛 v1) → **회의록 엑셀 master + fam_0704 직접 자동작성·결재상신** (v2). hwp 는 옛 사용자 선호 옵션으로 보존.
 
 ## 정보 5분류
 - **A 내장**: 회의비 판별(음식점·카페), 인원 산정(⌈금액÷5만⌉+1, **식대+음료 합산**), 회의시간 융통성(USETIME 참고), 별지1호 hwp 셀매핑(옵션), 회의록 엑셀 9컬럼, fam_0704 자동작성 11단계, 보안팝업 Alt+N(hwp 옵션), 회의내용 가이드, 분류코드 면제(**I·S·B·F·부서운영비**).
 - **B 런타임조회**: 카드내역(fam_0711 법인+연구비)·참여과제(rdm_2011)·사전결재(fam_0100)·발의자 사번. → `scripts/portal_ops.js`
-- **C 환경준비**: Chrome+통합정보 SSO 세션 + Claude in Chrome 확장 / Python+`openpyxl`(엑셀) / (옵션)아래아한글+COM+`pyhwpx`·`pywin32`·`pywinauto` / (옵션)Dooray 로그인.
+- **C 환경준비**: **Claude 전용 새 Chrome 창**(chrome-devtools-mcp — 회의록 팝업 첨부 때문; 그 창에서 포탈 `e.kist.re.kr` 로그인 **한 번 더**, 평소 Chrome 로그인은 넘어오지 않는다고 미리 안내) + KIST 사내망(밖이면 VPN) / Python `openpyxl`(엑셀 작성 직전에 확인·설치) / (옵션, **Windows 전용**) 아래아한글+COM+`pyhwpx`·`pywin32`·`pywinauto` / (옵션) Dooray 로그인 + `token.txt`.
 - **D config**: 공통(이름·카드책임자·참여과제)은 `~/.claude/kiki/kiki.config.json`(형제 공유), kk-dining 고유(**저장 모드**·upload_via_rpa·폴더)는 `kk-dining.config.json`. → `../_shared/personal_config.md`.
-- **E 격리**: Dooray 토큰(`~/.claude/kiki/kiki.env`)·사번·참석자 실명. skill 텍스트엔 0건.
+- **E 격리**: Dooray 토큰(`<kiki_root>/token.txt`)·사번·참석자 실명. skill 텍스트엔 0건.
 
 ## 설치/부트스트랩 (`kk-dining 설정해줘`)
-**0. 환경 점검** — `../_shared/environment_setup.md` 0단계(Chrome+Claude in Chrome MCP·통합정보 로그인[포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`, 2026-07 포탈주소 변경]·python `openpyxl`, 저장모드 2면 한글·COM·`pyhwpx`).
+**0. 환경 점검** — `../_shared/environment_setup.md` 0단계(새 Chrome 창·통합정보 로그인[포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`]; python `openpyxl` 은 엑셀 작성 시점에; 한글 여부는 아래 4).
 **공통 식별정보는 `~/.claude/kiki/kiki.config.json` 에서 읽는다**(없으면 1회 수집·저장, 다른 skill 재사용). kk-dining 고유만 `kk-dining.config.json`. (`../_shared/personal_config.md`)
 
 1. **성함·카드책임자·참여과제** *(공통 `user`/`card_holder`/`projects`)* — kiki.config 에 없으면 묻는다. 카드책임자 본인 여부 확인 + 사번 1회(없으면 fam_0711 에서). 참여과제는 `queryProjects` 자동조회 → 분류코드 포함 확인.
 2. **사전결재 면제 판정** *(자동)* — 참여과제 분류코드(`projects[].code`)로 **I·S·B·F·부서운영비** 면제 자동 판정 → "맞나요?" 확인 (`project_code.md`). 과제별 저장 불필요.
 3. (질문 X) 카드 조회는 **법인+연구비 항상 둘 다**.
-4. **저장 모드** *(kk-dining 고유)* — "(1)엑셀만 (2)엑셀+한글". `xlsx_only` / `xlsx_and_hwp`. Claude 는 어느 쪽이든 **엑셀만 조회**.
-5. **"Dooray 드라이브 업로드 RPA 처리? (예/아니요)"** — 아니요(기본)면 fam_0704 직접 자동작성. 예면 토큰(`kiki.env`) + 담당 행정원 폴더(공통 `payment_admin.folder_url`).
+4. **"회의록을 한글(hwp) 파일로도 저장할까요?"** *(kk-dining 고유 저장 모드 — 부서 관행에 따라 엑셀만 쓰는 곳도 많다)* — 아니요(기본) = `xlsx_only` / 예 = `xlsx_and_hwp`. Claude 는 어느 쪽이든 **엑셀만 조회**.
+   - 예를 고르면 **아래아한글 설치 여부를 확인**(Windows: `python <kk-pay>/scripts/convert.py --check` 의 `hwp`, 또는 레지스트리 `HWPFrame.HwpObject`). 있으면 `pyhwpx pywin32 pywinauto` 를 그때 설치.
+   - **한글이 없으면** 단정하지 말고 묻는다: *"아래아한글이 없습니다. 무료 오픈소스 한글 편집기 HOP(Open HWP, Windows/macOS/Linux, https://github.com/golbin/hop)을 설치하면 hwp 를 열어 편집·PDF 내보내기는 됩니다. 단 HOP 은 자동화 인터페이스(CLI/API)가 없어 kk-dining 의 hwp **자동생성은 Windows+아래아한글 전용**이고, 한글 없이는 엑셀 회의록으로 진행됩니다(hwp 가 꼭 필요하면 엑셀 내용을 HOP 에서 양식에 직접 옮기기). HOP 을 설치할까요, 엑셀만으로 갈까요?"* → 설치는 confirm 후(Windows `.msi` / macOS `brew install hop` / Linux `.deb`·`.rpm`·`.AppImage`). macOS/Linux 는 hwp 자동 생성 불가 → 엑셀만.
+5. **"Dooray 드라이브 업로드 RPA 처리? (예/아니요)"** — 아니요(기본)면 fam_0704 직접 자동작성. 예면 토큰(`<kiki_root>/token.txt`) + 담당 행정원 폴더(공통 `payment_admin.folder_url`).
 6. (질문 X, **지침 안내**) 폴더 3종 — 아래 "경로".
 
 ### 토큰 (5=예일 때만)
-`~/.claude/kiki/kiki.env` 의 `DOORAY_TOKEN`(형제 공유). 입력 방식(A 파일 / B 채팅)·없으면 빈 템플릿 자동생성은 `../_shared/personal_config.md`. 발급 https://kist.gov-dooray.com/setting/api/token.
+`<kiki_root>/token.txt`(형제 공유, 예 `C:\kiki\token.txt`) 의 `Dooray token:` 다음 줄. **절대경로를 보여주며** 안내하고 **채팅 붙여넣기는 노출 위험을 항상 경고**. 상세 `../_shared/personal_config.md`. 발급 https://kist.gov-dooray.com/setting/api/token.
 
 ### 경로 (설치 시 지침으로 안내)
 - 📁 **카드영수증/증빙**: 카페·마트·편의점·호텔 결제건만 명세서 jpg 필요 (식당은 카드전표 갈음). 사용자 폴더 경로 알려주거나 그때그때 첨부. → `meeting_form.md`
-- 📁 **회의록 엑셀**: `C:\kiki\dining\meeting_log\{YYYY.MM}\{yymmdd}_회의록.xlsx` 표준 (yymmdd = 처리일, 같은날 모든 건 1파일). → `meeting_log_excel.md`
-- 📁 **회의록 hwp**(저장 모드 2): `C:\kiki\dining\<yymmdd>\` (yymmdd=연 2자리). 엑셀과 동시 생성, 별지1호 양식. → `meeting_form.md`
-- 📁 **과제보고서**(회의내용 작성용): 과제별 경로 알려주거나 `C:\kiki\dining\project_report\`.
+- 📁 **회의록 엑셀**: `{kiki_root}\dining\meeting_log\{YYYY.MM}\{yymmdd}_회의록.xlsx` 표준(`{kiki_root}` = 설치 때 고른 kiki 폴더, 기본 `C:\kiki` / macOS·Linux `~/kiki`) (yymmdd = 처리일, 같은날 모든 건 1파일). → `meeting_log_excel.md`
+- 📁 **회의록 hwp**(저장 모드 2): `{kiki_root}\dining\<yymmdd>\` (yymmdd=연 2자리). 엑셀과 동시 생성, 별지1호 양식. → `meeting_form.md`
+- 📁 **과제보고서**(회의내용 작성용): 과제별 경로 알려주거나 `{kiki_root}\dining\project_report\`.
 
 ## 작업 (`회의비 처리하자`)
 
@@ -52,11 +54,11 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 
 ### 단계 8-9: 회의내용 + 엑셀 작성
 8. **회의시간** — 카드승인시간(USETIME) 참고 융통성. 예: USETIME 14:38 → 회의 13:00~14:30 (결제 직전 종료).
-9. **회의내용**(10만원↑만) — 과제보고서 기반 생성 후 확인. 10만 미만 생략. **엑셀 9컬럼 행 추가** (`scripts/meeting_log_xlsx.py`): `D:\...\meeting_log\{YYYY.MM}\{yymmdd}_회의록.xlsx` (처리일 1파일에 같은날 모든 건). 저장 모드 2 면 `make_dininglog.make_batch(...)`로 hwp 도 동봉 → `C:\kiki\dining\<yymmdd>\`. → `meeting_log_excel.md`, `meeting_form.md`
+9. **회의내용**(10만원↑만) — 과제보고서 기반 생성 후 확인. 10만 미만 생략. **엑셀 9컬럼 행 추가** (`scripts/meeting_log_xlsx.py`): `{kiki_root}\dining\meeting_log\{YYYY.MM}\{yymmdd}_회의록.xlsx` (처리일 1파일에 같은날 모든 건). 저장 모드 2 면 `make_dininglog.make_batch(...)`로 hwp 도 동봉 → `{kiki_root}\dining\<yymmdd>\`. → `meeting_log_excel.md`, `meeting_form.md`
 
 ### 단계 10-11: fam_0704 자동작성 + 결재상신
 10. **fam_0704 직접 자동작성**(`회의록 작성 화면`, NEXACRO `fam_0704_02`):
-    - 부모탭 JS(Claude in Chrome) → `application.popupframes` 통해 11단계 자동 (DOC_CLS="G" frozen 회피 → 식비안내 팝업 닫기 → 카드매핑 `doSetDesp("RAWCARD")` → 계정 필터 popBudgList → `doDecision()` 콜백 → 통장표기 `dpstDispNm` + **`common_onkillfocus` 동기화 필수** → 적요 → 회의록 팝업 입력[사용구분 `rd_UseType="3"` 기타(A이외)식대 + 사전결재 `button00_onclick` 연동 + 회의록 원본 복원 + `doSave()`] → fam_0704 `bt_save_onclick` 임시저장 → `bt_approval_onclick` 결재상신).
+    - 부모탭 JS(chrome-devtools 창의 `evaluate_script`; 도구 매핑은 `../_shared/nexacro_file_upload.md` §4-6) → `application.popupframes` 통해 11단계 자동 (DOC_CLS="G" frozen 회피 → 식비안내 팝업 닫기 → 카드매핑 `doSetDesp("RAWCARD")` → 계정 필터 popBudgList → `doDecision()` 콜백 → 통장표기 `dpstDispNm` + **`common_onkillfocus` 동기화 필수** → 적요 → 회의록 팝업 입력[사용구분 `rd_UseType="3"` 기타(A이외)식대 + 사전결재 `button00_onclick` 연동 + 회의록 원본 복원 + `doSave()`] → fam_0704 `bt_save_onclick` 임시저장 → `bt_approval_onclick` 결재상신).
     - ⭐ **행추가(`bt_addRow`)로 한 상신에 최대 5건 묶기** (8건이면 5+3 분할). **같은날 식당+카페는 동일 상신건**에 묶음(=1행 처리).
     - 자세한 11단계 JS = → `fam_0704_automation.md`
     - ⭐ **연구비카드 회의비**(카드 구분 '연구비', CARDTYPECD 3)는 `DOC_CLS="4"` → **`fam_0703_02`**. 영수증함·매핑·핸들러 이름과 행 전환 규칙이 다르고 통장표기가 없다 → **`fam_0703_automation.md` 절차서만 따른다**(§0 정찰 → 매핑 → 계정 → 적요 → 회의록·첨부 → **DESP_LIST 행별 검증** → 임시저장). 2026-09-08 실증.
@@ -81,7 +83,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 - **결재상신(`bt_approval`)은 실제 지급 결재 제출**(되돌리려면 결재 회수 필요) → 11단계 직전 최종 confirm 필수.
 - 결재선은 별도 gw 창이라 Claude 제어 불가 → 사용자 직접.
 - 참석자·카페영수증 유무는 사용자만 아는 값 → 그때그때 묻는다.
-- credential(토큰)·사번·실명은 skill·repo에 0건. 토큰은 `kiki.env`(repo 밖).
+- credential(토큰)·사번·실명은 skill·repo에 0건. 토큰은 `token.txt`(repo 밖, 채팅 붙여넣기 X).
 
 ## 참고
 - `references/fam_0704_automation.md` — **NEXACRO 부모탭 JS 완전자동 11단계** (DOC_CLS / 식비팝업 / 카드매핑 / popBudgList 콜백 / 통장표기 killfocus / 회의록 / 사전결재 연동 / **첨부**(회의록 팝업 `pop_fam_0703_02` 의 `fileDiv1`서명록/`fileDiv2`증빙/`fileDiv3`사전결재, 패턴 C = `extUp._input_node` 직접 노출) / 저장 / 결재상신). gfn_msg 원복 트랩 포함.

@@ -1,0 +1,13 @@
+# kiki 토큰 파일 — 이 파일은 본인 PC 에만 있고, 공유·업로드되지 않습니다.
+#
+# 언제 필요한가: kk-pay 의 "카드결제건 → Dooray 드라이브 업로드(RPA)" 와 kk-dining 의 RPA 업로드 옵션에만.
+#   (kk-mail · kk-budget · kk-inspect · 세금계산서 직접작성은 토큰이 필요 없습니다.)
+#
+# 발급: https://kist.gov-dooray.com/setting/api/token
+#   Dooray 웹 → 우상단 프로필 → 개인설정 → API → "개인 인증 토큰" 생성 → 복사
+#
+# ⚠️ 토큰을 Claude/Codex 채팅창에 붙여넣지 마세요 — 대화 기록에 남아 타인에게 노출될 수 있습니다.
+#    아래 "Dooray token:" 다음 줄에 붙여넣고 저장한 뒤, 채팅에는 "토큰 넣었어" 라고만 알려주세요.
+
+Dooray token:
+

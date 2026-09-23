@@ -6,6 +6,7 @@
 ## C1 — 개인 credential·식별자·개인학습을 skill 텍스트에 두지 않는다
 - 토큰·비번·API 키 ❌ / 개인 멤버ID·사번·실제 폴더ID ❌ / 특정인의 발신처-폴더 학습 ❌.
 - 이런 값은 **런타임 자동조회**(폴더ID·멤버정보) 또는 **사용자 로컬 config**(`~/.claude/kiki/`)에만.
+- 토큰은 **`<kiki_root>/token.txt` 파일로만** 받는다(절대경로를 보여주고 사용자가 붙여넣게). **채팅창 붙여넣기는 대화 기록에 남아 노출될 수 있음을 항상 경고**하고, 값은 출력하지 않는다.
 - (반면교사: 일부 기존 skill은 SKILL.md에 실제 API 키를 박아 둠 — kiki는 금지.)
 
 ## C2 — 모든 쓰기는 사용자 confirm 후
@@ -15,7 +16,7 @@
 - 환경별로 다른 값(폴더 구조 등)은 코드가 런타임 조회. 부족분만 사용자에게 물어 config 생성.
 
 ## C4 — config·credential은 repo 밖 + gitignore
-- 개인 config는 `~/.claude/kiki/<skill>.config.json` (repo 밖, git 충돌·유출 방지).
+- 개인 config는 `~/.claude/kiki/<skill>.config.json` (repo 밖, git 충돌·유출 방지). 토큰 파일 `token.txt` 는 kiki 폴더에 두되 gitignore(`*token*`).
 - repo 내 실수 방지로 `.gitignore`에 `*.config.json`, `*token*`, `.env` 포함.
 
 ## C5 — 한국어

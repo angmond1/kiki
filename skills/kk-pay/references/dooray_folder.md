@@ -37,4 +37,4 @@
 - ⏳ 이름검색은 **"검색 중…"** 진행표시 + **"최대 5분"** 안내(다운 오해 방지). `find_admin_folder(progress=...)`.
 
 ## 인증
-- 폴더 조회·업로드는 **dooray 개인 토큰** 필요(`~/.claude/kiki/kiki.env`). 발급 `https://kist.gov-dooray.com/setting/api/token`.
+- 폴더 조회·업로드는 **dooray 개인 토큰** 필요(`<kiki_root>/token.txt`, 구형 `~/.claude/kiki/kiki.env` 도 읽힘). 발급 `https://kist.gov-dooray.com/setting/api/token`.

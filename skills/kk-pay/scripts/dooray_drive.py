@@ -2,14 +2,14 @@
 """kk-pay 코어 (2) — dooray drive 폴더 검색·구조파악·업로드·처리완료 아카이브.
 
 인증: dooray 개인 토큰 (업로드는 세션쿠키로 안 됨 → 토큰 필요).
-  토큰 로드 우선순위: 환경변수 DOORAY_TOKEN → ~/.claude/kiki/kiki.env (DOORAY_TOKEN=...)
+  토큰 로드 우선순위: 환경변수 DOORAY_TOKEN → <kiki_root>/token.txt → ~/.claude|.codex/kiki/token.txt → (구형) kiki.env
   발급: https://kist.gov-dooray.com/setting/api/token  (토큰은 repo·skill 에 저장 금지, 로컬 env 만)
 
 전사 공통(개인정보 아님, 내장 OK):
   PROJECT 3311002956353796322 / DRIVE 3311002957555545393 = RPA-지급신청자동화 (전 본부·행정원 공유)
 """
 from __future__ import annotations
-import os, re, time, sys
+import os, re, time, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 try:
     sys.stdout.reconfigure(encoding="utf-8")
@@ -35,19 +35,63 @@ DEPT_ALIAS = {
 _RPA_MARK = ("세금계산서", "회의비", "지급신청 매뉴얼")
 
 
+def _kiki_root() -> str:
+    """kiki 작업 폴더 — 환경변수 KIKI_ROOT → kiki.config.json(claude/codex) 의 kiki_root."""
+    r = os.environ.get("KIKI_ROOT", "").strip()
+    if r:
+        return os.path.expanduser(r)
+    for cfg in ("~/.claude/kiki/kiki.config.json", "~/.codex/kiki/kiki.config.json"):
+        p = os.path.expanduser(cfg)
+        if os.path.exists(p):
+            try:
+                r = (json.load(open(p, encoding="utf-8-sig")).get("kiki_root") or "").strip()
+            except Exception:
+                r = ""
+            if r:
+                return os.path.expanduser(r)
+    return ""
+
+
+def _token_from_file(p: str) -> str:
+    """token.txt('Dooray token:' 다음 줄) 또는 kiki.env(DOORAY_TOKEN=...) 에서 토큰 추출. 없으면 ''."""
+    try:
+        lines = [ln.rstrip("\r\n") for ln in open(p, encoding="utf-8-sig")]
+    except Exception:
+        return ""
+    body = [ln.strip() for ln in lines if ln.strip() and not ln.lstrip().startswith("#")]
+    for i, ln in enumerate(body):
+        if ln.upper().startswith("DOORAY_TOKEN="):
+            return ln.split("=", 1)[1].strip().strip('"').strip("'")
+        if ln.lower().startswith("dooray token"):
+            rest = ln.split(":", 1)[1].strip() if ":" in ln else ""
+            if rest:
+                return rest.strip('"').strip("'")
+            return body[i + 1].strip('"').strip("'") if i + 1 < len(body) else ""
+    return body[0].strip('"').strip("'") if body else ""   # 헤더 없는 파일: 첫 줄이 토큰
+
+
+def _token_candidates() -> list:
+    """우선순위: <kiki_root>/token.txt → ~/.claude|.codex/kiki/token.txt → (구형) kiki.env."""
+    root = _kiki_root()
+    c = [os.path.join(root, "token.txt")] if root else []
+    c += [os.path.expanduser(x) for x in ("~/.claude/kiki/token.txt", "~/.codex/kiki/token.txt",
+                                          "~/.claude/kiki/kiki.env", "~/.codex/kiki/kiki.env")]
+    return c
+
+
 def _load_token() -> str:
     t = os.environ.get("DOORAY_TOKEN", "").strip()
     if t:
         return t
-    p = os.path.expanduser("~/.claude/kiki/kiki.env")
-    if os.path.exists(p):
-        for line in open(p, encoding="utf-8"):
-            line = line.strip()
-            if line.startswith("DOORAY_TOKEN="):
-                return line.split("=", 1)[1].strip().strip('"').strip("'")
+    for p in _token_candidates():
+        if os.path.exists(p):
+            t = _token_from_file(p)
+            if t and " " not in t:
+                return t
+    where = os.path.join(_kiki_root() or "<kiki 폴더>", "token.txt")
     raise RuntimeError(
-        "dooray 토큰이 필요합니다. ~/.claude/kiki/kiki.env 에 'DOORAY_TOKEN=...' 저장 "
-        "(발급: https://kist.gov-dooray.com/setting/api/token)")
+        f"dooray 토큰이 필요합니다. {where} 의 'Dooray token:' 다음 줄에 토큰을 붙여넣고 저장하세요 "
+        "(발급: https://kist.gov-dooray.com/setting/api/token). 채팅창에는 붙여넣지 마세요(노출 위험).")
 
 
 class DoorayDrive:

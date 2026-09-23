@@ -81,6 +81,52 @@
 3. **예실대비표 재오픈 불안정** — 같은 탭에서 예실대비표 팝업을 두 번째로 열면 grid 가 **빈 채(0행)** 뜰 수 있음 → `rdm_2011` 로 **navigate 리셋 후 1회만** 열고, grid·집행내역 팝업 로딩은 **polling**(행 수 > 0 될 때까지 최대 N회 대기) 후 파싱.
 4. **팝업 window 후킹** — 집행내역은 별도 window → `window.open` 후킹으로 포획하고 부모/팝업 각각 후킹(공통 가이드 §4-11).
 
+## ⭐ 집행내역 팝업 — 셀클릭 핸들러 직접 호출 (2026-09-18 확립, **권장 표준**)
+좌표 클릭(zoom 으로 행·열 찾기)은 과제마다 비목 구성이 달라 행 Y 가 밀리고, 한 번 어긋나면 엉뚱한 팝업이 뜨거나 아무 반응이 없다.
+**NEXACRO 그리드의 셀클릭 핸들러를 코드로 직접 호출**하면 해상도·스크롤·행 위치와 완전히 무관해진다.
+
+1. **메인 폼 잡기** — `application.mainframe.all[0].form` 이 `bdg_2030` 폼.
+   (`mainframe.frames` / `mainframe.components` 로는 못 찾는다 — `all[0]` 이 ChildFrame.)
+2. **그리드 찾기** — 폼 하위를 재귀로 돌며 `_type_name==='Grid'` 이고
+   `getBindCellIndex('body','CTRLPERFAMT') >= 0` 인 컴포넌트(실측 `Div00/Grid10`).
+3. **셀 인덱스는 조회해서 쓴다**(하드코딩 금지) — `grid.getBindCellIndex('body', <컬럼>)`
+   → 집행 `CTRLPERFAMT`=8 · 계류완료 `CTRLCAUSAMT`=9 · 계류진행 `TEMPAMT`=10 · 잔액 `BALNAMT`=11.
+4. **행은 rowposition 으로 지정** — 핸들러는 인자의 `e.row` 가 아니라 **그리드 현재 행**을 본다.
+   `form.ds_datagrid1.set_rowposition(dsRow)` 를 **먼저** 하지 않으면 무조건 첫 행 팝업이 열린다(실측 함정).
+5. **호출**
+   ```js
+   form.ds_datagrid1.set_rowposition(dsRow);
+   form.Tab00_tabpage1_Grid01_oncellclick(grid, {row:dsRow, cell:c, col:c,
+     fromobject:grid, fromreferenceobject:grid, eventid:'oncellclick'});
+   ```
+   함수명이 `Tab00_tabpage1_...` 인데 실제 그리드는 `Div00/Grid10` 로 **이름이 안 맞아도 이 함수가 맞다**
+   (내부에서 CTRLPERFAMT/CTRLCAUSAMT/TEMPAMT 로 분기).
+6. **대상 행 매핑** — `ds_datagrid1` 에서 `LEV==='1'` 인 행이 카테고리.
+   **화면에 보이는 행 순서 ≠ dataset 행 인덱스**(LEV2 세부행이 사이에 섞임) → 반드시 dataset 인덱스를 쓴다.
+7. **팝업 수신** — `application.popupframes` 최상단에 뜬다. 폼 종류가 셋:
+   집행 `popBdgExeList` / 계류완료 `popPendList` / 계류진행 `popBdgCusExpList`.
+   폼 로딩이 비동기라 **4~7초 대기** 후 `frame.form.ds_datagrid1` 을 읽는다(즉시 읽으면 `form`=null).
+8. 🔴 **닫기는 반드시 팝업 폼의 `btn_close.click()`** — `form.close()` / `removeChild` / `destroy` 로 닫으면
+   폼에 `modalPopDiv_popBdgExeList` Div 가 **잔류**해서, 이후 모든 셀클릭이
+   `"Object with the ID [modalPopDiv_popBdgExeList] already exists."` 로 **조용히 실패**한다
+   (팝업 0개·화면 무반응·에러도 안 보임 → 원인 찾기 매우 어렵다). 이미 이 상태면 **페이지 navigate 리셋**이 가장 빠른 복구.
+9. **금액 컬럼 자동 판별** — 팝업마다 다르다. 후보 `RESOLAMT` / `CTRLCHNGAMT` / `INVOICE_RQSTAMT` 중
+   **합계가 0 보다 큰 첫 컬럼**을 고른다. 날짜(`RESOLYMD`/`BUDGCTLYMD`)가 빈 행 = **합계행** → 제외.
+   상세합이 화면 소계와 일치하는지 매번 검산.
+10. **이름 매칭은 행의 모든 문자열 컬럼을 합쳐서** — 팝업별 컬럼명 차이(적요 `COMDSCCONT` vs `CONT`,
+    신청인 `USERNM` vs `RQSTEMPNM`)를 그대로 흡수한다. 이름 뒤 글자가 한글/영숫자면 오탐으로 표시(경계 검증).
+
+> 이 방식은 좌표·해상도 무관 + 비링크 셀 구분까지 되므로, 앞 절의 좌표 기반 DOM 우회보다 **항상 먼저 시도**한다.
+
+## ⚠️ 인건비는 개인 귀속이 안 된다 (2026-09-18 실측)
+- **내부인건비1**: 집행내역이 월별 `"{YYYY}년 {MM}월 프로젝트 내부 인건비 흡수"` 한 줄씩 — **개인명 없음**.
+  (예실대비표 화면에서 이 셀만 **밑줄 없는 비링크**인 경우가 있다 = 드릴다운 자체가 없음.)
+- **학생인건비**: `"학생인건비 풀링제 흡수({과제번호})"` 단 1건 — **개인명 없음**.
+- **내부인건비2**(별정직)만 `"{YYYY}년{MM}월:별정직급여/퇴직충당금/법정부담금 {성명}"` 형식으로 개인이 보인다.
+- → "특정 연구자가 이 과제에서 쓴 인건비"는 예실대비표로 답할 수 없다. 인사·급여 또는 참여율 화면을 안내할 것.
+- 반대로 **지식재산권관리비(간접비)** 는 `"특허비용({성명},{특허번호})"` 형식이라 **개인 귀속이 된다** —
+  개인 사용분을 집계할 땐 직접비만 보지 말고 이 항목 포함 여부를 사용자에게 확인(반환 건은 음수로 잡혀 순액 처리됨).
+
 ## 함정 요약
 1. `BUDGYEAR='9999'` 필수 (연도 넣으면 빈 응답).
 2. `ACCCLSCD` 필수 (없으면 LEV2 세부만 → 카테고리 A/D 누락).

@@ -317,7 +317,8 @@ input.id = "kk_file_input";
 Object.assign(input.style,{position:"fixed",left:"20px",top:"20px",width:"260px",height:"40px",opacity:"1",display:"block",zIndex:"2147483647",background:"white"});
 if (!document.body.contains(input)) document.body.appendChild(input);
 
-// 2) 자동화 도구로 그 input 에 파일 직접 주입 (Playwright setInputFiles / chrome MCP upload_file)
+// 2) 자동화 도구로 그 input 에 파일 직접 주입 — chrome-devtools: take_snapshot → #kk_file_input uid → upload_file({uid, filePath}) 파일별
+//    (Claude in Chrome file_upload 는 채팅에 첨부한 파일만 가능 → 로컬 증빙은 chrome-devtools 창에서)
 //    → #kk_file_input 타깃, 절대경로
 
 // 3) 서버 저장 — gfn_upload 호출 (회의비 RQST_NO 합성식 + FLE_TP)
@@ -360,7 +361,7 @@ C.fileDiv2.gfn_upload("", "fn_endFileCallBack1", "ds_file", "RQST_NO="+rqst, "02
 - **외부참석자 `PROJJOINYN` 필수(8/1~)**: `doChkJoinPeople` 가 `cardusetime>="20260801"` 이면 `ds_datagrid2` 각 행 `PROJJOINYN` 검사 → 외부 협력자 `'N'`, 과제 참여연구원 `'Y'`. (`g2.setColumn(r,"PROJJOINYN","N")`)
 - ⚠️ **참석자 grid 비동기 로드 레이스**: `btn_Conference` 후 서버가 참석자 목록을 뒤늦게 로드해 3초 안에 채운 행을 **빈 결과로 덮어씀**. → 팝업 open 후 **6초 대기** 후 채우고 **저장 직전 rowcount 재검증**.
 - **최소참석인원**: 합 ≥ ⌈RQSTAMT÷50,000⌉ (469,680 → 10명 이상) 강제.
-- **첨부 코드 확정**(`fn_callBack` 소스): fileDiv1 `"01"`/`fn_endFileCallBack` · fileDiv2 `"02"`/`fn_endFileCallBack1` · fileDiv3 `"03"`/`fn_endFileCallBack2`. RQST_NO=`CONFERENCENO+"-"+CARDUSEMGRNO` → **회의록 1차 `doSave`(번호 발급) 후 첨부**. `file_upload` 다중 path 1회 OK(ds_files 누적) → count 검증 → `gfn_upload` → `tmHeader=S` 확인 → input id/style 원복. 영역별 input 은 각각 `extUp._input_node`.
+- **첨부 코드 확정**(`fn_callBack` 소스): fileDiv1 `"01"`/`fn_endFileCallBack` · fileDiv2 `"02"`/`fn_endFileCallBack1` · fileDiv3 `"03"`/`fn_endFileCallBack2`. RQST_NO=`CONFERENCENO+"-"+CARDUSEMGRNO` → **회의록 1차 `doSave`(번호 발급) 후 첨부**. chrome-devtools `upload_file` 파일별 반복(ds_files 누적; 채팅 첨부 파일이면 Claude in Chrome `file_upload` 다중 path 1회도 OK) → count 검증 → `gfn_upload` → `tmHeader=S` 확인 → input id/style 원복. 영역별 input 은 각각 `extUp._input_node`.
 - **해외 회의비**: **fileDiv2(증빙 02) = 영수증 jpg + 카드사용내역서(해외이용내역, 환율 증빙) + 식비반납 수입의뢰서 + 해외출장신청서** (⭐ 출장신청서도 증빙에 — fileDiv3 사전결재문서 아님, 2026-09-07 사용자 확정). fileDiv3 은 비움. 금액 fam_0711 `USEAMT`, 회의시간 현지시간, 출장계정≠회의비계정이면 적요에 공동계정 사유. 저장 시 "해외출장시 식비공제 확인바랍니다" 는 안내(저장됨).
 - ⚠️ **`doNew` 직후 `ds_rqstGrid` 는 이미 빈 행 1개**(CUSTNM 없음)를 갖는다 → "행이 있으면 매핑 스킵" 같은 가드는 오작동(2026-09-08 실측: 매핑 없이 계정만 빈 행에 들어감). 매핑 여부 판정은 **rowcount 가 아니라 `CUSTNM`/`CARDUSEMGRNO` 채워짐**으로. 첫 카드는 그 빈 행(curRow 0)에 `doSetDesp`, 둘째부터 `bt_addRow`.
 - ⭐ **해외 가맹점 = 거래처구분 콤보에서 "거래처명" 선택** (2026-09-07 사용자 확정): 해외 카드건은 가맹점번호(국내 사업자)가 없어 `CUSTCD` 가 비고, fam_0704 `bt_save` 검증 `CUSTCLSCD!='2' && (CUSTCD||CUSTNM 빈)` 에 걸려 "N번째 신청내역의 거래처 관련 항목을 입력해 주시기 바랍니다". → 거래처구분을 **"거래처명"**(거래처코드 없이 거래처명만 쓰는 구분. 검증식상 CUSTCD 면제 코드는 '2' — 첫 실행 때 콤보 innerdataset 라벨로 '2'=거래처명인지 확인)으로 바꾸고 거래처명 입력: 행별 `doGetDesp()` → `combo_custcls.set_value(코드)` + `F.switch1_RAWCARD_combo_custcls_onitemchanged.call(F,cb,{postvalue:코드,prevalue:'3'})` + `formDetail_Custnm.set_value(거래처명)`+`_onkillfocus` + `ds_rqstGrid.setColumn(i,'CUSTCLSCD',코드)`/`'CUSTNM'` 후 통장표기 재동기화 → 저장 통과. 국내 카드는 기본 '3'(가맹점 자동매핑) 그대로.

@@ -14,6 +14,7 @@
      "acccd": "", "filter_names": [], "allocations": {"재료비": 0, "활동비1": 0, "내부인건비2": 0}, "merge_act2_into_act1": true}
   ],
 
-  "output_dir": "C:\\kiki\\budget",
+  "output_dir": "{kiki_root}/budget",
+  "_output_dir": "{kiki_root} = ~/.claude/kiki/kiki.config.json 의 kiki_root (기본 C:\\kiki / ~/kiki).",
   "filename_pattern": "{yymmdd}.xlsx"
 }

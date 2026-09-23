@@ -1,41 +1,64 @@
-# kiki 설치 환경 점검 (형제 skill 공유)
+# kiki 실행 환경 점검 (형제 skill 공유)
 
-> **모든 kk-* skill 은 첫 실행(부트스트랩) 때 아래를 동일하게 확인/안내한 뒤 진행한다.**
-> 무자격 환경(미연결·미로그인)이면 **크래시 대신 친절한 안내로 멈춘다**.
+> **모든 kk-* skill 은 첫 실행(부트스트랩)과 매 작업 시작 때 아래를 동일하게 확인/안내한 뒤 진행한다.**
+> 무자격 환경(미연결·미로그인)이면 **크래시 대신 친절한 안내로 멈춘다**. 설치 자체(패키지·Python·Node.js·MCP 등록)는 `CLAUDE.md`/`INSTALL.md` 가 담당 — 여기는 *실행 직전* 점검.
+> 권장 모델: 첫 설정·첫 1~2회 = Opus 5(high), 이후 kk-mail·kk-budget 은 Sonnet 5, kk-dining·세금계산서 직접작성은 Opus 5 유지(README 표).
 
 ## 0단계 — 환경 점검 (모든 skill 공통, 부트스트랩 맨 앞)
 
-1. **Chrome + "Claude in Chrome"(MCP) 확장 — 설치·연결 확인** *(전 skill 공통, 예외 없음)*
-   - `list_connected_browsers` 로 연결 확인. 안 되면:
-     *"이 skill 은 Chrome 의 'Claude in Chrome'(MCP) 확장으로 동작합니다. 확장을 설치·연결해 주세요(확장 미설치 시 안내)."* 후 중단.
-   - 연결됐으면 `select_browser` / `tabs_context_mcp` 로 작업 탭 확보.
-   - **도구 이름 표기 규칙 (2026-09 기준)**: kiki 문서는 도구를 **짧은 이름**(`javascript_tool`·`tabs_context_mcp`·`file_upload` / chrome-devtools 의 `evaluate_script`·`upload_file`·`select_page`·`handle_dialog` …)으로 적는다. 실제 전체 이름은 `mcp__<서버명>__<도구명>` 이고 **서버명은 앱 버전·설치 방식에 따라 바뀐다** — Claude in Chrome: `mcp__Claude_in_Chrome__…`(2026-06) → `mcp__claude-in-chrome__…`(2026-09 현재) / chrome-devtools-mcp: `claude mcp add chrome-devtools …` 로 등록하면 `mcp__chrome-devtools__…`, plugin 설치면 `mcp__plugin_chrome-devtools-mcp_chrome-devtools__…` / Codex 는 `mcp__chrome_devtools.<도구명>`. **서버명이 달라도 도구명이 같으면 같은 도구**다. 세션 시작 시 도구 목록(ToolSearch `select:` 또는 deferred 목록)으로 실제 이름을 확인해 호출하고, deferred 상태면 ToolSearch 로 먼저 로드한다. 안 되면 모델 탓보다 **도구명·MCP 버전**을 먼저 의심.
-   - **⭐ 첨부 파일이 있는 작업은 *처음부터* `chrome-devtools-mcp` 로 시작하라 (2026-07-07 실측 교훈, 최우선)**: Claude in Chrome 으로 신청서 작성·저장까지 해놓고 **첨부 단계에서 chrome-devtools 로 갈아타면 로그인·작성을 처음부터 다시** 하게 된다(Claude in Chrome `file_upload` 는 **세션공유 파일만** 허용 → 로컬 증빙 첨부 불가). **세금계산서 지급신청(kk-pay)·소액검수(kk-inspect)처럼 첨부가 예정된 작업은 chrome-devtools 를 기본 브라우저로** 시작하고, 그 창에서 `e.kist.re.kr` 1회 로그인 후 전 과정(작성→저장→첨부→계좌검증→상신)을 거기서 진행. (첨부 없는 단순 조회만 Claude in Chrome 무방.)
-   - **★ chrome-devtools-mcp 개요** *(kk-inspect 필수 / kk-pay 첨부 시 필수)*: Claude Code 에 **`chrome-devtools-mcp` MCP 서버 등록** 필요. NEXACRO `window.open` **별도 window 팝업**(mcs_0003)·**iframe 팝업**(fam_0702)은 Claude in Chrome 으론 첨부 불가 → chrome-devtools-mcp 가 **자체 Chrome(CDP)** 으로 "파일추가"/`_input_node` 에 직접 `upload_file`. **MCP 서버 1개**(+ 시스템 Chrome; 격리 프로필이라 **`e.kist.re.kr` SSO 1회 로그인** 필요, 이후 유지). 미등록이면 입력까지만 자동·**첨부는 사용자 수동**. 절차·workspace root 제약·iframe adoptNode → [`nexacro_file_upload.md`](nexacro_file_upload.md) §4-6 + kk-pay `references/tax_invoice_payment.md` §9-1-A.
+### 1. 어느 창에서 일하나 — 브라우저 도구 확인
+kiki 는 Chrome 창 두 종류를 쓴다. **skill 마다 쓰는 창이 정해져 있고, 사용자에게 어느 창에 로그인해야 하는지 먼저 알려준다.**
 
-2. **대상 시스템 로그인 세션 확인** *(skill 별 대상이 다름 — 아래 표)*
-   - 로그인 페이지가 뜨면(세션 만료) *"{시스템}에 로그인해 주세요"* 안내 후 중단. **Claude 가 대신 로그인하지 않는다.**
-   - **⚠️ 포탈 주소 변경 (2026-07-07)**: KIST 포탈/로그인 관문이 **`e.kist.re.kr`** 로 변경됐다(구 `p.kist.re.kr`·`ekist.re.kr`). **근거·브라우저 설정** = wiki 데이터정보팀 「1-7 HTTPS 적용에 따른 브라우저 설정 안내」(2026-06-26): ① 공식 URL `https://e.kist.re.kr` 로 북마크 재설정 ② Chrome **팝업 차단 설정에 `https://p.kist.re.kr` 을 "팝업 전송 및 리디렉션 허용"에 추가** — NEXACRO 별도창 팝업(fam_0702·mcs_0003 등)이 이 설정 없으면 안 열린다; **chrome-devtools-mcp 의 자체 Chrome 프로필도 같은 허용 필요**(팝업이 안 뜨면 이것부터 의심) ③ HTTPS 접속이 안 되면 캐시·쿠키 삭제 후 브라우저 재시작. 단 **통합정보시스템 NEXACRO 업무화면(검수·지급·회의비·예산)은 여전히 `p.kist.re.kr:8081/nxui/kistis/…` 그대로** (`e.kist.re.kr/nxui/…` 는 404). → **로그인/포탈 = `e.kist.re.kr`, 업무화면 = `p.kist.re.kr:8081`**.
-   - **⚠️ 업무화면 전 포탈 로그인부터 확인 (2026-07-07 실전, 표준 절차)**: **작업 시작 시(특히 새 세션·오래 미사용) 통합정보 업무화면(`indexQ.jsp` 등)으로 바로 navigate 하지 말 것** — 세션 만료면 `Your session has expired` alert 가 **반복**해서 뜨고(handle_dialog 로 닫아도 페이지가 또 띄움) 진행 불가. 먼저 **`e.kist.re.kr` 포탈 메인**으로 가 로그인 상태 확인(로그인돼 있으면 eKIST 메인에 본인 이름) → 그 뒤 업무화면 navigate. SSO 쿠키가 살아 있으면 `e.kist.re.kr → nsso → login.do → eKIST 메인` 이 **자동 로그인**(재입력 불필요)되는 경우도 많다.
+| skill / 작업 | 창 | 도구 | 로그인 |
+|--------------|----|------|--------|
+| kk-mail | **평소 쓰는 Chrome** | Claude in Chrome 확장 (`javascript_tool` 등) | Dooray `kist.gov-dooray.com` 로그인 상태면 끝 |
+| kk-budget | 평소 쓰는 Chrome | Claude in Chrome 확장 | 포탈 `e.kist.re.kr` 로그인 상태면 끝 |
+| kk-pay — 카드결제건 RPA 업로드 | 평소 쓰는 Chrome + `token.txt` | Claude in Chrome 확장 + `dooray_drive.py` | 포탈 + Dooray(업로드 확인 페이지). **새 창 없음** |
+| kk-pay — 세금계산서 직접작성 | **Claude 전용 새 Chrome 창** | chrome-devtools-mcp (`evaluate_script`·`upload_file` …) | 그 창에서 포탈 로그인 **한 번 더** |
+| kk-dining | **Claude 전용 새 Chrome 창** (첨부 때문) | chrome-devtools-mcp | 그 창에서 포탈 로그인 한 번 더 |
+| kk-inspect | **Claude 전용 새 Chrome 창** | chrome-devtools-mcp | 그 창에서 포탈 로그인 한 번 더 |
 
-   | skill | 로그인/포탈 (2026-07 변경) | 업무화면 · 인증 |
-   |-------|------------|----------|
-   | kk-mail | `kist.gov-dooray.com` (Dooray) | Dooray · 브라우저 세션 쿠키 |
-   | kk-pay | **`e.kist.re.kr`** 포탈 로그인 + Dooray 드라이브 | `p.kist.re.kr:8081` 통합정보 · SSO 세션 + Dooray 토큰 |
-   | kk-dining | **`e.kist.re.kr`** 포탈 로그인 | `p.kist.re.kr:8081` 통합정보 · SSO 세션 |
-   | kk-budget | **`e.kist.re.kr`** 포탈 로그인 | `p.kist.re.kr:8081` 통합정보 · SSO 세션 (조회 전용) |
-   | kk-inspect | **`e.kist.re.kr`** 포탈 로그인 | `p.kist.re.kr:8081` 통합정보 · SSO 세션 |
+- **"Claude in Chrome" 확장** — `list_connected_browsers` 로 연결 확인. 안 되면: *"이 skill 은 Chrome 의 'Claude in Chrome' 확장으로 동작합니다. 확장 설치(https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn)·연결(Desktop: 설정 → Claude in Chrome ON / Code: `claude --chrome`) 후 다시 해주세요."* 후 중단. 연결됐으면 `select_browser` / `tabs_context_mcp` 로 작업 탭 확보.
+- **chrome-devtools-mcp** *(kk-inspect · kk-dining · kk-pay 세금계산서 직접작성 필수)* — 도구 목록에 `upload_file`·`evaluate_script`·`select_page` 가 없으면 미등록: *"파일첨부 자동화에는 chrome-devtools-mcp 등록이 필요합니다: `claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest` (Node.js 필요) 후 Claude 재시작."* 미등록이면 입력까지만 자동·**첨부는 사용자 수동**으로 진행 여부를 묻는다.
+- ⭐ **첨부가 있는 작업은 *처음부터* chrome-devtools 창에서 시작한다** (2026-07-07 실측 교훈): Claude in Chrome 으로 작성·저장까지 해놓고 첨부 단계에서 갈아타면 **로그인·작성을 처음부터 다시** 하게 된다(Claude in Chrome `file_upload` 는 채팅에 첨부한 파일만 올릴 수 있어 로컬 증빙 첨부 불가). 첨부 없는 단순 조회만 Claude in Chrome 무방. chrome-devtools 는 자체 Chrome(별도 프로필)을 띄우며 도구 매핑·workspace root 제약은 [`nexacro_file_upload.md`](nexacro_file_upload.md) §4-6.
+- **새 창 안내 문구(첨부 작업 시작 전 반드시)**: *"파일첨부를 위해 Claude 전용 Chrome 창을 하나 띄웁니다. 평소 Chrome 과 로그인이 공유되지 않아 그 창에서 포탈(e.kist.re.kr)에 한 번 더 로그인해 주세요. 한 번 하면 그 창은 기억합니다(정오 리셋 제외)."*
+- **도구 이름 표기 규칙 (2026-09 기준)**: kiki 문서는 도구를 **짧은 이름**(`javascript_tool`·`tabs_context_mcp`·`file_upload` / chrome-devtools 의 `evaluate_script`·`upload_file`·`select_page`·`handle_dialog` …)으로 적는다. 실제 전체 이름은 `mcp__<서버명>__<도구명>` 이고 **서버명은 앱 버전·설치 방식에 따라 바뀐다** — Claude in Chrome: `mcp__Claude_in_Chrome__…`(2026-06) → `mcp__claude-in-chrome__…`(2026-09 현재) / chrome-devtools-mcp: `claude mcp add chrome-devtools …` 로 등록하면 `mcp__chrome-devtools__…`, plugin 설치면 `mcp__plugin_chrome-devtools-mcp_chrome-devtools__…` / Codex 는 `mcp__chrome_devtools.<도구명>`. **서버명이 달라도 도구명이 같으면 같은 도구**다. 세션 시작 시 도구 목록(ToolSearch `select:` 또는 deferred 목록)으로 실제 이름을 확인해 호출하고, deferred 상태면 ToolSearch 로 먼저 로드한다. 안 되면 모델 탓보다 **도구명·MCP 버전**을 먼저 의심.
 
-3. **Dooray 토큰** *(업로드 쓰는 skill 만 — kk-pay, kk-dining 옵션)*
-   - `~/.claude/kiki/kiki.env` 의 `DOORAY_TOKEN` 확인. 없으면 빈 템플릿 자동 생성 + 발급 안내(`personal_config.md`). 조회 전용(kk-budget·kk-inspect)·세션쿠키(kk-mail)는 생략.
+### 2. 로그인 세션 확인 (사용자 본인이 로그인 — Claude 가 대신 하지 않는다)
+- **KIST 사내망**에서만 동작. 밖(재택·출장)이면 *"KIST VPN 에 접속한 뒤 다시 해주세요"*.
+- 로그인 페이지가 뜨면(세션 만료) *"{어느 창}에서 {시스템}에 로그인해 주세요"* 안내 후 중단.
+- **포탈 주소 (2026-07 변경)**: 로그인/포탈 = **`https://e.kist.re.kr`**(구 `ekist.re.kr`), 통합정보 NEXACRO 업무화면(검수·지급·회의비·예산)은 여전히 **`http://p.kist.re.kr:8081/nxui/kistis/…`** (`e.kist.re.kr/nxui/…` 는 404).
+- **⚠️ 업무화면 전 포탈 로그인부터 확인 (표준 절차)**: 작업 시작 시(특히 새 세션·새 창·오래 미사용·**정오 이후**) 업무화면(`indexQ.jsp` 등)으로 바로 navigate 하지 말 것 — 세션 만료면 `Your session has expired` alert 가 **반복**되고 진행 불가. 먼저 `e.kist.re.kr` 포탈 메인으로 가 로그인 상태 확인(로그인돼 있으면 eKIST 메인에 본인 이름) → 그 뒤 업무화면 navigate. SSO 쿠키가 살아 있으면 `e.kist.re.kr → nsso → login.do → eKIST 메인` 이 **자동 로그인**되는 경우도 많다.
+- **KIST 포탈은 매일 정오(12:00) 전체 세션 리셋** — 오전에 시작한 작업은 정오 전에 저장까지 끝내고, 오후엔 재로그인 후 재오픈.
 
-4. **Python 패키지** *(쓰는 skill 만)*
-   - kk-budget·kk-dining: `openpyxl` (엑셀)
-   - kk-pay: `Pillow pywin32` (이미지/문서 변환)
-   - kk-inspect: `Pillow` (+ pdf→jpg 필요 시 `PyMuPDF`)
-   - kk-dining (저장모드 `xlsx_and_hwp` 일 때만): 아래아한글 + `pyhwpx pywin32 pywinauto`
-   - 미설치면 *"`pip install <pkg>` 가 필요합니다"* 안내(크래시 X).
+### 3. 토큰 (`token.txt`) *(kk-pay 카드 RPA 업로드 · kk-dining RPA 업로드 옵션만)*
+- 위치: **`<kiki_root>/token.txt`**(설치 스크립트가 생성, 예 `C:\kiki\token.txt`). `kiki_root` 는 `~/.claude/kiki/kiki.config.json` 에 기록돼 있다. (구형 `~/.claude/kiki/kiki.env` 도 계속 읽힌다.)
+- 토큰이 비어 있으면 **절대경로를 보여주며** 안내: *"https://kist.gov-dooray.com/setting/api/token 에서 개인 인증 토큰을 만들어 `C:\kiki\token.txt` 의 `Dooray token:` 다음 줄에 붙여넣고 저장한 뒤 '토큰 넣었어' 라고 알려주세요. ⚠️ 채팅창에 토큰을 붙여넣지 마세요(대화 기록 노출)."* 원하면 파일을 열어준다(`notepad`/`open -e`).
+- 사용자가 넣었다고 하면 파일을 읽어 **값은 출력하지 않고** 형식(공백 없음·길이)만 확인. 채팅에 값이 붙여넣어졌으면 즉시 파일로 옮기고 노출 위험을 알린다. 상세 `personal_config.md`.
+- 조회 전용(kk-budget·kk-inspect)·세션쿠키(kk-mail)·세금계산서 직접작성은 토큰 불요.
+
+### 4. Python 패키지 — **필요한 시점에, 그때그때** (부트스트랩에서 일괄 설치 X)
+`python -c "import X"` 로 확인 → 없으면 *"`pip install X` 가 필요합니다(용도). 설치할까요?"* → confirm 후 설치. 크래시 X.
+
+| skill | 패키지 | 필요한 시점 |
+|-------|--------|------------|
+| kk-budget | `openpyxl` | 엑셀 리포트 저장 직전 |
+| kk-dining | `openpyxl` / (hwp 회의록 옵션, Windows) `pyhwpx pywin32 pywinauto` | 회의록 엑셀 작성 직전 / hwp 옵션 선택 시 |
+| kk-pay | `Pillow`(이미지→jpg) · `requests`(Dooray 업로드) · Windows 문서 변환 시 `pywin32` | 증빙 변환 직전 / 업로드 직전 |
+| kk-inspect | `Pillow` (+ pdf→jpg 시 `PyMuPDF`) | 증빙 변환 직전 |
+| kk-mail | — | — |
+
+### 5. 아래아한글 · MS Office — 있으면 자동, 없으면 **물어본다**
+- 필요한 경우만: kk-pay 증빙이 hwp/docx/xlsx 라 pdf 변환이 필요할 때, kk-dining 에서 회의록을 **hwp 로도** 저장하기로 한 때. 대부분의 KIST PC 엔 둘 다 있다 — `python convert.py --check`(kk-pay) 로 유무 확인.
+- **없을 때** 단정하지 말고 묻는다: docx/xlsx → *"MS Office 가 없어 무료 LibreOffice(https://www.libreoffice.org/download/)를 설치하면 자동 변환됩니다. 설치할까요?"* / hwp → *"아래아한글이 없습니다. 무료 오픈소스 한글 편집기 HOP(Open HWP, Windows/macOS/Linux, https://github.com/golbin/hop)을 설치하면 hwp 를 열어 편집하고 PDF 로 내보낼 수 있습니다(자동 변환은 안 됨 — 내보낸 PDF 를 주시면 됩니다). 설치할까요?"* (Windows `.msi` / macOS `brew install hop` / Linux `.deb`·`.rpm`·`.AppImage`; rhwp 엔진 기반, MIT) 설치는 사용자 confirm 후. 거절하면 "직접 pdf 로 저장해 주세요" 로 진행.
+- kk-dining **hwp 회의록 자동생성은 Windows + 아래아한글 전용**(엑셀 회의록은 모든 OS). 한글이 없는데 hwp 를 원하면 그 사실을 알리고 엑셀 회의록으로 진행(+ HOP 안내 — HOP 은 CLI/API 가 없어 자동 생성엔 못 쓴다; 한글 없는 환경용 hwpx 직접 생성기는 미구현·후속 과제).
 
 ## 안내 문구 표준
 - 멈춰야 할 때: 무엇이/왜 안 됐는지 + 사용자가 할 일 한 문장으로. (조용히 실패 금지)
 - KIST 사내망/계정 권한이 필요한 접속은 그 사실을 함께 안내.
+
+## 막혔을 때 (처음부터 안내하지 말고, 증상이 나올 때만)
+- **포탈 팝업 창(검수창·지급신청 별도창·회의록 팝업)이 안 뜸** → Chrome 팝업 차단. 설정 → 개인정보 보호 및 보안 → 사이트 설정 → 팝업 및 리디렉션 → "팝업 전송 및 리디렉션 허용" 에 `https://p.kist.re.kr` 추가. **Claude 전용 새 창(chrome-devtools 프로필)도 별도 설정** 필요(팝업이 안 뜨면 이것부터 의심). 근거: wiki 데이터정보팀 「1-7 HTTPS 적용에 따른 브라우저 설정 안내」(2026-06-26). 평소 포탈을 쓰던 PC 는 대개 이미 돼 있다.
+- **`upload_file` 이 "not within any configured workspace roots"** → chrome-devtools 는 Claude 를 연 폴더(cwd) 하위 파일만 올린다 → 증빙을 `<kiki_root>/_tmp/` 로 복사해 그 경로로 올린다(`nexacro_file_upload.md` §4-6).
+- **HTTPS 접속이 안 됨** → 캐시·쿠키 삭제 후 브라우저 재시작(위 wiki 안내 ③).
+- **엑셀 저장 `PermissionError`** → 파일이 열려 있음. 닫아달라 안내 후 재시도.

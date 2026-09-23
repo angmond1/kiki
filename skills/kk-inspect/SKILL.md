@@ -16,7 +16,7 @@ KIST 통합정보시스템의 **소액검수신청 (검수신청관리, `mcs_000
 - 형제 공통 규약 `../_shared/security_policy.md` 준수 — credential·개인식별자 skill 텍스트 금지, 모든 쓰기 confirm 후, config·token 은 `~/.claude/kiki/`(repo 밖)+gitignore.
 
 ## 환경 전제
-- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — Chrome + Claude in Chrome(MCP) 연결 + **파일첨부엔 `chrome-devtools-mcp`(MCP) 필수**(별도 window 팝업 mcs_0003 은 이걸로만 첨부 — 미등록 시 입력까지만·첨부는 사용자 수동, `../_shared/nexacro_file_upload.md` §4-6) + **통합정보 SSO 로그인**(포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`, 본인 로그인·Claude 자동로그인 금지 · 2026-07 포탈주소 변경) + python `Pillow`(+ pdf→jpg 시 `PyMuPDF`). **조회·입력·첨부는 자동(codex 해법, `../_shared/nexacro_file_upload.md`), 최종 신청은 사용자 confirm.**
+- **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — **Claude 전용 새 Chrome 창**(chrome-devtools-mcp 한 채널로 입력·첨부·신청 전부; 별도 window 팝업 mcs_0003 은 이걸로만 첨부 — 미등록 시 입력까지만·첨부는 사용자 수동, `../_shared/nexacro_file_upload.md` §4-6) + **그 창에서 통합정보 SSO 로그인 한 번 더**(포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`; 평소 Chrome 의 로그인은 넘어오지 않는다고 미리 안내, 본인 로그인·Claude 자동로그인 금지) + KIST 사내망(밖이면 VPN). python `Pillow`(+ pdf→jpg 시 `PyMuPDF`)는 **증빙 변환 직전에** 확인·설치. 토큰 불요. **조회·입력·첨부는 자동, 최종 신청은 사용자 confirm.**
 - 공통 개인정보(이름·사번·연락처·위치·담당 행정원·참여과제)는 `~/.claude/kiki/kiki.config.json` 에서 읽는다 → `../_shared/personal_config.md`.
 
 ---
@@ -31,7 +31,7 @@ KIST 통합정보시스템의 **소액검수신청 (검수신청관리, `mcs_000
 - `payment_admin.name`: 지급신청 담당 연구행정원(검수창 자동검색용)
 - `projects`: **(자동)** 통합정보 프로젝트(연구관리) 화면에서 참여 과제(번호+명) 수집. "과제 갱신" 시 재수집.
 
-kk-inspect 고유(`kk-inspect.config.json`): **검수 파일 폴더**(기본 `C:\kiki\inspect`).
+kk-inspect 고유(`kk-inspect.config.json`): **검수 파일 폴더**(기본 `{kiki_root}\inspect`, 예 `C:\kiki\inspect` / macOS·Linux `~/kiki/inspect`).
 
 검수신청자 본인 정보는 검수창에 NEXACRO 가 로그인 사용자로 자동 채우기도 하지만, kiki.config 값으로 대조·보정한다.
 
@@ -39,7 +39,7 @@ kk-inspect 고유(`kk-inspect.config.json`): **검수 파일 폴더**(기본 `C:
 
 ## 2단계 — 검수 작업 (사용자가 "검수신청하자" 등으로 요청 시)
 
-증빙이 모인 폴더(기본 `C:\kiki\inspect`)를 기준으로 아래 흐름을 따른다. 결제건이 여러 개면 **하나씩 순차** 처리한다.
+증빙이 모인 폴더(기본 `{kiki_root}\inspect`)를 기준으로 아래 흐름을 따른다. 결제건이 여러 개면 **하나씩 순차** 처리한다.
 
 ### 2-1. 증빙 파악
 폴더의 PDF(세금계산서·거래명세서·카드영수증)를 읽어 **품목·규격·수량·단가·합계·거래일·거래처**를 추출한다. 품명/수량/단위 규칙은 `references/evidence_rules.md`.
@@ -69,7 +69,7 @@ kk-inspect 고유(`kk-inspect.config.json`): **검수 파일 폴더**(기본 `C:
 결제건이 더 있으면 2-1로 돌아가 순차 처리한다. 검수창 팝업은 한 건 저장 시 닫히므로 다음 건은 팝업 열기부터 다시 한다.
 
 ### 2-9. 폴더 정리
-모든 건 완료 후, 폴더의 파일들을 **`C:\kiki\inspect\{yymmdd}`** 로 옮길지 물어본다. 승인하면 **폴더구조·파일명을 그대로 유지**한 채 이동한다. (yymmdd는 처리일.)
+모든 건 완료 후, 폴더의 파일들을 **`{kiki_root}\inspect\{yymmdd}`** 로 옮길지 물어본다. 승인하면 **폴더구조·파일명을 그대로 유지**한 채 이동한다. (yymmdd는 처리일.)
 
 ---
 

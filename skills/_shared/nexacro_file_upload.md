@@ -186,7 +186,8 @@ if (!document.body.contains(input)) document.body.appendChild(input);
 
 ### 5-2. 그 input 에 파일 직접 주입
 - Playwright: `await page.locator("#kk_file_input").setInputFiles("D:\\…\\file.jpg");`
-- chrome MCP `upload_file` 도 그 input 타깃으로 직접 호출.
+- chrome-devtools-mcp: `take_snapshot` 으로 노출한 `#kk_file_input` 의 uid 확보 → `upload_file({uid, filePath})` 파일별 반복(로컬 경로 OK — 단 cwd 하위, §4-6).
+- Claude in Chrome `file_upload(ref, paths)` 는 **채팅에 첨부한(세션 공유) 파일만** 올라간다 → 로컬 증빙은 chrome-devtools 로. 그래서 첨부 있는 작업은 처음부터 chrome-devtools 창에서(environment_setup 0단계 1).
 ※ 이 단계는 **클라이언트 선택**만 반영(서버 업로드 X). 서버 저장은 §5-3 으로.
 
 ### 5-3. 서버 저장 (`gfn_upload`)
@@ -271,8 +272,8 @@ s.textContent = `[id*="_form_modalPopDiv"], [id*="modalPopDivScrollableInnerCont
 | 화면 | skill | 패턴 | 컴포넌트 | 비고 | 상태 |
 |---|---|---|---|---|---|
 | fam_0702 | kk-pay | **A** | `importFileUpload` | C 미시도 (재시도시 C 먼저) | ✅ codex 실증 2026-06-07 |
-| fam_0704_02 | kk-dining | (A 또는 C) | §2 로 확인 | 부모탭 화면 | 🔵 미실증 |
-| **pop_fam_0703_02** | kk-dining | **C** | `fileDiv1`(서명록)/`fileDiv2`(증빙)/`fileDiv3`(사전결재) | RQST_NO=`CONFERENCENO + "-" + ds_param.CARDUSEMGRNO`, FLE_TP=`"02"`(증빙) | ✅ codex 실증 2026-06-07 |
+| fam_0704_02 | kk-dining | (A 또는 C) | §2 로 확인 | 부모탭 화면 — 실행 창은 chrome-devtools(첨부가 있으니 처음부터) | 🔵 미실증 |
+| **pop_fam_0703_02** | kk-dining | **C** | `fileDiv1`(서명록)/`fileDiv2`(증빙)/`fileDiv3`(사전결재) | RQST_NO=`CONFERENCENO + "-" + ds_param.CARDUSEMGRNO`, FLE_TP=`"02"`(증빙). 로컬 증빙은 **chrome-devtools `upload_file`**(노출한 `#kk_file_input` uid)로 — Claude in Chrome `file_upload` 는 채팅에 첨부한 파일만 | ✅ codex 실증 2026-06-07 |
 | mcs_0003_pop2 | kk-inspect | **B** | `fileDiv1` | 별도 chrome page (`window.open`) — **chrome-devtools-mcp 단일채널(§4-6) 권장**, `upload_file` 은 cwd workspace root 안 파일만(밖이면 복사) | ✅ codex 2026-06-07 / Claude(chrome-devtools) 2026-06-19 |
 
 새 화면에 적용할 때는 §1-1 (C 우선) → 안되면 §1-2 (A/B 판별) → §2 (컴포넌트명) 순으로 확인 후 이 표 갱신.

@@ -7,7 +7,7 @@
 - 링크: `https://kist.gov-dooray.com/wiki/3538560283559420253/3538560286709555986`
 
 ## 검색법
-- **공식 API** (개인 토큰): `~/.claude/kiki/kiki.env` 의 토큰으로
+- **공식 API** (개인 토큰): `<kiki_root>/token.txt`(구형 `kiki.env`) 의 토큰으로
   - 트리: `GET https://api.gov-dooray.com/wiki/v1/wikis/3538560283559420253/pages?parentPageId={pid}`
   - 본문: `GET .../pages/{pageId}` (mimeType text/x-markdown)
   - 첨부: `.../pages/{pid}/files/{fid}?media=raw` → 307 → file-api manual GET (Authorization 만)

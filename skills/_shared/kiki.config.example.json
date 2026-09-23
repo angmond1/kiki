@@ -1,5 +1,8 @@
 {
-  "_note": "kiki 공통 개인설정 — 모든 kk-* skill 이 공유한다. 이 파일을 ~/.claude/kiki/kiki.config.json 으로 복사해 본인 값을 채우세요(repo 밖, git 업로드 금지). 토큰은 여기 두지 말고 ~/.claude/kiki/kiki.env 에. skill 고유 설정은 각 ~/.claude/kiki/kk-<skill>.config.json.",
+  "_note": "kiki 공통 개인설정 — 모든 kk-* skill 이 공유한다. 이 파일을 ~/.claude/kiki/kiki.config.json 으로 복사해 본인 값을 채우세요(repo 밖, git 업로드 금지). 토큰은 여기 두지 말고 <kiki_root>/token.txt 에(Dooray token: 다음 줄). skill 고유 설정은 각 ~/.claude/kiki/kk-<skill>.config.json.",
+
+  "kiki_root": "",
+  "_kiki_root": "kiki 작업 폴더 — 설치 때 선택(기본 Windows C:\\kiki / macOS·Linux ~/kiki). 하위 budget/ dining/ inspect/ _tmp/ 와 token.txt(Dooray 토큰) 가 여기. 설치 스크립트가 기록. 다른 config 의 {kiki_root} 는 이 값.",
 
   "user": {
     "name": "",

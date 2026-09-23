@@ -1,6 +1,6 @@
 {
   "_note": "kk-pay 고유 설정만. 실제 config 는 ~/.claude/kiki/kk-pay.config.json (repo 밖).",
-  "_common": "이름·사번·카드책임자·담당 행정원(폴더 링크)·참여과제는 공통 ~/.claude/kiki/kiki.config.json 에서 읽는다(card_holder, payment_admin, projects). 토큰은 ~/.claude/kiki/kiki.env. 상세 ../_shared/personal_config.md.",
+  "_common": "이름·사번·카드책임자·담당 행정원(폴더 링크)·참여과제는 공통 ~/.claude/kiki/kiki.config.json 에서 읽는다(card_holder, payment_admin, projects). 토큰은 <kiki_root>/token.txt. 상세 ../_shared/personal_config.md.",
 
   "uploadScope": { "card": true, "taxInvoice": false, "meeting": false },
   "_uploadScope": "RPA 처리 범위. 카드는 보통 true. 세금계산서/회의비는 부서별로.",

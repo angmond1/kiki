@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""증빙 파일 개명 + 원본 휴지통 이동 (복구 가능, 영구삭제 X).
+"""증빙 파일 개명 + 원본 휴지통 이동 (복구 가능, 영구삭제 X). Windows / macOS / Linux.
 
 사용:
   python rename_evidence.py <원본경로> "<새파일명(확장자포함)>"   # 새 이름으로 복사
@@ -11,12 +11,36 @@
 """
 import sys, os, shutil, subprocess
 
+IS_WIN = sys.platform.startswith("win")
+IS_MAC = sys.platform == "darwin"
+
+
 def to_recycle(path):
-    """Windows 휴지통으로 이동 (복구 가능)."""
-    ps = ("Add-Type -AssemblyName Microsoft.VisualBasic;"
-          "[Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile("
-          f"'{path}','OnlyErrorDialogs','SendToRecycleBin')")
-    subprocess.run(['powershell', '-NoProfile', '-Command', ps], check=False)
+    """OS 휴지통으로 이동 (복구 가능). 어느 방법도 안 되면 같은 폴더의 _trash/ 로 이동."""
+    try:
+        if IS_WIN:
+            ps = ("Add-Type -AssemblyName Microsoft.VisualBasic;"
+                  "[Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile("
+                  f"'{path}','OnlyErrorDialogs','SendToRecycleBin')")
+            r = subprocess.run(['powershell', '-NoProfile', '-Command', ps], check=False, capture_output=True)
+            if r.returncode == 0 and not os.path.exists(path):
+                return
+        elif IS_MAC:
+            r = subprocess.run(['osascript', '-e',
+                                f'tell application "Finder" to delete POSIX file "{os.path.abspath(path)}"'],
+                               check=False, capture_output=True)
+            if r.returncode == 0 and not os.path.exists(path):
+                return
+        elif shutil.which('gio'):
+            r = subprocess.run(['gio', 'trash', path], check=False, capture_output=True)
+            if r.returncode == 0 and not os.path.exists(path):
+                return
+    except Exception:
+        pass
+    trash = os.path.join(os.path.dirname(os.path.abspath(path)), '_trash')
+    os.makedirs(trash, exist_ok=True)
+    shutil.move(path, os.path.join(trash, os.path.basename(path)))
+
 
 def main():
     if '--trash' in sys.argv:
@@ -31,6 +55,7 @@ def main():
     dst = os.path.join(os.path.dirname(src), newname)
     shutil.copy2(src, dst)
     print('개명 저장:', os.path.basename(dst))
+
 
 if __name__ == '__main__':
     main()

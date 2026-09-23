@@ -56,6 +56,7 @@ function parseRows(xml){var out=[],R=/<Row[^>]*>([\s\S]*?)<\/Row>/g,m;
 - 브라우저 자동화 **출력에 쿠키·세션값 섞이면 `[BLOCKED: Cookie/query string data]`** 로 차단 → 출력에서 `_ga`/`_fwb`/`WMONID`/`authTk` 등 제거하고 핵심 필드만 반환.
 - 일부 backend 는 화면 호출 순서/세션 상태에 의존해 **직접 fetch 가 빈 응답**(kk-pay `chkPopup` 사례, 화면 Enter 로는 동작) → 그땐 좌표 fallback 또는 config 우회.
 - **DOM 팝업 연쇄(자동화 브라우저)는 불안정** — fetch 안 되는 화면(예 예실대비표 → 집행내역 개인집계)을 DOM 팝업으로 우회할 때 3가지 함정: ① `(async()=>{})()` 결과가 `{}` 로 옴 → **전역 저장 후 동기 read**, ② 백그라운드 탭 **throttle** 로 느림 + *부분누락으로 틀린 값* → **Chrome foreground** 안내, ③ 팝업 **재오픈 시 빈 grid** → navigate 리셋 + **로딩 polling**(행>0 대기). 상세 kk-budget `budget_fetch_spec.md` §개인집계 DOM 안정화.
+- ⭐ **그리드 셀클릭 팝업은 좌표 말고 핸들러 직접 호출**(2026-09-18 확립) — `application.mainframe.all[0].form` 으로 화면 폼을 잡고, 그리드(`getBindCellIndex('body',<금액컬럼>)>=0`)를 재귀 탐색해 `ds.set_rowposition(행)` **후** `form.<Grid>_oncellclick(grid,{row,cell,...})` 호출하면 해상도·행위치 무관(핸들러가 인자 row 가 아니라 *현재 행*을 보므로 rowposition 필수). 🔴 닫기는 **팝업 폼 `btn_close.click()`** 만 — `form.close()`/`destroy` 로 닫으면 `modalPopDiv_*` Div 가 남아 이후 모든 클릭이 `already exists` 로 **조용히 실패**(복구는 navigate 리셋).
 
 ## 좌표 fallback (fetch 가 안 될 때 — "어떻게든 성공")
 fetch 실패해도 포기 말고 화면 캡처+좌표로 2차 시도:

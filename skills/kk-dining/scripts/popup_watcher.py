@@ -7,6 +7,9 @@ kk-dining 코어 (3) — 한글 보안 팝업 자동 처리 watcher (독립 프�
 - 별도 프로세스 필수: 같은 프로세스 스레드는 한글 COM 블록 중 GIL 로 안 돎.
 - make_dininglog.make_batch(..., watcher_path=이 파일) 로 subprocess 동반.
 """
+import sys
+if not sys.platform.startswith("win"):
+    raise SystemExit("popup_watcher 는 Windows + 아래아한글 전용입니다.")
 import win32gui, win32con, win32api, time, datetime, tempfile, os
 
 LOG = os.path.join(tempfile.gettempdir(), 'ki_dining_watcher.log')

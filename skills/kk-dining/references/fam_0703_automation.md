@@ -72,7 +72,7 @@ goRow(i); F.btn_Conference_onclick.call(F,null,{});     // → window.applicatio
 ```
 - 입력·저장은 fam_0704_automation §9 와 동일: `ds_SAVE` 컬럼 + components `set_value`, `rd_UseType` '3', 내부 `ds_datagrid1` KORNM/PAYNO/DEPTNM, 외부 `ds_datagrid2` OUTNAME/OUTCOMPANY/**PROJJOINYN 'N'**(8/1 이후 필수), `C.joinPeople=총원`, `C.doSave()`. 최소참석인원 ≥ ⌈금액÷50,000⌉.
 - 저장 판정 = `C.ds_SAVE.CONFERENCENO` 발급 여부(메시지 "저장되었습니다." 는 4초 이상 늦게 옴). **CONFERENCENO 는 지급신청서당 1개**(두 행 공유) — 카드별 구분·첨부 키는 `CONFERENCENO-CARDUSEMGRNO`.
-- 첨부(패턴 C, `../_shared/nexacro_file_upload.md`): `C.fileDiv2.extUp._input_node` 에 id 부여·노출 → `find` → `file_upload(ref, 파일들)`(다중 가능) → `C.fileDiv2.ds_files` 행수·tmHeader `I` 확인 → `C.fileDiv2.gfn_upload('','fn_endFileCallBack1','ds_file','RQST_NO='+C.CONFERENCENO+'-'+C.ds_param.getColumn(0,'CARDUSEMGRNO'),'02')` → 6초 → 전부 `S/02` 확인 → input 숨김(id 제거) → `C.bt_close_onclick.call(C,C.bt_close,{})`.
+- 첨부(패턴 C, `../_shared/nexacro_file_upload.md`): `C.fileDiv2.extUp._input_node` 에 id 부여·노출 → chrome-devtools `take_snapshot` 으로 그 input uid → `upload_file` 파일별(로컬 증빙; 채팅에 첨부한 파일이면 Claude in Chrome `find`→`file_upload(ref, 파일들)` 다중도 가능) → `C.fileDiv2.ds_files` 행수·tmHeader `I` 확인 → `C.fileDiv2.gfn_upload('','fn_endFileCallBack1','ds_file','RQST_NO='+C.CONFERENCENO+'-'+C.ds_param.getColumn(0,'CARDUSEMGRNO'),'02')` → 6초 → 전부 `S/02` 확인 → input 숨김(id 제거) → `C.bt_close_onclick.call(C,C.bt_close,{})`.
 - 해외 건 첨부 = 영수증 jpg(전표+영수증)·**연구비카드매입.pdf**(카드사용내역서, 환율 증빙)·수입의뢰서(식비 반납 건별)·해외출장신청서 → **전부 fileDiv2(02 증빙)**.
 - 다음 행으로 가기 전 회의록이 닫혔는지(`popupframes.pop_fam_0703_02` 없음) 확인. 회의록을 다시 열어 각 행의 회의록이 독립 보존됐는지 재검증 가능(2026-09-08 확인).
 
