@@ -26,8 +26,8 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
 ### Step 1 — kiki 폴더 위치 정하기 + 패키지 확보
 1. **먼저 묻는다**(AskUserQuestion 등 선택 프롬프트): *"kiki 를 어디에 둘까요? ① 기본 `C:\kiki`(권장, macOS/Linux `~/kiki`) ② 직접 지정"*. 이 폴더가 **skill 원본 + 엑셀·회의록·검수 파일 + `token.txt`** 의 집(`kiki_root`)이 된다.
 2. 패키지를 그 폴더에 확보한다(이미 받아둔 폴더가 있으면 그 폴더를 root 로 쓰거나 위 폴더로 옮긴다):
-   - **git 있으면** `git clone https://github.com/angmond1/kiki.git <root>` (권한 오류면 조용히 실패하지 말고: `gh auth login` 또는 collaborator 초대 여부(메인테이너 `dnklee@kist.re.kr`) 확인 요청, 또는 아래 ZIP 로).
-   - **git 없으면** 사용자에게 안내: 브라우저에서 GitHub 페이지(로그인·collaborator 필요) `Code ▾ → Download ZIP` → `<root>` 에 풀기 → 완료를 알려달라. (`kiki-main` 하위 폴더가 생겨도 그 안에서 진행하면 된다.)
+   - **git 있으면** `git clone https://github.com/angmond1/kk.git <root>` (권한 오류면 조용히 실패하지 말고: `gh auth login` 또는 collaborator 초대 여부(메인테이너 `dnklee@kist.re.kr`) 확인 요청, 또는 아래 ZIP 로).
+   - **git 없으면** 사용자에게 안내: 브라우저에서 GitHub 페이지(로그인·collaborator 필요) `Code ▾ → Download ZIP` → `<root>` 에 풀기 → 완료를 알려달라. (`kk-main` 하위 폴더가 생겨도 그 안에서 진행하면 된다.)
    - 동료에게 받은 폴더면 그대로.
 3. ⚠️ **이후 작업은 그 폴더 안에서**(Claude Code 는 그 폴더를 작업 루트로). 다른 폴더에서 계속하면 이 지침이 적용되지 않아 추측 설치가 된다. 작업 루트를 옮기는 법: Claude Code 는 그 폴더에서 `claude` 를 다시 실행(Desktop 은 그 폴더를 프로젝트로 열기). 못 옮기면 스크립트와 이 파일을 **절대경로**로 실행·Read 하며 계속한다.
 

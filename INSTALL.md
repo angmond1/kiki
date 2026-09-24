@@ -1,6 +1,6 @@
 # kiki 설치 가이드 (사람이 읽는 상세)
 
-> 빠른 길: claude/codex 대화창에 **"https://github.com/angmond1/kiki 설치해줘"** → 에이전트가 [CLAUDE.md](CLAUDE.md)(claude) / [CODEX.md](CODEX.md)(codex) 절차로 설치합니다. 아래는 사람이 직접 하거나 확인할 때의 상세입니다.
+> 빠른 길: claude/codex 대화창에 **"https://github.com/angmond1/kk 설치해줘"** → 에이전트가 [CLAUDE.md](CLAUDE.md)(claude) / [CODEX.md](CODEX.md)(codex) 절차로 설치합니다. 아래는 사람이 직접 하거나 확인할 때의 상세입니다.
 
 ## 0. 준비물 (각자 본인 PC에서 한 번)
 
@@ -61,9 +61,9 @@ KIST 내부망에서 실행. KIST 밖(재택·출장)이면 **KIST VPN 접속 �
 
 ## 1. 패키지 받기 — git 없어도 됨
 어디에 둘지 먼저 정한다. **기본 `C:\kiki`**(macOS/Linux `~/kiki`) 권장 — 이 폴더가 skill 원본 + 엑셀·회의록·검수 파일 + `token.txt` 의 집이 된다. 다른 경로도 가능.
-- **ZIP**: GitHub 페이지 `Code ▾ → Download ZIP` → 위 폴더에 풀기(하위 폴더 `kiki-main` 이 생기면 그 안 내용을 올려도 되고 그대로 써도 된다). private repo 라 GitHub 로그인 + collaborator 초대 필요(문의 dnklee@kist.re.kr).
+- **ZIP**: GitHub 페이지 `Code ▾ → Download ZIP` → 위 폴더에 풀기(하위 폴더 `kk-main` 이 생기면 그 안 내용을 올려도 되고 그대로 써도 된다). private repo 라 GitHub 로그인 + collaborator 초대 필요(문의 dnklee@kist.re.kr).
 - **동료에게 폴더로** 받아도 된다.
-- **git 이 있으면**: `git clone https://github.com/angmond1/kiki.git C:\kiki` (인증은 `gh auth login` 또는 Git Credential Manager).
+- **git 이 있으면**: `git clone https://github.com/angmond1/kk.git C:\kiki` (인증은 `gh auth login` 또는 Git Credential Manager).
 
 ## 2. skill 설치 — `~/.claude/skills/` 로
 

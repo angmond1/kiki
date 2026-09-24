@@ -4,7 +4,7 @@
 > 재사용 가능한 빌드 방법론·NEXACRO/dooray 패턴은 [DEVELOPMENT.md](DEVELOPMENT.md), skill 별 캡처 상세는 각 skill 의 `references/`.
 
 ## 배포
-- KIST 구성원용 행정 자동화 skill 패키지. GitHub `angmond1/kiki` **private** + collaborator 초대.
+- KIST 구성원용 행정 자동화 skill 패키지. GitHub `angmond1/kk` **private** + collaborator 초대.
 
 ## repo 구조
 ```
