@@ -110,7 +110,7 @@
     };
   }
 
-  // ---------- Tier 4: 찾기 — 페이징 목록 + 본문 (2026-09-24 실증) ----------
+  // ---------- 기능 1: 찾기 — 페이징 목록 + 본문 (2026-09-24 실증) ----------
   // 폴더의 메일을 최신순으로 페이지를 넘기며 수집. since(YYYY-MM-DD)/sinceDays 보다 오래된 메일이 나오면 중단.
   //   opt = { folder:'inbox'|'sent'|... (시스템 folderName) | folderId:'...', sinceDays?:90, since?:'YYYY-MM-DD', until?:'YYYY-MM-DD', maxPages?:6, size?:500 }
   // 반환 { total, fetched, pages, mails:[summarize + url] }. 실측: size 500 × 3페이지(1,500건) ≈ 2.5초. size 1000 도 허용.
@@ -182,7 +182,7 @@
     return out;
   }
 
-  // ---------- Tier 1: 스팸 신고 (휴지통 + 학습 + 발신자 차단) ----------
+  // ---------- 기능 4: 스팸 신고 (휴지통 + 학습 + 발신자 차단) ----------
   // idList: 메일 id 배열 (N건 일괄). 항상 호출측이 사용자 confirm 후 실행.
   async function reportSpam(idList, { applyBefore = true, addReject = true } = {}) {
     return dfetch('/v2/wapi/mails/report-spam-hacking', {
@@ -196,7 +196,7 @@
     });
   }
 
-  // ---------- Tier 2: 폴더 이동 (1회성, 과거 메일) ----------
+  // ---------- 기능 2: 폴더 이동 (1회성, 과거 메일) ----------
   async function moveMails(mailIdList, targetFolderId, targetFolderName) {
     return dfetch('/v2/wapi/mails/move', {
       method: 'POST',
@@ -204,7 +204,7 @@
     });
   }
 
-  // ---------- Tier 3: 자연어 자동분류 규칙 엔진 ----------
+  // ---------- 기능 3: 자연어 자동분류 규칙 엔진 ----------
   // 규칙 1건 생성. 조건은 from(발신) 또는 subject(제목 키워드) — 둘 다 주면 AND.
   // 정책(2026-09-24): 기본은 fromEmails(정확 주소) 만 넘긴다. subjectKeywords 는 사용자가 명시했을 때만 — 발신+제목 AND 규칙은 제목이 조금만 바뀌어도 빠져나간다.
   //   spec = { fromEmails?:[], subjectKeywords?:[], toFolderName, applyBefore?, operator?, applyOrder? }
@@ -239,7 +239,7 @@
     return dfetch(`/v2/wapi/mail-rules/${ruleId}`, { method: 'DELETE' });
   }
 
-  // ---------- Tier 4-A: 서버 검색 (POST /v2/wapi/mails/search — Dooray 검색창과 동일 호출, 2026-09-24 캡처·실측) ----------
+  // ---------- 기능 1 경로 A: 서버 검색 (POST /v2/wapi/mails/search — Dooray 검색창과 동일 호출, 2026-09-24 캡처·실측) ----------
   // terms: ['한양대'] 단어 배열. 원소끼리 AND, 한 원소 안의 띄어쓰기('한양대 화공세미나')는 구절(인접) 매칭. 대상 = 제목·본문·발신자 전체.
   //   기간: since/before ('YYYY-MM-DD' 또는 ISO 시각; 서버는 ISO 시각+타임존만 받으므로 날짜면 보정) 또는 sinceDays. until/period 등 다른 이름은 조용히 무시된다.
   //   폴더 지정 파라미터 없음(folderName 무시, 받은·보낸 모두) — exceptFolders(시스템 폴더 이름, 기본 draft/spam/trash 제외)만. 결과 folder 로 사후 필터.

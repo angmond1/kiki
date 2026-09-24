@@ -2,7 +2,7 @@
   "_note": "예시 파일. 실제 config는 ~/.claude/kiki/kk-mail.config.json 에 둔다(repo 밖). 토큰·비번·개인키 저장 금지 — 메일 코어는 브라우저 세션 쿠키로 동작하므로 credential이 필요 없다.",
   "folderClassification": {
     "enabled": false,
-    "_comment": "Tier 2 폴더 분류 사용 여부. false면 스팸 처리(Tier 1)와 자연어 규칙(Tier 3)만.",
+    "_comment": "기능 2 폴더 분류 사용 여부. false면 메일 찾기(1)·자연어 규칙(3)·스팸 처리(4)만.",
     "folders": {
       "광고": { "use": false },
       "공고": { "use": false },

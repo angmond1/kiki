@@ -18,7 +18,7 @@
 - **읽음 플래그 두 종류**(`mailSummary.flags`): `read` = 사용자 화면의 읽음/안 읽음(토글 가능) / `opened` = 한 번이라도 열린 적 있음(상세 GET 시 true 로 굳고 되돌릴 수 없음). **표시용은 `read`**.
 - **페이징**: `page=0,1,2…` 로 넘긴다(최신부터 — 1년 전 구간까지 11페이지×1000건 ≈ 23초 실측 → 오래된 기간은 아래 검색 API). `size` 는 500·1000 도 허용(실측 2026-09-24: 500×3페이지 1,500건 ≈ 2.5초). 코어 `listMails({folder|folderId, sinceDays|since, until, maxPages, size})` 가 기간 컷오프까지 자동으로 넘긴다.
 
-## 메일 본문 (Tier 4 찾기, ✅ 확정 2026-09-24 실측)
+## 메일 본문 (기능 1 찾기, ✅ 확정 2026-09-24 실측)
 ```
 GET /v2/wapi/mails/{mailId}          // Dooray 웹이 메일을 열 때 부르는 것과 동일 (withBody 파라미터 불필요)
 ```
@@ -34,7 +34,7 @@ POST /v2/wapi/mails/unread   { "mailIdList": ["..."] }
 ```
 - 응답 `header.resultCode 0`. 목록의 `flags.read` 가 바뀐다(`opened` 는 불변).
 
-## 검색 — Dooray 검색창과 동일 호출 (Tier 4-A, ✅ 2026-09-24 캡처·실측)
+## 검색 — Dooray 검색창과 동일 호출 (기능 1 경로 A, ✅ 2026-09-24 캡처·실측)
 ```
 POST /v2/wapi/mails/search?preview=true
 { "exceptFolders": ["draft","spam","trash"], "all": ["한양대"], "page": 0, "order": "-createdAt", "highlight": true, "size": 100,
@@ -47,7 +47,7 @@ POST /v2/wapi/mails/search?preview=true
 - 응답: `result.totalCount`, `result.contents[{id, uid, subject}]`(하이라이트용 껍데기, body 비어 있음), **`result.references.mailMap[id]`** = 목록 API 와 같은 메일 객체(`createdAt, subject, users, folderId, fileCount, mailSummary{flags, previewText}`), `references.folderMap[id]{name,type}`. `preview=true` 면 `mailSummary.previewText` 에 **본문 앞부분(~300자, 인용 포함)** 이 실린다. `size` 100 OK(50건 응답 ≈ 600KB).
 - UI: 검색창 Enter → URL `/mail/all?query=all%3D<단어>&period=keyword%3Dall`, 기간 직접입력 → `period=keyword%3Ddirect%26startedAt%3D…%26endedAt%3D…`. 검색 결과 화면은 첫 메일을 자동으로 연다(읽음 처리) — 코어 `searchMails` 는 API 만 부르므로 화면·읽음 상태를 건드리지 않는다.
 
-## 스팸 신고 (Tier 1)
+## 스팸 신고 (기능 4)
 ```
 POST /v2/wapi/mails/report-spam-hacking
 { "idList": ["..."],                         // N건 일괄
@@ -57,14 +57,14 @@ POST /v2/wapi/mails/report-spam-hacking
 ```
 → 휴지통 이동 + 학습 신고 + (옵션)발신자 차단 + (옵션)과거 inbox 소급.
 
-## 폴더 이동 (Tier 2 1회성)
+## 폴더 이동 (기능 2, 1회성)
 ```
 POST /v2/wapi/mails/move
 { "targetFolderId": "...", "targetFolderName": "...", "mailIdList": ["..."] }  // 셋 다 필수
 ```
 키 이름 주의: 이동은 `mailIdList`/`targetFolder*`, 스팸은 `idList`.
 
-## 자동분류 규칙 (Tier 3)
+## 자동분류 규칙 (기능 3)
 ```
 GET    /v2/wapi/mail-rules?size=1000&page=0&types=auto_classification   // page=0 명시해야 contents 정상
 POST   /v2/wapi/mail-rules                                              // body는 배열, 단 ⚠️ 첫 1건만 생성
@@ -81,7 +81,7 @@ DELETE /v2/wapi/mail-rules/{rule-id}
    "applyBeforeMailFolders": ["inbox", "user_folders"] }]
 ```
 - ⚠️ **배열에 N개를 넣어도 첫 1건만 생성됨** → 여러 규칙은 단건씩 N회 POST (코어 `createRule`이 단건).
-- `condition`은 `from`·`subject` 중 하나 이상(둘 다 있으면 AND). **정책: 기본은 `from`(정확 주소) 만** — `subject` 는 사용자가 명시했을 때만(SKILL Tier 3, 2026-09-24). `applyBeforeMail`=과거 메일 소급.
+- `condition`은 `from`·`subject` 중 하나 이상(둘 다 있으면 AND). **정책: 기본은 `from`(정확 주소) 만** — `subject` 는 사용자가 명시했을 때만(SKILL 기능 3, 2026-09-24). `applyBeforeMail`=과거 메일 소급.
 - 규칙 객체 필드: `id, type, condition, action, applyOrder`(우선순위·낮을수록 먼저 적용), `lastAppliedAt, createdAt`.
 - ⚠️ `condition.from.type`은 **`include`만** 지원 (`not_include`/`exact`는 -200200, 2026-06-04 확인). → 같은 도메인 두 용도 분기(예 `nrf.re.kr`→공고 / `nzine@nrf.re.kr`→뉴스)는 **`applyOrder`로** 처리(정확주소 규칙을 도메인 규칙보다 작은 값=먼저).
 
