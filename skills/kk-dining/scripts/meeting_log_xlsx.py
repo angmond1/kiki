@@ -2,8 +2,8 @@
 """
 kk-dining 회의록 엑셀 헬퍼.
 
-표준: `{yymmdd}_회의록.xlsx` (yymmdd = 지급신청 처리일).
-같은날 처리하는 회의비 건은 모두 동일 파일에 행 추가.
+표준(2026-09-24~): `{root}\{yymm}_회의록.xlsx` — 한 폴더, 월별 1파일(yymm = 지급신청 처리 연월). 그 달 처리 건은 모두 같은 파일에 행 추가.
+주된 목적 = 이전 회의 주제·내용과의 중복 방지 기록(지급신청에 첨부하지 않음). 새 회의록 전 all_titles() 로 전부 스캔.
 
 9컬럼 형식:
   순번 | 사용일자 | 금액 | 장소(거래처) | 처리계정 | 내부참석자 | 외부참석자 | 외부참석자 소속 | 회의목적
@@ -12,7 +12,7 @@ kk-dining 회의록 엑셀 헬퍼.
 
 사용 예:
     from meeting_log_xlsx import open_or_create, append_row, read_log
-    path = open_or_create("2026.06", "260605")
+    path = open_or_create("2606")            # {root}\2606_회의록.xlsx
     append_row(path, {
         "date_text": "4월 30일 13:00~14:30",
         "amount": 323000,
@@ -25,6 +25,7 @@ kk-dining 회의록 엑셀 헬퍼.
         "content": "1. 연구 진행상황 및 향후 계획 공유\n - ...",
     })
     rows = read_log(path)   # list[dict]
+    past = all_titles()      # 중복 방지: 폴더 내 모든 회의록의 제목·내용
 """
 from __future__ import annotations
 import os
@@ -47,20 +48,17 @@ WIDTHS = [6, 20, 11, 18, 10, 12, 26, 18, 55]
 DEFAULT_ROOT = r"C:\kiki\dining\meeting_log"
 
 
-def expected_path(year_month: str, yymmdd: str,
-                  root: Optional[str] = None) -> str:
-    """`{root}\{YYYY.MM}\{yymmdd}_회의록.xlsx` 경로 반환."""
+def expected_path(yymm: str, root: Optional[str] = None) -> str:
+    """`{root}\{yymm}_회의록.xlsx` 경로 반환 (한 폴더, 월별 1파일)."""
     root = root or DEFAULT_ROOT
-    folder = os.path.join(root, year_month)
-    return os.path.join(folder, f"{yymmdd}_회의록.xlsx")
+    return os.path.join(root, f"{yymm}_회의록.xlsx")
 
 
-def open_or_create(year_month: str, yymmdd: str,
-                   root: Optional[str] = None) -> str:
+def open_or_create(yymm: str, root: Optional[str] = None) -> str:
     """엑셀 파일을 열거나(있으면) 9컬럼 양식으로 생성(없으면). 경로 반환."""
     if openpyxl is None:
         raise RuntimeError("openpyxl not installed; run: pip install openpyxl")
-    fp = expected_path(year_month, yymmdd, root)
+    fp = expected_path(yymm, root)
     folder = os.path.dirname(fp)
     os.makedirs(folder, exist_ok=True)
     if os.path.exists(fp):
@@ -160,6 +158,34 @@ def read_log(path: str) -> list[dict]:
             "title": title,
             "content": content,
         })
+    return out
+
+
+def all_titles(root: Optional[str] = None) -> list[dict]:
+    """중복 방지용 — 폴더의 모든 `*_회의록.xlsx` 를 읽어
+    [{file, date_text, amount, place, acccd, title, content}] 를 반환한다.
+    새 회의록을 쓰기 전 사용자가 준 주제를 title 들과 비교(같거나 유사하면 조정 제안)."""
+    if openpyxl is None:
+        raise RuntimeError("openpyxl not installed")
+    root = root or DEFAULT_ROOT
+    out: list[dict] = []
+    if not os.path.isdir(root):
+        return out
+    for fn in sorted(os.listdir(root)):
+        if not fn.endswith("_회의록.xlsx") or fn.startswith("~$"):
+            continue
+        try:
+            ws = openpyxl.load_workbook(os.path.join(root, fn), data_only=True).active
+        except Exception:
+            continue
+        for r in ws.iter_rows(min_row=2, values_only=True):
+            r = list(r) + [None] * 9
+            if not any(r[:9]):
+                continue
+            purpose = str(r[8] or "")
+            title, _, content = purpose.partition("\n")
+            out.append({"file": fn, "date_text": str(r[1] or ""), "amount": r[2], "place": str(r[3] or ""),
+                        "acccd": str(r[4] or ""), "title": title.strip(), "content": content.strip()})
     return out
 
 

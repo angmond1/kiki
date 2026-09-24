@@ -67,7 +67,7 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
 `~/.claude/skills/` 에 **새 skill 디렉토리가 생기면 그 세션에서는 인식되지 않는다**(Code·Desktop 공통). 설치 직후 사용자에게:
 > "설치 완료. **Claude 를 재시작**한 뒤 `kk-mail 설정해줘` 라고 해주세요. (새 skill 은 재시작해야 인식됩니다.)"
 
-이때 README 에서 뺀 안내를 함께 준다: ① **권장 모델 표**(§0) ② **KIST 사내망**(밖이면 VPN) ③ **로그인 창**(§2 표 — 첨부 skill 은 Claude 전용 새 창에서 한 번 더 로그인) ④ 아래아한글·MS Office 는 필요할 때 skill 이 묻는다는 것.
+이때 README 에서 뺀 안내를 함께 준다: ① **권장 모델 표**(§0) ② **KIST 사내망**(밖이면 VPN) ③ **로그인 창**(§2 표 — 첨부 skill 은 Claude 전용 새 창에서 한 번 더 로그인).
 
 - **Claude Code**: 세션 종료 후 재실행(또는 새 세션). **Claude Desktop**: 트레이(Windows)·Dock(macOS) 아이콘 → **Quit(완전 종료)** 후 재실행. 창만 닫는 건 재시작이 아니다.
 - 같은 세션에서 바로 `kk-*` 를 트리거하려 하지 말 것. 재시작 전에 사용자가 `kk-* 설정해줘` 를 요청하면 skill 을 흉내 내지 말고 재시작을 다시 안내한다(같은 세션에서는 새 skill 이 로드되지 않는다).

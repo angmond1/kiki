@@ -4,15 +4,16 @@
 
   "log_format": "xlsx_only",
   "log_root": "{kiki_root}/dining/meeting_log",
-  "_log_root": "회의록 엑셀 루트. 클라우드 동기화 폴더로 바꿔도 됨(예: 본인 드라이브 동기화 경로).",
-  "hwp_output_root_optional": "{kiki_root}/dining",
-  "_hwp_output_root_optional": "hwpx 회의록 출력 루트(키 이름은 호환 위해 유지). 하위 <yymmdd>/ 에 저장.",
+  "_log_root": "회의록 엑셀·hwpx 폴더(한 폴더, 월별 {yymm}_회의록.xlsx + 건별 hwpx). 클라우드 동기화 폴더로 바꿔도 됨.",
+  "hwp_output_root_optional": "{kiki_root}/dining/meeting_log",
+  "_hwp_output_root_optional": "hwpx 회의록 출력 폴더 = 엑셀과 같은 폴더(키 이름은 호환 위해 유지). 파일명 {yymmdd}_{과제번호}_{과제이름 간략}_회의록.hwpx",
   "upload_via_rpa": false,
   "_upload_via_rpa": "true 면 회의록을 dooray 드라이브에 올려 RPA 처리(행정원 폴더 = kiki.config payment_admin.folder_url). 기본 false = fam_0704 직접 자동작성.",
   "receipt_path": "",
   "_receipt_path": "카드영수증/증빙 폴더(사람마다 다름, 비우면 그때그때 첨부). {kiki_root} = kiki.config.json 의 kiki_root (기본 C:\\kiki / ~/kiki).",
   "output_dir": "{kiki_root}/dining",
   "project_report_dir": "{kiki_root}/dining/project_report",
+  "_project_report_dir": "근거자료(과제제안서·보고서) 폴더 — 부트스트랩에서 사용자에게 복사를 요청. 파일명에 과제번호 포함 권장.",
 
   "_notes": {
     "pre_approval_exempt_codes": ["I", "S", "B", "F", "부서운영비"],

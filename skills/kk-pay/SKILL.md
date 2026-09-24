@@ -39,14 +39,15 @@ description: |
 **0. 환경 점검** — `../_shared/environment_setup.md` 0단계(어느 창·로그인·`token.txt`; python 패키지는 필요 시점에).
 **공통 식별정보는 먼저 `~/.claude/kiki/kiki.config.json` 에서 읽는다**(이미 있으면 재질문 X). 없는 공통 항목만 물어 거기 저장(다른 skill 재사용). kk-pay 고유만 `kk-pay.config.json`. (`../_shared/personal_config.md`)
 
-1. **dooray 토큰** *(공통, `token.txt`)* — `<kiki_root>/token.txt`(예 `C:\kiki\token.txt`) 가 비어 있으면 **절대경로를 보여주며** 안내: 발급 `https://kist.gov-dooray.com/setting/api/token` → 파일의 `Dooray token:` **다음 줄**에 붙여넣고 저장 → "두레이 토큰 저장했다". ⚠️ **채팅에 토큰을 붙여넣지 말라고 항상 경고**(대화 기록에 남아 노출). 넣었다고 하면 값은 출력하지 않고 형식만 확인. 원하면 파일을 열어준다(`notepad`/`open -e`). (구형 `kiki.env` 도 읽힘)
+1. **RPA 업로드 사용 여부** *(kk-pay 고유 `uploadScope`)* — *"카드결제건을 Dooray 드라이브에 올려 RPA 로 지급신청할까요(권장)? 세금계산서 직접작성만 쓸 거면 '아니요'."* 예면 1-a~1-c, 아니요면 토큰·행정원 폴더 없이 2 로.
+   - 1-a. **dooray 토큰** *(공통, `token.txt`)* — `<kiki_root>/token.txt`(예 `C:\kiki\token.txt`) 가 비어 있으면 **절대경로를 보여주며** 안내: 발급 `https://kist.gov-dooray.com/setting/api/token` → 파일의 `Dooray token:` **다음 줄**에 붙여넣고 저장 → "두레이 토큰 저장했다". ⚠️ **채팅에 토큰을 붙여넣지 말라고 항상 경고**(대화 기록에 남아 노출). 넣었다고 하면 값은 출력하지 않고 형식만 확인. 원하면 파일을 열어준다(`notepad`/`open -e`). (구형 `kiki.env` 도 읽힘)
+   - 1-b. **담당 연구행정원** *(공통 `payment_admin`)* — 옵션1(권장) **폴더 링크 붙여넣기** → folderId / 옵션2 **이름 검색**(`dooray_drive.find_admin_folder`, "최대 5분" 진행표시). 후보 복수면 1개 선택.
+   - 1-c. **업로드 범위 분기** *(kk-pay 고유)* — 행정원 폴더 구조 자동파악 후: 세금계산서·회의비 별도 폴더 있으면 "따로 업로드?" / 없으면 "어디까지 RPA?".
 2. **카드책임자** *(공통 `card_holder`)* — 보통 본인(fam_0711 조회 키, 사번 1회 확인). kiki.config 에 없으면 묻는다.
-3. **담당 연구행정원** *(공통 `payment_admin`)* — 옵션1(권장) **폴더 링크 붙여넣기** → folderId / 옵션2 **이름 검색**(`dooray_drive.find_admin_folder`, "최대 5분" 진행표시). 후보 복수면 1개 선택.
-4. **업로드 범위 분기** *(kk-pay 고유)* — 행정원 폴더 구조 자동파악 후: 세금계산서·회의비 별도 폴더 있으면 "따로 업로드?" / 없으면 "어디까지 RPA?".
-5. **수행과제 확인** *(공통 `projects`)* — `window.kkPay.queryProjects()` 자동수집 → "이 과제들 맞나요?(전부/일부/추가)" → kiki.config 캐시.
-6. **PC 영수증 저장 폴더 경로** *(kk-pay 고유 `receiptFolder`)*.
+3. **수행과제 확인** *(공통 `projects`)* — 지급신청할 **과제번호가 필요하므로 포탈에서 참여과제를 파악**한다: `window.kkPay.queryProjects()` 자동수집 → "이 과제들 맞나요?(전부/일부/추가)" → kiki.config 캐시.
+4. **PC 영수증 저장 폴더 경로** *(kk-pay 고유 `receiptFolder`)*.
 
-→ 공통(1·2·3·5) = `kiki.config.json`/`token.txt` / kk-pay 고유(4·6) = `kk-pay.config.json`.
+→ 공통(1-a·1-b·2·3) = `kiki.config.json`/`token.txt` / kk-pay 고유(1·1-c·4) = `kk-pay.config.json`.
 
 ---
 

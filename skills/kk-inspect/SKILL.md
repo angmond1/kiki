@@ -25,7 +25,7 @@ KIST 통합정보시스템의 **소액검수신청 (검수신청관리, `mcs_000
 
 **0. 환경 점검** — `../_shared/environment_setup.md` 0단계.
 
-공통 개인정보는 **`~/.claude/kiki/kiki.config.json`** 에서 읽는다(이미 있으면 재질문 X). 없거나 빈 항목만 순서대로 물어 거기 저장(다른 skill 재사용) — **개인정보라 로컬에만, git/메모리에 안 올림**:
+공통 개인정보는 **`~/.claude/kiki/kiki.config.json`** 에서 읽는다(이미 있으면 재질문 X). 없거나 빈 항목만 순서대로 물어 거기 저장(다른 skill 재사용) — **개인정보라 로컬에만, git/메모리에 안 올림**. 질문할 때 이 사실을 함께 말한다(*"이름·사번·연락처는 검수창 자동입력용이며 이 PC 의 config 에만 저장되고 채팅에 다시 출력하지 않습니다"*):
 - `user`: 이름 · 사번(6자리) · 연락처
 - `location`: 지역(본원=`LABT_00` / 강릉=`LABT_01` / 전북=`LABT_02`) → 건물(`references/code_tables.md` → `BD_xxx`) → 호실
 - `payment_admin.name`: 지급신청 담당 연구행정원(검수창 자동검색용)
