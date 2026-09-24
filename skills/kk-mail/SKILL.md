@@ -110,7 +110,7 @@ description: |
 
 ## 부트스트랩 (첫 사용 또는 "kk-mail 설정")
 
-개인화 정보를 자동조회 + 대화로 채워 config를 만든다.
+개인화 정보를 자동조회 + 대화로 채워 config를 만든다. 설정은 스팸·분류용이고 **메일 찾기(Tier 4)는 설정 없이 바로 된다** — 마지막 6에서 사용법을 안내한다.
 
 1. 실행 준비(위) 완료.
 2. **현재 상태 파악** — `findAllFolders()` + `listMailRules()`로 **기존 폴더·분류 규칙을 먼저 조회**(충돌 판단용). 폴더 목록 제시.
@@ -133,7 +133,12 @@ description: |
    - ⚠️ **NRF/KEIT/KIAT 분기**: 정확주소(`nzine@nrf.re.kr`·`email@keit.re.kr`·`nabis@keit.re.kr`·`newsletters@kiat.or.kr`·`ssm@kontrs.or.kr` → 기관뉴스)를 도메인(`nrf.re.kr`·`keit.re.kr`·`kiat.or.kr` → 과제 / `kontrs.or.kr` → 학회)보다 **먼저**(`createRule` `applyOrder` 작게) 등록. Dooray `not_include` 미지원이라 우선순위로만 분기.
 
 5. `~/.claude/kiki/kk-mail.config.json` 생성/갱신 (`kk-mail.config.example.json` 참고).
-   - config 없어도 Tier 1(스팸)·Tier 3(자연어 규칙)은 동작. config는 Tier 2/권장분류 선호 기억용.
+   - config 없어도 Tier 1(스팸)·Tier 3(자연어 규칙)·Tier 4(메일 찾기)는 동작. config는 Tier 2/권장분류 선호 기억용.
+6. **마무리 안내(반드시 출력)** — 설정이 끝나면 준비물이 더 필요 없다는 것(같은 Chrome·같은 Dooray 로그인, 토큰·추가 설치 없음)과 앞으로 쓸 수 있는 말을 예시로 보여준다:
+   - 스팸 처리: *"지난주 광고 스팸 골라줘"*
+   - 폴더 분류: *"받은편지함 정리해줘"*
+   - 자동분류 규칙: *"앞으로 nature.com 은 저널 폴더로"* (기본 조건은 발신 주소만)
+   - **메일 찾기**: *"2024년에 한양대 세미나 갔던 거 관련 메일 찾아줘"*, *"첨부에 견적서 있던 업체 메일 어디 있지"* — 키워드 검색으로 안 잡히는 메일을 제목·본문·발신자를 뒤져 뜻으로 골라 링크로 보여준다(읽음 상태는 바꾸지 않음, 받은·보낸 메일 모두).
 
 ---
 
