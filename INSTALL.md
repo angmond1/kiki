@@ -31,7 +31,8 @@
 ### 0-4. Python 3 + Node.js (패키지 설치 때 함께)
 - Python: https://www.python.org/downloads/ — Windows 는 설치 화면 **"Add python.exe to PATH"** 체크. (`winget install -e --id Python.Python.3.12` / macOS `brew install python` / Ubuntu `sudo apt install python3 python3-pip`; macOS 에 Homebrew 가 없으면 위 링크의 설치 파일로, 새 Mac 은 `python3` 첫 실행 때 Xcode 개발자 도구 설치 창이 뜰 수 있음)
 - Node.js(LTS): https://nodejs.org/ (`winget install -e --id OpenJS.NodeJS.LTS` / `brew install node` / `sudo apt install nodejs npm`)
-- 확인: 새 터미널에서 `python --version`(macOS/Linux `python3 --version`), `node --version`, `npx --version`.
+- 확인: 새 터미널에서 `python --version`(macOS/Linux `python3 --version`), `node --version`, `npx --version`. Windows 는 `py -3 --version` 도 확인(python.org 설치본의 py 런처 — `python` 이 PATH 에 없어도 이걸로 동작). `python` 입력 시 Microsoft Store 가 열리면 아직 미설치.
+- **Windows 에 Python 이 없을 때**(대부분의 KIST PC): 에이전트가 confirm 후 `winget install -e --id Python.Python.3.12 …` 로 설치한다(관리자 권한 불필요, 1~2분). `winget` 이 없는 Windows 10 은 python.org 설치 파일에서 **"Add python.exe to PATH" 체크** 후 설치. 설치 직후엔 열려 있던 창에서 `python` 이 안 잡힐 수 있어 `py -3` 로 진행하거나 Claude 를 재시작한다.
 - **Python 패키지는 미리 설치하지 않는다** — 각 skill 이 필요한 시점에 확인 후 설치(아래 §5 표). 명령은 Windows `python -m pip install X` / macOS·Linux `python3 -m pip install --user X`(`externally-managed-environment` 오류면 `--break-system-packages` 추가). 에이전트가 confirm 후 대신 실행한다.
 
 ### 0-5. KIST 사내망
