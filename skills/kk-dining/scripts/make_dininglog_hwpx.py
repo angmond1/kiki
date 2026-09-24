@@ -62,8 +62,12 @@ def _esc(s) -> str:
     return html.escape(str(s), quote=False)   # & < > 만 (따옴표는 본문에 그대로)
 
 
-def _para_with_text(proto: str, text: str, first: bool) -> str:
-    """단락 XML(proto)을 복제해 텍스트만 text 로. 첫 run 의 글자모양(charPrIDRef)은 유지, 나머지 run 은 제거."""
+def _para_with_text(proto: str, text: str, first: bool,
+                    para_pr: str | None = None, char_pr: str | None = None) -> str:
+    """단락 XML(proto)을 복제해 텍스트만 text 로. 첫 run 의 글자모양(charPrIDRef)은 유지, 나머지 run 은 제거.
+    para_pr/char_pr 를 주면 문단모양·글자모양 ID 를 그 값으로 바꾼다(양식 힌트 문구의 빨간색·가운데정렬 등을 피할 때).
+    ⚠️ 템플릿의 <hp:linesegarray>(줄 배치 캐시)는 반드시 제거 — 남겨두면 한글이 그 줄 폭에 맞춰 **자간을 눌러 한 줄에 우겨 넣고**
+    줄바꿈을 하지 않는다(2026-09-24 실측). 없으면 한글이 열 때 다시 계산한다."""
     runs = list(_RUN.finditer(proto))
     if runs:
         attrs = _RUN_OPEN.match(runs[0].group(0)).group(1)
@@ -73,21 +77,27 @@ def _para_with_text(proto: str, text: str, first: bool) -> str:
         m = _LINESEG.search(proto)
         cut = m.start() if m else proto.rfind("</hp:p>")
         head, tail, attrs = proto[:cut], proto[cut:], ""
+    if char_pr is not None:
+        attrs = re.sub(r'charPrIDRef="\d+"', f'charPrIDRef="{char_pr}"', attrs) if "charPrIDRef" in attrs \
+            else attrs + f' charPrIDRef="{char_pr}"'
     run = f"<hp:run{attrs}><hp:t>{_esc(text)}</hp:t></hp:run>" if text != "" else f"<hp:run{attrs}/>"
     p = head + run + tail
+    p = _LINESEG.sub("", p)                            # 줄 배치 캐시 제거 → 한글이 재계산(줄바꿈 정상)
+    if para_pr is not None:
+        p = re.sub(r'(<hp:p\b[^>]*\bparaPrIDRef=")\d+(")', rf"\g<1>{para_pr}\2", p, count=1)
     if not first:                                      # 첫 단락 외에는 id=0 (한글 저장본과 동일 관례)
         p = re.sub(r'(<hp:p\b[^>]*\bid=")[^"]*(")', r"\g<1>0\2", p, count=1)
     return p
 
 
-def _fill_cell(cell: str, text) -> str:
-    """셀의 단락 전체를 text(여러 줄은 '\\n')로 교체. 첫 단락을 원형으로 복제."""
+def _fill_cell(cell: str, text, para_pr: str | None = None, char_pr: str | None = None) -> str:
+    """셀의 단락 전체를 text(여러 줄은 '\\n')로 교체. 첫 단락을 원형으로 복제(줄 배치 캐시는 제거)."""
     paras = list(_P.finditer(cell))
     if not paras:
         return cell
     proto = paras[0].group(0)
     lines = str(text if text is not None else "").replace("\r\n", "\n").split("\n")
-    new = "".join(_para_with_text(proto, ln, i == 0) for i, ln in enumerate(lines))
+    new = "".join(_para_with_text(proto, ln, i == 0, para_pr, char_pr) for i, ln in enumerate(lines))
     return cell[: paras[0].start()] + new + cell[paras[-1].end():]
 
 
