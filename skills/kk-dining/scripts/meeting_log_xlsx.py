@@ -29,6 +29,7 @@ kk-dining 회의록 엑셀 헬퍼.
 """
 from __future__ import annotations
 import os
+import re
 from typing import Optional
 
 try:
@@ -76,6 +77,15 @@ def open_or_create(yymm: str, root: Optional[str] = None) -> str:
     return fp
 
 
+def _to_amount(v) -> int:
+    """323000 / '323,000' / '45,000
+11,000'(같은 날 식당+카페 두 금액) → 정수 합계. 숫자 없으면 0."""
+    if isinstance(v, (int, float)):
+        return int(v)
+    nums = re.findall(r"\d[\d,]*", str(v or ""))
+    return sum(int(n.replace(",", "")) for n in nums) if nums else 0
+
+
 def _next_seq(ws) -> int:
     """현재 시트의 다음 순번."""
     seq = 0
@@ -112,7 +122,7 @@ def append_row(path: str, data: dict) -> int:
     ws.append([
         seq,
         data.get("date_text", ""),
-        int(data.get("amount", 0)),
+        _to_amount(data.get("amount", 0)),
         data.get("place", ""),
         data.get("acccd", ""),
         data.get("int_members", ""),
