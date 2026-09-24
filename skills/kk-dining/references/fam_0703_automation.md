@@ -41,8 +41,9 @@ window.__Fkey='fam_0703_02'; const F = window.application.popupframes.fam_0703_0
 
 ## 3. 행 전환 규칙 (⚠️ 2026-09-08 가장 큰 버벅거림 원인)
 ```js
-function goRow(i){ F.ds_rqstGrid.set_rowposition(i); F.curRow=i; F.rqstGrid_oncellclick.call(F,F.rqstGrid,{}); }
+function goRow(i){ F.ds_rqstGrid.set_rowposition(i); F.curRow=i; F.rqstGrid_oncellclick.call(F,F.rqstGrid,{row:i}); }
 ```
+- `{row:i}` 를 꼭 넘긴다 — 법인카드 fam_0704_02 의 같은 핸들러는 `this.curRow = e.row` 라 `{}` 면 회의록이 **직전 행 카드로** 열린다(2026-09-24). 두 화면 공통 코드로 통일.
 - `rqstGrid_oncellclick` = closure `curRow = rowposition` + `doGetDesp()`(그 행 DESP_LIST → `import2.ds_main_CARD` 로드). `F.curRow=i` 만으로는 closure 가 안 바뀐다(회의록 버튼 `btn_Conference` 만 `this.curRow` 를 쓰므로 둘 다 세팅).
 - **팝업(계정 popBudgList / 회의록 / 거래처)을 열기 전에 반드시 `goRow(i)`**. 팝업 복귀 콜백 `fn_popCall`→`doSetDesp("dsc")` 가 `import2.ds_main_CARD` 내용으로 **closure curRow 행의 DESP_LIST 를 재구성**한다(형식 `C@@CARDNO@@CARDAPPRNO@@EMPNO@@EMPNO@@CARDUSEYMD@@CARDBUYYMD@@USEAMT@@VATAMT@@SVCCHRGAMT##`). 어긋난 상태로 팝업이 닫히면 **다른 행 카드로 덮어쓴다** — CARDUSEMGRNO·RQSTAMT·가맹점명은 그대로라 **화면으론 안 보인다**.
 

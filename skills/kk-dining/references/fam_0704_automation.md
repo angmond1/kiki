@@ -179,19 +179,29 @@ C.rd_UseType_onitemchanged.call(C, rdUseType, {fromobject:rdUseType, postvalue:"
   (`""`=선택 / **`N`=N(미참여)** / `Y`=Y(참여)). 미지정이면 저장·상신 검증에서 막힌다.
 - 사전결재 인원수는 **내부+외부 합계**로 맞춘다 (내부에서 빠진 인원을 외부로 옮기면 총원 유지).
 
-##### 내부 등록 (이름 → 사번 자동조회)
-`setColumn` 만으로는 조회가 돌지 않는다. **`ds_datagrid1_oncolumnchanged` 를 정식 이벤트 객체로 호출**해야 서버가
-이름으로 사번·부서·참여연구원 여부를 채운다. 성공하면 `PAYNO`·`DEPTNM`·`RSCHR_REG_NO` 가 자동으로 붙는다.
+##### 내부 등록 (이름 → 사번 자동조회) — ⭐ 2026-09-24 재실측으로 정정
+`setColumn` 만으로는 조회가 돌지 않는다. 핸들러 소스는 `if(e.columnid=="KORNM") this.OpenInPeoplePopup();` 뿐이고,
+`OpenInPeoplePopup` 은 **`ds_datagrid1.rowposition` 행의 KORNM** 으로 사원검색 팝업 `pop_fam_0703_02_4` 를 연다.
+⚠️ `new nexacro.DSColChangeEventInfo(...)` 는 인자 매핑이 달라 `columnid` 에 이름값이 들어가 **아무 일도 안 일어난다**(2026-09-24 7명 전원 무반응). → **평범한 객체 `{columnid:'KORNM', row:r}`** 를 넘긴다.
 
 ```js
-// ⚠️ 인자 순서 = (obj, id, row, col, colid, newvalue, oldvalue) — newvalue/oldvalue 를 바꿔 넣으면
-//    빈 이름으로 조회되어 행이 조용히 삭제된다 (2026-08-07 실측 함정).
-const r1 = C.ds_datagrid1.addRow();
-C.ds_datagrid1.setColumn(r1, "KORNM", "홍길동");
-C.ds_datagrid1_oncolumnchanged.call(C, C.ds_datagrid1,
-  new nexacro.DSColChangeEventInfo(C.ds_datagrid1, "oncolumnchanged", r1, 2, "KORNM", "홍길동", ""));
-// 서버 왕복 3~4초 대기 후 PAYNO 확인 → 없으면 참여연구원 아님 → 외부로 강등
+const g = C.ds_datagrid1;
+const r = g.addRow(); g.setColumn(r, "KORNM", "홍길동"); g.set_rowposition(r);   // rowposition 필수
+C.ds_datagrid1_oncolumnchanged.call(C, g, {columnid:"KORNM", row:r});
+// ⏱ 3초. 결과는 세 갈래:
+//  (a) 검색결과 1명 → 팝업 없이 자동 반영: PAYNO·DEPTNM 채워짐
+//  (b) 참여연구원 아님 → gfn_msg "본 계정의 참여연구원이 아닙니다…" + 행은 이름만 남음(PAYNO 없음) → 그 행 삭제하고 외부로
+//  (c) 검색결과 여러 행 → popupframes.pop_fam_0703_02_4 열림. P.ds_datagrid1 (KORNM/PAYNO/DEPTNM/EMPLCLSNM/PARTIYN/DUPLICATE_EAT_YN)
+//      에서 고를 행을 set_rowposition → P.datagrid1_oncelldblclick.call(P,P.datagrid1,{}) (= gfn_popupClose(행객체))
+//      같은 사람이 여러 행(조인 중복)이면 아무 행이나, 동명 2인(예 학생연구원 PARTIYN Y / 별정직 N)이면 PARTIYN='Y' 쪽.
 ```
+- ⚠️ **한 명씩 순차로**(등록 → 3초 → 결과 확인 → 다음). 여러 명을 한 루프에서 돌리면 팝업 open/close 가 겹쳐 결과가 뒤섞인다(2026-09-24 실측: 일부 NORES·오배정).
+- `javascript_tool` 에서 이 호출을 식의 마지막 값으로 두면 `Object reference chain is too long` 오류가 나지만 **호출 자체는 실행된다** → 끝에 `'ok'` 같은 문자열을 두고, 다음 호출에서 상태를 읽는다.
+
+##### ⚠️ 중복 참석 경고 `DUPLICATE_EAT_YN` (2026-09-24)
+검색결과/등록행의 `DUPLICATE_EAT_YN` 이 `'N'` 이 아니면 그 사람이 **같은 날 다른 회의비 회의록에 이미 참석자로 등록**돼 있다
+(예 `사용시간 : 12:21 / 계정 : 26N4090 / 적요 : … / 목적: … / 인원: ○○○외 3명`). gfn_msg 로 "…중복인 경우 제외바랍니다" 가 뜬다.
+→ **저장하지 말고 사용자에게 그 내용을 그대로 보여주고 결정을 받는다**(제외 / 유지 / 중단). 발의자·카드책임자여도 제외될 수 있고, 제외하면 적요 `○○○ 외 N명` 의 대표자를 남은 첫 참석자로 바꾼다.
 
 ##### 외부/미참여자 등록
 ```js
@@ -275,6 +285,9 @@ F.bt_approval_onclick.call(F, null, {});
 - `F.bt_addRow_onclick.call(F, null, {})` (or `F.ds_rqstGrid.addRow()`)로 행추가 → 한 상신에 **최대 5건** 묶기.
 - 8건 = **5+3 분할 상신**.
 - **같은날 식당+카페 연달아 사용** = 동일 상신건에 묶음(1건처럼).
+- ⚠️⚠️ **행 전환(fam_0704_02) = `F.ds_rqstGrid.set_rowposition(i); F.rqstGrid_oncellclick.call(F,F.rqstGrid,{row:i});`** — 핸들러가 `this.curRow = e.row` 후 `doGetDesp()` 로 **`ds_temp_popup_CONFERENCE`(회의록 팝업 인자)** 를 그 행 카드로 채운다. `{}` 를 넘기면 curRow 가 undefined 가 되어 **회의록 버튼이 직전 행 카드의 회의록을 연다**(2026-09-24 실측: 9/4 행에서 9/1 카드 회의록이 열림). fam_0703_02(연구비)는 closure curRow 라 `{}` 로도 되지만, **양쪽 다 `{row:i}` 를 넘기는 것으로 통일**.
+- 회의록 팝업을 연 뒤 입력 전에 **가드**: `C.ds_param.getColumn(0,'CARDUSEMGRNO') === F.ds_rqstGrid.getColumn(i,'CARDUSEMGRNO')` 이고 `C.ds_SAVE.CONFERENCEPERPOSE` 가 비어 있을 때만 입력. 아니면 그대로 닫고(`C.bt_close_onclick.call(C,C.bt_close,{})`) 행 전환부터 다시.
+- CONFERENCENO 는 법인카드도 **지급신청서당 1개**(행끼리 공유, 2026-09-24 두 행 모두 2026014713). 통장표기(`import2.ds_main_DPST.DPSTDISPNM`)도 문서당 1개(첫 행 가맹점명)라 행마다 넣을 필요 없음.
 
 ### 결재선 (gw 전자결재 별도 창, 사용자 직접)
 - **계정책임자(과제) 무조건 결재선 포함**. 계정책임자 = 화면 회계구분 아랫칸 (== `F.ds_rqstGrid.getColumn(0,"RDSBJEMPNM")`).
