@@ -58,6 +58,9 @@ function parseRows(xml){var out=[],R=/<Row[^>]*>([\s\S]*?)<\/Row>/g,m;
 - **DOM 팝업 연쇄(자동화 브라우저)는 불안정** — fetch 안 되는 화면(예 예실대비표 → 집행내역 개인집계)을 DOM 팝업으로 우회할 때 3가지 함정: ① `(async()=>{})()` 결과가 `{}` 로 옴 → **전역 저장 후 동기 read**, ② 백그라운드 탭 **throttle** 로 느림 + *부분누락으로 틀린 값* → **Chrome foreground** 안내, ③ 팝업 **재오픈 시 빈 grid** → navigate 리셋 + **로딩 polling**(행>0 대기). 상세 kk-budget `budget_fetch_spec.md` §개인집계 DOM 안정화.
 - ⭐ **그리드 셀클릭 팝업은 좌표 말고 핸들러 직접 호출**(2026-09-18 확립) — `application.mainframe.all[0].form` 으로 화면 폼을 잡고, 그리드(`getBindCellIndex('body',<금액컬럼>)>=0`)를 재귀 탐색해 `ds.set_rowposition(행)` **후** `form.<Grid>_oncellclick(grid,{row,cell,...})` 호출하면 해상도·행위치 무관(핸들러가 인자 row 가 아니라 *현재 행*을 보므로 rowposition 필수). 🔴 닫기는 **팝업 폼 `btn_close.click()`** 만 — `form.close()`/`destroy` 로 닫으면 `modalPopDiv_*` Div 가 남아 이후 모든 클릭이 `already exists` 로 **조용히 실패**(복구는 navigate 리셋).
 
+- 🔴 **브라우저 도구 혼동 금지** — Claude Desktop(Code 탭)에는 내장 브라우저(`mcp__Claude_Browser__*`, browser pane)가 기본으로 붙어 있지만 **사용자 Chrome 의 SSO 세션이 없다**. 통합정보·두레이 작업은 전부 **Claude in Chrome(`mcp__claude-in-chrome__*`)** 으로 — `browser_batch`/`navigate`/`computer` 도 같은 서버 것을 쓴다(섞어 부르면 빈 창이 열리고 `Preview not found`, 2026-09-24).
+- 반환 객체 **키 이름**에 `authTk`·`token`·`cookie` 가 있으면 값이 없어도 `[BLOCKED: Sensitive key]` — authTk 는 `ready:true` 불리언으로만 확인.
+
 ## 좌표 fallback (fetch 가 안 될 때 — "어떻게든 성공")
 fetch 실패해도 포기 말고 화면 캡처+좌표로 2차 시도:
 - **해상도 달라도 매번 `zoom`/`screenshot` 으로 요소 위치를 찾아** 클릭(고정좌표 하드코딩 금지).

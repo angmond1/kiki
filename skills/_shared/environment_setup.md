@@ -19,6 +19,7 @@ kiki 는 Chrome 창 두 종류를 쓴다. **skill 마다 쓰는 창이 정해져
 | kk-inspect | **Claude 전용 새 Chrome 창** | chrome-devtools-mcp | 그 창에서 포탈 로그인 한 번 더 |
 
 - **"Claude in Chrome" 확장** — `list_connected_browsers` 로 연결 확인. 안 되면: *"이 skill 은 Chrome 의 'Claude in Chrome' 확장으로 동작합니다. 확장 설치(https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn)·연결(Desktop: 설정 → Claude in Chrome ON / Code: `claude --chrome`) 후 다시 해주세요."* 후 중단. 연결됐으면 `select_browser` / `tabs_context_mcp` 로 작업 탭 확보.
+- 🔴 **내장 브라우저 ≠ Claude in Chrome** — Claude Desktop 앱에는 별도의 내장 브라우저(`mcp__Claude_Browser__*`, 'browser pane')가 있고 세션 기본값으로 잡혀 있을 수 있다. 여기엔 **사용자 Chrome 의 포탈 로그인이 없다** → kiki skill 은 항상 `mcp__claude-in-chrome__*` 도구(ToolSearch 로 로드)를 쓴다. 내장 쪽 `browser_batch` 를 부르면 빈 창이 열리고 `Preview not found` 로 실패한다.
 - **chrome-devtools-mcp** *(kk-inspect · kk-dining · kk-pay 세금계산서 직접작성 필수)* — 도구 목록에 `upload_file`·`evaluate_script`·`select_page` 가 없으면 미등록: *"파일첨부 자동화에는 chrome-devtools-mcp 등록이 필요합니다: `claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest` (Node.js 필요) 후 Claude 재시작."* 미등록이면 입력까지만 자동·**첨부는 사용자 수동**으로 진행 여부를 묻는다.
 - ⭐ **첨부가 있는 작업은 *처음부터* chrome-devtools 창에서 시작한다** (2026-07-07 실측 교훈): Claude in Chrome 으로 작성·저장까지 해놓고 첨부 단계에서 갈아타면 **로그인·작성을 처음부터 다시** 하게 된다(Claude in Chrome `file_upload` 는 채팅에 첨부한 파일만 올릴 수 있어 로컬 증빙 첨부 불가). 첨부 없는 단순 조회만 Claude in Chrome 무방. chrome-devtools 는 자체 Chrome(별도 프로필)을 띄우며 도구 매핑·workspace root 제약은 [`nexacro_file_upload.md`](nexacro_file_upload.md) §4-6.
 - **새 창 안내 문구(첨부 작업 시작 전 반드시)**: *"파일첨부를 위해 Claude 전용 Chrome 창을 하나 띄웁니다. 평소 Chrome 과 로그인이 공유되지 않아 그 창에서 포탈(e.kist.re.kr)에 한 번 더 로그인해 주세요. 한 번 하면 그 창은 기억합니다(정오 리셋 제외)."*
@@ -66,6 +67,8 @@ kiki 는 Chrome 창 두 종류를 쓴다. **skill 마다 쓰는 창이 정해져
 - 엑셀 잠금: Windows 는 열려 있으면 `PermissionError` → 닫아달라 안내. macOS 는 오류 없이 저장되지만 Excel 이 덮어쓸 수 있으니 작업 전 닫아달라 안내.
 - 재시작 안내 문구: Windows "트레이 아이콘 → Quit" / macOS "Dock 아이콘 → Quit(⌘Q), 창 닫기는 종료 아님". Linux 는 Claude Desktop 이 없으므로 CLI 세션 재시작.
 - 콘솔 한글: Windows PowerShell 5.1 은 BOM 없는 스크립트의 한국어를 깨뜨린다(`install.ps1` 은 BOM 포함). Python 출력은 `PYTHONIOENCODING=utf-8` 이 설정돼 있어 깨져 보여도 파일 내용은 정상.
+- Windows Git Bash: `"C:\kiki\budget\"` 처럼 **역슬래시로 끝나는 경로를 큰따옴표로 감싸면** 닫는 따옴표가 이스케이프돼 `unexpected EOF` → `/c/kiki/budget/` 형식을 쓴다.
+- Windows 콘솔 cp949: python 이 `—`(em dash) 등 cp949 밖 문자를 print 하면 `UnicodeEncodeError` 로 **죽는다**(PYTHONIOENCODING 미설정 셸) → 스크립트 첫머리 `sys.stdout.reconfigure(encoding='utf-8')`, 한 줄 검증도 동일.
 - 상세 비교표 → `INSTALL.md` §6.
 
 ## 안내 문구 표준

@@ -77,6 +77,7 @@
     var ds = S.form.ds_datagrid1, out = [];
     for (var r = 0; r < ds.getRowCount(); r++) {
       if (String(ds.getColumn(r, 'LEV') || '') !== '1') continue;
+      if (!String(ds.getColumn(r, 'BUDGITEMCD') || '')) continue;   // 소계/총계행(코드 없음) 제외
       out.push({
         dsRow: r,
         cd: String(ds.getColumn(r, 'BUDGITEMCD') || ''),
@@ -204,7 +205,7 @@
 
   window.kkExe = {
     init: init, cats: cats, open: open, parse: parse, close: close, pop: pop,
-    _version: 'kk-budget-exec-detail/1.0'
+    _version: 'kk-budget-exec-detail/1.1'
   };
   return window.kkExe._version;
 })();

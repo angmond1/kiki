@@ -53,6 +53,10 @@ def dash(ws, row, col, label="-"):
 
 
 def main(json_path, out_path):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")  # Windows cp949 콘솔에서 한글·기호 출력 크래시 방지
+    except Exception:
+        pass
     snap = json.load(open(json_path, encoding="utf-8"))
     cats = snap["track_categories"]
     ds = snap["snapshot_date"]
