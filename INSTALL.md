@@ -6,7 +6,7 @@
 
 ### 0-1. 계정·앱
 - **Claude** — Claude Code(CLI) 또는 Claude Desktop 앱. 둘 다 같은 `~/.claude/skills/` 를 쓴다. Desktop 만 쓰더라도 **CLI 를 함께 설치**해 두면 설치 스크립트·MCP 등록이 쉽다(https://code.claude.com/docs/ko/quickstart).
-- **권장 모델**: 설치·첫 설정·첫 1~2회 실사용은 **Opus 5**(Fable 5.1 가능하면 그것), 노력도 high. 익숙해지면 kk-mail·kk-budget 은 Sonnet 5(medium) — 단 kk-mail 자연어 메일검색은 Opus 5, kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high). **kk-dining · kk-pay 세금계산서 직접작성은 계속 Opus 5**(NEXACRO 폼 제어 함정이 많고 결재 직전 작업).
+- **권장 모델**: 설치·첫 설정·첫 1~2회 실사용은 **Opus 5**(Fable 5.1 가능하면 그것), 노력도 high. 익숙해지면 kk-budget 은 Sonnet 5(medium), kk-mail 은 Opus 5(분류·스팸처리는 Sonnet 5), kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high). **kk-dining · kk-pay 세금계산서 직접작성은 계속 Opus 5**(NEXACRO 폼 제어 함정이 많고 결재 직전 작업).
 
 ### 0-2. Google Chrome + "Claude in Chrome" 확장 (필수 — 평소 Chrome 창 제어)
 1. 설치: https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn

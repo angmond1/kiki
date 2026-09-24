@@ -2,7 +2,7 @@
 
 > **모든 kk-* skill 은 첫 실행(부트스트랩)과 매 작업 시작 때 아래를 동일하게 확인/안내한 뒤 진행한다.**
 > 무자격 환경(미연결·미로그인)이면 **크래시 대신 친절한 안내로 멈춘다**. 설치 자체(패키지·Python·Node.js·MCP 등록)는 `CLAUDE.md`/`INSTALL.md` 가 담당 — 여기는 *실행 직전* 점검.
-> 권장 모델: 첫 설정·첫 1~2회 = Opus 5(high), 이후 kk-mail·kk-budget 은 Sonnet 5(kk-mail 자연어 메일검색은 Opus 5), kk-dining·세금계산서 직접작성은 Opus 5 유지(README 표).
+> 권장 모델: 첫 설정·첫 1~2회 = Opus 5(high), 이후 kk-budget 은 Sonnet 5, kk-mail 은 Opus 5(분류·스팸처리는 Sonnet 5), kk-dining·세금계산서 직접작성은 Opus 5 유지(README 표).
 
 ## 0단계 — 환경 점검 (모든 skill 공통, 부트스트랩 맨 앞)
 
