@@ -22,13 +22,14 @@
   claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest
   ```
   `--scope user` = 모든 폴더·**Claude Desktop 에서도** 같은 등록이 보인다. 등록 후 Claude 재시작.
+  CLI 가 없으면 사용자 홈의 `.claude.json`(Windows `C:\Users\<이름>\.claude.json`)에 `{"mcpServers": {"chrome-devtools": {"type": "stdio", "command": "npx", "args": ["-y", "chrome-devtools-mcp@latest"]}}}` 를 직접 넣어도 같다(파일이 있으면 `mcpServers` 에 병합). 대화창에 "chrome-devtools-mcp 설치해줘" 라고 하면 에이전트가 이 과정을 대신한다.
   (plugin 으로도 가능: `claude plugin install chrome-devtools-mcp@claude-plugins-official`)
 - Codex: 설정 → MCP 서버 → 서버 추가 → 이름 `chrome-devtools`, 명령 `npx -y chrome-devtools-mcp@latest`.
 - 확인: 재시작 후 도구 목록에 `evaluate_script`·`upload_file`·`select_page` 등이 보이면 성공(서버 접두어는 설치 방식마다 다름 — `skills/_shared/environment_setup.md` "도구 이름 표기 규칙").
 - 이 창은 **평소 Chrome 과 로그인이 공유되지 않는다** → 첨부 작업 때 그 창에서 `e.kist.re.kr` 에 **한 번 더 로그인**(이후 기억).
 
 ### 0-4. Python 3 + Node.js (패키지 설치 때 함께)
-- Python: https://www.python.org/downloads/ — Windows 는 설치 화면 **"Add python.exe to PATH"** 체크. (`winget install -e --id Python.Python.3.12` / macOS `brew install python` / Ubuntu `sudo apt install python3 python3-pip`)
+- Python: https://www.python.org/downloads/ — Windows 는 설치 화면 **"Add python.exe to PATH"** 체크. (`winget install -e --id Python.Python.3.12` / macOS `brew install python` / Ubuntu `sudo apt install python3 python3-pip`; macOS 에 Homebrew 가 없으면 위 링크의 설치 파일로, 새 Mac 은 `python3` 첫 실행 때 Xcode 개발자 도구 설치 창이 뜰 수 있음)
 - Node.js(LTS): https://nodejs.org/ (`winget install -e --id OpenJS.NodeJS.LTS` / `brew install node` / `sudo apt install nodejs npm`)
 - 확인: 새 터미널에서 `python --version`(macOS/Linux `python3 --version`), `node --version`, `npx --version`.
 - **Python 패키지는 미리 설치하지 않는다** — 각 skill 이 필요한 시점에 확인 후 `pip install`(아래 §5 표).
@@ -91,6 +92,7 @@ Copy-Item -Recurse "skills\kk-mail" "$env:USERPROFILE\.claude\skills\kk-mail"
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\kiki" | Out-Null
 Copy-Item "skills\_shared\kiki.config.example.json" "$env:USERPROFILE\.claude\kiki\kiki.config.json"
 Copy-Item "skills\_shared\token.txt.example" ".\token.txt"
+New-Item -ItemType Directory -Force budget, dining, inspect, _tmp | Out-Null
 ```
 ```bash
 # macOS/Linux
@@ -99,6 +101,7 @@ cp -R skills/kk-mail ~/.claude/skills/kk-mail
 mkdir -p ~/.claude/kiki
 cp skills/_shared/kiki.config.example.json ~/.claude/kiki/kiki.config.json
 cp skills/_shared/token.txt.example ./token.txt
+mkdir -p budget dining inspect _tmp
 ```
 그리고 `~/.claude/kiki/kiki.config.json` 의 `"kiki_root"` 에 패키지 폴더 경로를 적는다(Windows 는 `C:\\kiki` 처럼 백슬래시 2개).
 

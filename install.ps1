@@ -1,4 +1,4 @@
-#requires -version 5
+﻿#requires -version 5
 <#
   kiki 설치 스크립트 (Windows)
   - 선택한 skill + 공통(_shared) 을 ~/.claude/skills/ 로 복사 (Claude 가 skill 을 찾는 곳)

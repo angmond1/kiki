@@ -79,6 +79,7 @@ p, r = sys.argv[1], sys.argv[2]
 s = io.open(p, encoding="utf-8").read().replace('"kiki_root": ""', '"kiki_root": ' + json.dumps(r), 1)
 io.open(p, "w", encoding="utf-8").write(s)
 PY
+  rm -f "$cfg/kiki.config.json.bak"
   echo "[기록] kiki_root = $root  ($cfg/kiki.config.json)"
 elif ! grep -q '"kiki_root"' "$cfg/kiki.config.json"; then
   echo "[주의] 기존 kiki.config.json 에 kiki_root 항목이 없습니다. 첫 실행 때 Claude 가 추가합니다: $root"

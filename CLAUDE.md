@@ -2,12 +2,12 @@
 
 > 이 문서는 **Claude (Claude Code CLI / Claude Desktop 앱)** 가 kiki 를 설치·실행할 때 따르는 기준이다.
 > **에이전트(Claude)에게**: 사용자가 "kiki 설치해줘" / "이거 설치해줘" 라고 하면, 추측하지 말고 **아래 1번 절차를 순서대로** 수행하라. 패키지 폴더를 확보한 **직후, 진행 전에 이 `CLAUDE.md` 와 `README.md` 를 먼저 Read 하라**(자동 주입이 안 될 수 있으니 능동적으로 읽는다). 각 skill 사용법은 설치 후 각 `skills/kk-*/SKILL.md` 가 1차 기준.
-> (Codex 사용자는 [CODEX.md](CODEX.md). 메인테이너 노트는 배포본에 없다 — `CLAUDE.local.md`, repo 밖.)
+> (Codex 사용자는 [CODEX.md](CODEX.md). `docs/`·`tools/` 는 메인테이너용 참고 자료라 사용자는 읽지 않아도 된다. 메인테이너 개인 노트 `CLAUDE.local.md` 는 배포본에 없다.)
 
 ## 0. kiki 가 무엇인가 (한 줄)
 KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·`kk-inspect`). **로그인된 Chrome 을 "Claude in Chrome" 확장 + chrome-devtools-mcp 로 제어**해 포털/Dooray 를 다룬다. skill 은 `~/.claude/skills/` 에 두면 Claude Code·Desktop 이 인식한다(설치 후 **재시작 필요**).
 
-**권장 모델**: 설치·첫 설정·첫 1~2회 실사용 = **Opus 5**(Fable 5.1 가능하면) · 노력도 high. 이후 kk-mail·kk-budget 은 Sonnet 5, kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high), **kk-dining·kk-pay 세금계산서 직접작성은 Opus 5 유지**. README 에는 이 표가 없으므로 **설치 완료 안내(Step 5) 때 이 권장을 표로 한 번 보여준다**. 사용자가 다른 모델로 설치를 시작했으면 한 줄로 알려주되 진행은 계속한다.
+**권장 모델**: 설치·첫 설정·첫 1~2회 실사용 = **Opus 5**(Fable 5.1 가능하면) · 노력도 high. 이후 kk-mail·kk-budget 은 Sonnet 5, kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high), **kk-dining·kk-pay 세금계산서 직접작성은 Opus 5 유지**. README 에는 skill 별 권장모델(Opus/Sonnet)만 있으므로 **설치 완료 안내(Step 5) 때 "첫 설치·각 skill 첫 1~2회는 Opus, 이후 README 표대로" 를 한 번 알려준다**. 사용자가 다른 모델로 설치를 시작했으면 한 줄로 알려주되 진행은 계속한다.
 
 ---
 
@@ -16,8 +16,10 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
 ### Step 0 — 실행 환경 (Python · Node.js · 사내망)
 - **Python 3** 와 **Node.js**(npx) 가 있는지 확인한다: `python --version`(macOS/Linux `python3`), `node --version`, `npx --version`.
   - 없으면 **왜 필요한지 한 줄**(Python: 엑셀·증빙 변환·Dooray 업로드 / Node.js: 파일첨부용 chrome-devtools-mcp) 안내 후 **사용자 confirm 을 받고 설치**한다:
-    Windows `winget install -e --id Python.Python.3.12` · `winget install -e --id OpenJS.NodeJS.LTS` / macOS `brew install python node` / Ubuntu `sudo apt install python3 python3-pip nodejs npm` / 링크 https://www.python.org/downloads/ · https://nodejs.org/ . 설치 후 **새 터미널**에서 재확인(PATH).
+    Windows `winget install -e --id Python.Python.3.12 --accept-source-agreements --accept-package-agreements` · `winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements` / macOS `brew install python node`(Homebrew 가 없으면 아래 링크의 설치 파일로; 새 Mac 은 `python3` 첫 실행 때 Xcode 개발자 도구 설치 창이 뜰 수 있다) / Ubuntu `sudo apt install python3 python3-pip nodejs npm` / 링크 https://www.python.org/downloads/ · https://nodejs.org/ . 설치 후 **새 터미널**에서 재확인(PATH).
   - Python **패키지**(openpyxl·Pillow 등)는 지금 깔지 않는다 — 각 skill 이 필요할 때 확인·설치.
+  - skill 별 필요 런타임: **kk-mail 없음 / kk-budget Python / kk-pay·kk-dining·kk-inspect Python + Node.js**(chrome-devtools). 사용자가 쓸 skill 이 정해져 있으면 그것만 확인한다.
+  - 설치 직후엔 이 세션의 셸이 새 PATH 를 못 볼 수 있다 → 재확인이 실패해도 설치 실패로 단정하지 말고, 재시작(Step 5) 후 다시 확인하자고 안내한다.
 - **git 은 필요 없다.** 있으면 clone 에 써도 되지만 없다고 설치를 요구하지 말 것(ZIP/폴더로 진행).
 - **KIST 사내망**에서만 동작. 밖이면 KIST VPN 접속을 안내.
 
@@ -27,7 +29,7 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
    - **git 있으면** `git clone https://github.com/angmond1/kiki.git <root>` (권한 오류면 조용히 실패하지 말고: `gh auth login` 또는 collaborator 초대 여부(메인테이너 `dnklee@kist.re.kr`) 확인 요청, 또는 아래 ZIP 로).
    - **git 없으면** 사용자에게 안내: 브라우저에서 GitHub 페이지(로그인·collaborator 필요) `Code ▾ → Download ZIP` → `<root>` 에 풀기 → 완료를 알려달라. (`kiki-main` 하위 폴더가 생겨도 그 안에서 진행하면 된다.)
    - 동료에게 받은 폴더면 그대로.
-3. ⚠️ **이후 작업은 그 폴더 안에서**(Claude Code 는 그 폴더를 작업 루트로). 다른 폴더에서 계속하면 이 지침이 적용되지 않아 추측 설치가 된다.
+3. ⚠️ **이후 작업은 그 폴더 안에서**(Claude Code 는 그 폴더를 작업 루트로). 다른 폴더에서 계속하면 이 지침이 적용되지 않아 추측 설치가 된다. 작업 루트를 옮기는 법: Claude Code 는 그 폴더에서 `claude` 를 다시 실행(Desktop 은 그 폴더를 프로젝트로 열기). 못 옮기면 스크립트와 이 파일을 **절대경로**로 실행·Read 하며 계속한다.
 
 ### Step 2 — skill 설치 (OS 자동 감지)
 현재 OS 를 판단해 **하나만** 실행한다. `-Root`/`--root` 에 Step 1 의 폴더를 넘긴다(패키지 폴더 = root 면 생략 가능).
@@ -47,7 +49,7 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
    ```
    claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest
    ```
-   (`--scope user` 라 Claude Desktop 도 같은 등록을 읽는다. plugin 경로도 가능: `claude plugin install chrome-devtools-mcp@claude-plugins-official`.) `claude` CLI 가 PATH 에 없으면 `~/.claude.json` 의 `mcpServers` 에 직접 추가한다(같은 결과): `"chrome-devtools": {"type": "stdio", "command": "npx", "args": ["-y", "chrome-devtools-mcp@latest"]}`. 등록 후 재시작 필요.
+   (`--scope user` 라 Claude Desktop 도 같은 등록을 읽는다. plugin 경로도 가능: `claude plugin install chrome-devtools-mcp@claude-plugins-official`.) `claude` CLI 가 PATH 에 없으면 사용자 홈의 **`.claude.json`**(Windows `C:\Users\<이름>\.claude.json`, macOS `~/.claude.json` — Claude Code 와 Desktop 의 Code 탭이 공통으로 읽는 사용자 설정)을 직접 편집한다(같은 결과): 파일이 없으면 `{"mcpServers": {"chrome-devtools": {"type": "stdio", "command": "npx", "args": ["-y", "chrome-devtools-mcp@latest"]}}}` 로 새로 만들고, 있으면 JSON 을 파싱해 `mcpServers` 에 이 항목만 **병합**(다른 키 보존, 편집 전 백업). 등록 후 재시작 필요.
    ⭐ **사용자가 "chrome-devtools-mcp 설치해줘" 라고만 말해도 이 항목을 수행한다**(README 준비물 3): Node.js(`npx`) 확인 → 없으면 Step 0 대로 설치 → 등록 → "재시작 후 도구 목록에 `upload_file` 이 보이면 성공" 안내. 사용자에게 **"파일첨부 때는 Claude 전용 새 Chrome 창이 뜨고, 거기서 포탈 로그인을 한 번 더 해야 한다"** 를 미리 알려준다.
 
 ### Step 4 — 토큰 파일 안내 (Dooray 토큰)
@@ -55,7 +57,7 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
 > "Dooray 드라이브 업로드(kk-pay 카드결제건 RPA)를 쓰려면 토큰이 필요합니다. https://kist.gov-dooray.com/setting/api/token 에서 개인 인증 토큰을 만들어 **`C:\kiki\token.txt`** 의 `Dooray token:` 다음 줄에 붙여넣고 저장한 뒤 '두레이 토큰 저장했다' 라고 알려주세요. 지금 안 해도 되고 kk-pay 쓸 때 해도 됩니다.
 > ⚠️ 토큰·API 키를 **채팅창에 직접 붙여넣지 마세요** — 대화 기록에 남아 타인에게 노출될 수 있습니다."
 
-원하면 파일을 열어준다(Windows `notepad <경로>`, macOS `open -e <경로>`). 사용자가 "두레이 토큰 저장했다"(또는 "토큰 넣었어") 라고 하면 파일을 읽어 **값은 출력하지 말고 형식만 확인**(길이·공백 없음) 후 진행. 채팅에 토큰이 붙여넣어지면 즉시 파일로 옮기고 채팅 노출 위험을 다시 알린다.
+원하면 파일을 열어준다(Windows `notepad <경로>`, macOS `open -e <경로>`). 사용자가 "두레이 토큰 저장했다"(또는 "토큰 넣었어") 라고 하면 파일을 읽어 **값은 출력하지 말고 형식만 확인**(공백 없는 30자 안팎의 영숫자·기호 문자열; 짧거나 공백·한글이 섞이면 잘못 붙여넣은 것) 후 진행. 채팅에 토큰이 붙여넣어지면 즉시 파일로 옮기고 채팅 노출 위험을 다시 알린다.
 
 ### Step 5 — ⚠️ 재시작 (반드시 안내, 건너뛰지 말 것)
 `~/.claude/skills/` 에 **새 skill 디렉토리가 생기면 그 세션에서는 인식되지 않는다**(Code·Desktop 공통). 설치 직후 사용자에게:
@@ -64,7 +66,7 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
 이때 README 에서 뺀 안내를 함께 준다: ① **권장 모델 표**(§0) ② **KIST 사내망**(밖이면 VPN) ③ **로그인 창**(§2 표 — 첨부 skill 은 Claude 전용 새 창에서 한 번 더 로그인) ④ 아래아한글·MS Office 는 필요할 때 skill 이 묻는다는 것.
 
 - **Claude Code**: 세션 종료 후 재실행(또는 새 세션). **Claude Desktop**: 트레이(Windows)·Dock(macOS) 아이콘 → **Quit(완전 종료)** 후 재실행. 창만 닫는 건 재시작이 아니다.
-- 같은 세션에서 바로 `kk-*` 를 트리거하려 하지 말 것.
+- 같은 세션에서 바로 `kk-*` 를 트리거하려 하지 말 것. 재시작 전에 사용자가 `kk-* 설정해줘` 를 요청하면 skill 을 흉내 내지 말고 재시작을 다시 안내한다(같은 세션에서는 새 skill 이 로드되지 않는다).
 
 ### Step 6 — 첫 실행 + 인식 확인
 재시작 후 `kk-<skill> 설정해줘`. **skill 부트스트랩이 응답하면 인식 성공.** 응답이 없으면 재시작을 다시 하고(Step 5), `~/.claude/skills/kk-mail/SKILL.md` 존재를 확인한다. 이후 실행 환경 점검은 [`skills/_shared/environment_setup.md`](skills/_shared/environment_setup.md) 0단계가 담당(Python 패키지·한글/Office 대안은 필요 시점에 묻는다).
