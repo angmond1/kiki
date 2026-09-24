@@ -32,7 +32,7 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 
 ## 준비물
 
-### 1. claude, chatgpt 유료 계정과 데스크탑 앱 설치
+### 1. claude, chatgpt 유료 계정과 데스크탑 앱 또는 CLI 설치
 - claude desktop app https://claude.com/download  
 - codex (chatgpt) https://openai.com/ko-KR/codex/  
 
