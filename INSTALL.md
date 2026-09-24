@@ -30,8 +30,8 @@
 
 ### 0-4. Python 3 + Node.js (설치 때 에이전트가 기본으로 설치)
 - 어느 skill 에 필요한가: **kk-mail 없음 / kk-budget Python / kk-pay·kk-dining·kk-inspect Python + Node.js**(파일첨부 도구 chrome-devtools-mcp 가 Node 프로그램). 전체 설치(기본)면 둘 다.
-- **직접 할 일은 없다** — "kiki 설치해줘" 과정에서 에이전트가 없는 것을 찾아 한 번 묻고 설치한다(Windows `winget`, 관리자 권한 불필요·1~3분). **Node.js 설치 중 '사용자 계정 컨트롤' 창이 뜨면 '예'**만 눌러 주면 된다.
-- `winget` 이 없는 PC(주로 Windows 10)는 에이전트가 다운로드 페이지를 열어 주고 설치 마법사 단계를 안내한다 — Python 은 첫 화면의 **"Add python.exe to PATH" 체크** 가 핵심, Node.js 는 기본값으로 Next 만 누르면 된다.
+- **직접 할 일은 없다** — "kiki 설치해줘" 과정에서 에이전트가 없는 것을 찾아 안내와 함께 바로 설치한다(Windows `winget`, 1~3분; kk-mail 만 설치할 때는 건너뜀). **설치 중 '사용자 계정 컨트롤' 창이나 설치 화면이 뜨면 '예 / 다음'**만 눌러 주면 된다.
+- `winget` 은 Windows 11·최신 Windows 10 에 기본 포함(PowerShell 어디서든 실행). 새 PC 에서 `winget` 이 안 잡히면 Microsoft Store 를 열어 '앱 설치 관리자'가 업데이트되게 하거나, 회사 정책으로 막힌 PC 면 에이전트가 다운로드 페이지를 열어 주고 설치 마법사 단계를 안내한다 — Python 은 첫 화면의 **"Add python.exe to PATH" 체크** 가 핵심, Node.js 는 기본값으로 Next 만 누르면 된다.
 - 미리 깔아두고 싶으면: Python https://www.python.org/downloads/ (PATH 체크) / Node.js(LTS) https://nodejs.org/en/download . macOS `brew install python node` / Ubuntu `sudo apt install python3 python3-pip nodejs npm`(macOS 에 Homebrew 가 없으면 `.pkg` 설치 파일로, 새 Mac 은 `python3` 첫 실행 때 Xcode 개발자 도구 설치 창이 뜰 수 있음).
 - 확인: 새 터미널에서 `python --version`(macOS/Linux `python3 --version`), `node --version`, `npx --version`. Windows 는 `py -3 --version` 도 됨(python.org 설치본의 py 런처 — `python` 이 PATH 에 없어도 동작). `python` 입력 시 Microsoft Store 가 열리면 아직 미설치. 설치 직후 열려 있던 창에서 `python` 이 안 잡히면 `py -3` 로 진행하거나 Claude 를 재시작.
 - **Python 패키지는 미리 설치하지 않는다** — 각 skill 이 필요한 시점에 확인 후 설치(아래 §5 표). 명령은 Windows `python -m pip install X` / macOS·Linux `python3 -m pip install --user X`(`externally-managed-environment` 오류면 `--break-system-packages` 추가). 에이전트가 confirm 후 대신 실행한다.
