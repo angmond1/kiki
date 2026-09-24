@@ -29,6 +29,7 @@ description: |
    - 로그인 페이지가 뜨면(세션 만료) 사용자에게 "Dooray에 로그인해 달라" 안내 후 중단.
 3. **코어 주입(1회)**: `scripts/kk_mail_ops.js`를 Read → `javascript_tool`로 inject.
    - 반환값이 `kk-mail-ops/1.3`(버전 문자열)이면 성공. 이후 `window.kkMail.*` 호출.
+   - 코어 1.3 부터 **Dooray 검색 API**(`POST /v2/wapi/mails/search`, 검색창과 동일 호출)가 `searchMails`/`searchMany` 로 들어 있다 — 메일 찾기(Tier 4 경로 A)의 기본 수집 수단. 목록 API(`listMails`)는 최신부터 페이지를 넘기므로 오래된 기간은 검색 API 로. 파라미터 실측은 `references/wapi_reference.md` "검색" 절.
    - 페이지가 새로고침되면 `window.kkMail`이 사라지므로 재주입.
    - ⚠️ **async 반환이 `{}`로 비면**(특히 `/mail` → 특정 메일 redirect 직후 탭에서 발생): `javascript_tool`이 Promise 결과를 회수 못 하는 현상. 결과를 `window.__x = ...`에 저장하고 마지막 식은 동기 마커(`"go";`)로 즉시 반환 → **다음 호출에서 `JSON.parse(JSON.stringify(window.__x))`로 동기 회수**(2-스텝). sync 반환(`1+1`)은 정상이라 이 우회로가 통한다. 쓰기(`reportSpam`/`moveMails`)도 같은 패턴으로 실행 후 결과 회수.
 4. **출력 제약(2026-09-24 실측)**: `javascript_tool` 반환 문자열은 **약 1,000자에서 잘리고**(`[TRUNCATED]`), 출력 필터가 **`a=b` 꼴이 섞인 결과를 통째로 `[BLOCKED: Cookie/query string]`** 처리하며 URL·8자리 이상 숫자열(메일 id)도 가린다. → 결과는 window 에 두고 코어의 **`fmtList(mails, from, to)` / `fmtBody(b, chars, offset)` / `sanitize()`** 로 조각내어 회수(`=` 금지, id 는 `hyId` 하이픈 꼴). 모든 Tier 공통.
