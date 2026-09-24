@@ -42,7 +42,7 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 
   그리고 나서 claude desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" 켜기  
 
-### 3. chrome-devtools-mcp 설치 (파일첨부용)
+### 3. chrome-devtools-mcp 설치 (파일첨부용, Node.js 필요)
 - claude desktop: 대화창에서 "chrome-devtools-mcp 설치해줘"  
 - codex: 설정 → MCP 서버 → 서버 추가 → 이름 chrome-devtools  
 
