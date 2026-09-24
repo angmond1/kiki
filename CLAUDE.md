@@ -14,12 +14,14 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
 ## 1. 설치 절차 (에이전트가 그대로 실행)
 
 ### Step 0 — 실행 환경 (Python · Node.js · 사내망)
-- **Python 3** 와 **Node.js**(npx) 가 있는지 확인한다: `python --version`(macOS/Linux `python3`), `node --version`, `npx --version`. Windows 는 `python` 이 없어도 `py -3 --version` 이 되면 설치된 것(py 런처는 항상 PATH 에 있음) — 그 경우 이후 모든 명령을 `python` 대신 `py -3` 로 실행한다. `python` 을 쳤을 때 **Microsoft Store 창이 열리면 미설치**(Windows 의 가짜 python.exe).
-  - 없으면 **왜 필요한지 한 줄**(Python: 엑셀·증빙 변환·Dooray 업로드 / Node.js: 파일첨부용 chrome-devtools-mcp) 안내 후 **사용자 confirm 을 받고 설치**한다:
-    Windows `winget install -e --id Python.Python.3.12 --accept-source-agreements --accept-package-agreements` · `winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements` / macOS `brew install python node`(Homebrew 가 없으면 아래 링크의 설치 파일로; 새 Mac 은 `python3` 첫 실행 때 Xcode 개발자 도구 설치 창이 뜰 수 있다) / Ubuntu `sudo apt install python3 python3-pip nodejs npm` / 링크 https://www.python.org/downloads/ · https://nodejs.org/ . 설치 후 **새 터미널**에서 재확인(PATH). **Windows 에서 Python 이 없을 때의 실제 순서**: ① 사용자에게 "Python 이 없어 설치합니다(엑셀·증빙 변환에 필요)" 안내 → confirm ② `winget install -e --id Python.Python.3.12 --accept-source-agreements --accept-package-agreements` 실행(1~2분, 관리자 권한 불필요) — `winget` 자체가 없으면(주로 Windows 10) https://www.python.org/downloads/ 설치 파일을 받아 **"Add python.exe to PATH" 체크** 후 설치하라고 안내 ③ 확인은 `py -3 --version` → 되면 OK. `python --version` 이 여전히 안 되면 PATH 미반영이니 이번 세션은 `py -3` 로 진행하고 재시작 후 정상화된다고 알린다 ④ pip 는 `py -3 -m pip install X`.
-  - Python **패키지**(openpyxl·Pillow 등)는 지금 깔지 않는다 — 각 skill 이 필요할 때 확인·설치.
-  - skill 별 필요 런타임: **kk-mail 없음 / kk-budget Python / kk-pay·kk-dining·kk-inspect Python + Node.js**(chrome-devtools). 사용자가 쓸 skill 이 정해져 있으면 그것만 확인한다.
-  - 설치 직후엔 이 세션의 셸이 새 PATH 를 못 볼 수 있다 → 재확인이 실패해도 설치 실패로 단정하지 말고, 재시작(Step 5) 후 다시 확인하자고 안내한다.
+- **Python 3 와 Node.js 는 설치 때 기본으로 갖춘다** — 전체 설치(기본)면 둘 다, 사용자가 skill 을 골랐으면: kk-mail 만 → 둘 다 불필요 / kk-budget → Python / **kk-pay·kk-dining·kk-inspect(첨부 skill) → Python + Node.js**(chrome-devtools-mcp 가 Node 프로그램).
+- 확인: `python --version`(macOS/Linux `python3`), `node --version`, `npx --version`. Windows 는 `python` 이 없어도 `py -3 --version` 이 되면 설치된 것(py 런처는 항상 PATH 에 있음) — 그 경우 이후 모든 명령을 `python` 대신 `py -3` 로 실행한다. `python` 을 쳤을 때 **Microsoft Store 창이 열리면 미설치**(Windows 의 가짜 python.exe).
+- 없으면 **에이전트가 설치를 시작한다**(묻는 건 한 번): *"Python 과 Node.js 가 없어 설치합니다 — Python 은 엑셀·증빙 변환, Node.js 는 파일첨부 도구에 필요합니다. 1~3분 걸리고, 중간에 '사용자 계정 컨트롤' 창이 뜨면 **예**를 눌러 주세요. 진행할까요?"* → confirm 후:
+  - Windows: `winget install -e --id Python.Python.3.12 --accept-source-agreements --accept-package-agreements` → `winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements` (조용히 설치. Node.js 는 PC 전체 설치라 **UAC 창이 뜬다** — 사용자가 '예'를 눌러야 진행되니 실행 직후 그 사실을 다시 알린다. 타임아웃은 5분 이상으로.)
+  - `winget` 이 없으면(주로 Windows 10): 다운로드 페이지를 열어주고(`start https://www.python.org/downloads/`, `start https://nodejs.org/en/download`) 설치 마법사를 **단계별로 안내**한다 — Python: 첫 화면 아래 **"Add python.exe to PATH" 체크 → Install Now → UAC 예 → Close** / Node.js: **Next → 약관 동의 체크 → Next → Next → (Tools for Native Modules 는 체크 안 함) → Next → Install → UAC 예 → Finish**. 끝났다고 하면 다시 확인.
+  - macOS: `brew install python node`(Homebrew 가 없으면 python.org / nodejs.org 의 `.pkg` 설치 파일을 열어주고 "계속 → 동의 → 설치 → 암호 입력" 안내; 새 Mac 은 `python3` 첫 실행 때 Xcode 명령줄 도구 설치 창이 뜬다 → 설치) / Ubuntu: `sudo apt install python3 python3-pip nodejs npm`.
+- 설치 확인: Windows `py -3 --version`·`node --version`. `python`/`node` 가 아직 안 잡히면 PATH 미반영이니 이번 세션은 `py -3` 로 진행하고 재시작(Step 5) 후 정상화된다고 알린다(설치 실패로 단정 금지). pip 는 `py -3 -m pip install X`.
+- Python **패키지**(openpyxl·Pillow 등)는 지금 깔지 않는다 — 각 skill 이 필요할 때 확인·설치.
 - **git 은 필요 없다.** 있으면 clone 에 써도 되지만 없다고 설치를 요구하지 말 것(ZIP/폴더로 진행).
 - **KIST 사내망**에서만 동작. 밖이면 KIST VPN 접속을 안내.
 - OS 가 macOS/Linux 면 [INSTALL.md](INSTALL.md) §6 의 차이표(python3·pip 옵션·Homebrew·Xcode 도구·Finder 권한·hwp 변환 불가)를 먼저 읽고 그에 맞춰 안내한다. **macOS 는 미실측**이니 막히는 지점을 사용자에게 솔직히 말하고 우회한다.
