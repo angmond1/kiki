@@ -51,7 +51,7 @@ kiki 는 Chrome 창 두 종류를 쓴다. **skill 마다 쓰는 창이 정해져
 ### 5. 아래아한글 · MS Office — 있으면 자동, 없으면 **물어본다**
 - 필요한 경우만: kk-pay 증빙이 hwp/docx/xlsx 라 pdf 변환이 필요할 때. (kk-dining 의 hwpx 회의록은 **한글 없이 생성**되므로 해당 없음 — 열람만 한글/HOP) 대부분의 KIST PC 엔 둘 다 있다 — `python convert.py --check`(kk-pay) 로 유무 확인.
 - **없을 때** 단정하지 말고 묻는다: docx/xlsx → *"MS Office 가 없어 무료 LibreOffice(https://www.libreoffice.org/download/)를 설치하면 자동 변환됩니다. 설치할까요?"* / hwp → *"아래아한글이 없습니다. 무료 오픈소스 한글 편집기 HOP(Open HWP, Windows/macOS/Linux, https://github.com/golbin/hop)을 설치하면 hwp 를 열어 편집하고 PDF 로 내보낼 수 있습니다(자동 변환은 안 됨 — 내보낸 PDF 를 주시면 됩니다). 설치할까요?"* (Windows `.msi` / macOS `brew install hop` / Linux `.deb`·`.rpm`·`.AppImage`; rhwp 엔진 기반, MIT) 설치는 사용자 confirm 후. 거절하면 "직접 pdf 로 저장해 주세요" 로 진행.
-- kk-dining **hwpx 회의록 생성은 한글 불요·모든 OS**(`scripts/make_dininglog_hwpx.py`, 표준 라이브러리 — 양식 hwpx 의 값 셀 XML 치환). 한글이 없는 PC 에서 열어보려면 무료 HOP(https://github.com/golbin/hop) 안내(**작성엔 불필요**). hwp(구형)는 더 이상 만들지 않는다.
+- kk-dining **hwpx 회의록 생성은 한글 불요·모든 OS**(`scripts/make_dininglog_hwpx.py`, 표준 라이브러리 — 양식 hwpx 의 값 셀 XML 치환). 한글이 없는 PC 에서 열어보려면 무료 HOP(https://github.com/golbin/hop) 안내(**작성엔 불필요**; HOP 0.4.4 에서 hwpx 표시 확인 2026-09-24). hwp(구형)는 더 이상 만들지 않는다.
 
 ## 안내 문구 표준
 - 멈춰야 할 때: 무엇이/왜 안 됐는지 + 사용자가 할 일 한 문장으로. (조용히 실패 금지)

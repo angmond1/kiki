@@ -7,7 +7,7 @@
 ## 0. kiki 가 무엇인가 (한 줄)
 KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·`kk-inspect`). **로그인된 Chrome 을 "Claude in Chrome" 확장 + chrome-devtools-mcp 로 제어**해 포털/Dooray 를 다룬다. skill 은 `~/.claude/skills/` 에 두면 Claude Code·Desktop 이 인식한다(설치 후 **재시작 필요**).
 
-**권장 모델**: 설치·첫 설정·첫 1~2회 실사용 = **Opus 5**(Fable 5.1 가능하면) · 노력도 high. 이후 kk-mail·kk-budget 은 Sonnet 5, kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high), **kk-dining·kk-pay 세금계산서 직접작성은 Opus 5 유지**. 사용자가 다른 모델로 설치를 시작했으면 이 권장을 한 줄로 알려주되 진행은 계속한다.
+**권장 모델**: 설치·첫 설정·첫 1~2회 실사용 = **Opus 5**(Fable 5.1 가능하면) · 노력도 high. 이후 kk-mail·kk-budget 은 Sonnet 5, kk-pay 카드 RPA·kk-inspect 는 Sonnet 5(high), **kk-dining·kk-pay 세금계산서 직접작성은 Opus 5 유지**. README 에는 이 표가 없으므로 **설치 완료 안내(Step 5) 때 이 권장을 표로 한 번 보여준다**. 사용자가 다른 모델로 설치를 시작했으면 한 줄로 알려주되 진행은 계속한다.
 
 ---
 
@@ -47,7 +47,8 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
    ```
    claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest
    ```
-   (`--scope user` 라 Claude Desktop 도 같은 등록을 읽는다. plugin 경로도 가능: `claude plugin install chrome-devtools-mcp@claude-plugins-official`.) 등록 후 재시작 필요. 사용자에게 **"파일첨부 때는 Claude 전용 새 Chrome 창이 뜨고, 거기서 포탈 로그인을 한 번 더 해야 한다"** 를 미리 알려준다.
+   (`--scope user` 라 Claude Desktop 도 같은 등록을 읽는다. plugin 경로도 가능: `claude plugin install chrome-devtools-mcp@claude-plugins-official`.) `claude` CLI 가 PATH 에 없으면 `~/.claude.json` 의 `mcpServers` 에 직접 추가한다(같은 결과): `"chrome-devtools": {"type": "stdio", "command": "npx", "args": ["-y", "chrome-devtools-mcp@latest"]}`. 등록 후 재시작 필요.
+   ⭐ **사용자가 "chrome-devtools-mcp 설치해줘" 라고만 말해도 이 항목을 수행한다**(README 준비물 3): Node.js(`npx`) 확인 → 없으면 Step 0 대로 설치 → 등록 → "재시작 후 도구 목록에 `upload_file` 이 보이면 성공" 안내. 사용자에게 **"파일첨부 때는 Claude 전용 새 Chrome 창이 뜨고, 거기서 포탈 로그인을 한 번 더 해야 한다"** 를 미리 알려준다.
 
 ### Step 4 — 토큰 파일 안내 (Dooray 토큰)
 설치로 `<root>/token.txt` 가 생겼다. **절대경로를 그대로 보여주며** 안내한다:
@@ -59,6 +60,8 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
 ### Step 5 — ⚠️ 재시작 (반드시 안내, 건너뛰지 말 것)
 `~/.claude/skills/` 에 **새 skill 디렉토리가 생기면 그 세션에서는 인식되지 않는다**(Code·Desktop 공통). 설치 직후 사용자에게:
 > "설치 완료. **Claude 를 재시작**한 뒤 `kk-mail 설정해줘` 라고 해주세요. (새 skill 은 재시작해야 인식됩니다.)"
+
+이때 README 에서 뺀 안내를 함께 준다: ① **권장 모델 표**(§0) ② **KIST 사내망**(밖이면 VPN) ③ **로그인 창**(§2 표 — 첨부 skill 은 Claude 전용 새 창에서 한 번 더 로그인) ④ 아래아한글·MS Office 는 필요할 때 skill 이 묻는다는 것.
 
 - **Claude Code**: 세션 종료 후 재실행(또는 새 세션). **Claude Desktop**: 트레이(Windows)·Dock(macOS) 아이콘 → **Quit(완전 종료)** 후 재실행. 창만 닫는 건 재시작이 아니다.
 - 같은 세션에서 바로 `kk-*` 를 트리거하려 하지 말 것.

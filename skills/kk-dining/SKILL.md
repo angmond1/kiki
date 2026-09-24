@@ -25,7 +25,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 3. (질문 X) 카드 조회는 **법인+연구비 항상 둘 다**.
 4. **"회의록을 엑셀 외에 한글 파일(hwpx)로도 저장할까요?"** *(kk-dining 고유 저장 모드 — 부서 관행에 따라 엑셀만 쓰는 곳도 많다)* — 아니요(기본) = `xlsx_only` / 예 = `xlsx_and_hwpx`(구 `xlsx_and_hwp` 도 같은 뜻). Claude 는 어느 쪽이든 **엑셀만 조회**.
    - hwpx 는 `scripts/make_dininglog_hwpx.py` 가 **아래아한글 없이**(모든 OS, 추가 설치 없음) 별지1호 양식(`assets/minutes_template.hwpx`)의 값 셀만 치환해 만든다 → 한글 설치 여부를 묻거나 확인할 필요가 없다. hwp(구형)는 더 이상 만들지 않는다.
-   - 열람: 아래아한글 2014+ 또는 무료 오픈소스 **HOP**(Open HWP, Windows/macOS/Linux, https://github.com/golbin/hop). 한글이 없는 PC 에서 파일을 열어보고 싶어하면 HOP 을 안내(설치는 사용자 몫, **작성엔 불필요**).
+   - 열람: 아래아한글 2014+ 또는 무료 오픈소스 **HOP**(Open HWP, Windows/macOS/Linux, https://github.com/golbin/hop). 한글이 없는 PC 에서 파일을 열어보고 싶어하면 HOP 을 안내(설치는 사용자 몫, **작성엔 불필요**). **HOP 0.4.4 에서 표시 확인(2026-09-24).** 회의 목적(제목)은 **25자 내외** — 양식 셀이 한 줄이라 길면 자간이 눌린다(31자 실측). 상세는 회의내용에.
 5. **"Dooray 드라이브 업로드 RPA 처리? (예/아니요)"** — 아니요(기본)면 fam_0704 직접 자동작성. 예면 토큰(`<kiki_root>/token.txt`) + 담당 행정원 폴더(공통 `payment_admin.folder_url`).
 6. (질문 X, **지침 안내**) 폴더 3종 — 아래 "경로".
 
