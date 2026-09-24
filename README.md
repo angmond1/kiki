@@ -33,8 +33,8 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 ## 준비물
 
 ### 1. claude, chatgpt 유료 계정과 데스크탑 앱 (또는 CLI) 설치
-- claude desktop app https://claude.com/download  
-- codex (chatgpt) https://openai.com/ko-KR/codex/  
+- claude desktop app 설치 https://claude.com/download  
+- codex (chatgpt) 설치 https://openai.com/ko-KR/codex/  
 
 ### 2. chrome 브라우저 + 확장 프로그램 Claude in Chrome 설치
 - chrome 브라우저 설치 https://www.google.com/chrome/  
@@ -42,7 +42,7 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 
   그리고 나서 claude desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" 켜기  
 
-### 3. chrome-devtools-mcp (파일첨부용)
+### 3. chrome-devtools-mcp 설치 (파일첨부용)
 - claude desktop: 대화창에서 "chrome-devtools-mcp 설치해줘"  
 - codex: 설정 → MCP 서버 → 서버 추가 → 이름 chrome-devtools  
 
