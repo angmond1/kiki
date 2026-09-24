@@ -5,25 +5,26 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 
 # kk-dining — KIST 회의비 처리
 
-카드로 결제한 회의비(식사·카페)를 골라 **사전결재와 매칭 → 회의록 엑셀 작성 → fam_0704 지급신청서 직접 자동작성·임시저장·결재상신**까지 처리한다. 조회는 통합정보 SSO 세션(토큰 불요), fam_0704 자동작성은 부모탭 JS 로 NEXACRO 팝업 제어 — 회의록 팝업 **첨부가 있으므로 Claude 전용 새 Chrome 창(chrome-devtools-mcp)에서 처음부터**(JS 는 `evaluate_script`; 첨부 없는 조회만 Claude in Chrome), (선택) 별지1호 회의록 **hwpx** 동봉(한글 불요)·업로드는 사용자 옵션.
+카드로 결제한 회의비(식사·카페)를 골라 **사전결재와 매칭 → 회의록 엑셀 작성 → fam_0704 지급신청서 직접 자동작성·임시저장·결재상신**까지 처리한다. 조회는 통합정보 SSO 세션(토큰 불요), fam_0704 자동작성은 부모탭 JS 로 NEXACRO 팝업 제어 — 회의록 팝업 **첨부가 있으므로 Claude 전용 새 Chrome 창(chrome-devtools-mcp)에서 처음부터**(JS 는 `evaluate_script`; 첨부 없는 조회만 Claude in Chrome). **회의록 엑셀은 항상 자동 저장**, 별지1호 회의록 **hwpx 는 사용자가 원할 때만**(매번 묻는다, 기본 안 만듦)·업로드는 사용자 옵션.
 
-> **2026-06-05 패러다임 전환**: 회의록 hwp 양산 → 두레이 업로드 → 행정원 수기 신청 (옛 v1) → **회의록 엑셀 master + fam_0704 직접 자동작성·결재상신** (v2). 회의록 파일 동봉은 **hwpx**(한글 불요, `scripts/make_dininglog_hwpx.py`)로 — 보관 선호 옵션.
+> **2026-06-05 패러다임 전환**: 회의록 hwp 양산 → 두레이 업로드 → 행정원 수기 신청 (옛 v1) → **회의록 엑셀 master + fam_0704 직접 자동작성·결재상신** (v2).
+> ⭐ **2026-09-24 사용자 지시 — 저장 규칙**: 엑셀 = 임시저장 직후 **묻지 않고 자동 기록**. 한글(hwpx) = **항상 만들 필요 없음 → 완료 보고 때 "한글 회의록 파일도 만들까요?" 한 번 묻고, 사용자가 요구할 때만** 생성(`scripts/make_dininglog_hwpx.py`, 한글 불요). 설정(`log_format`)으로 hwpx 를 자동 생성하지 않는다.
 
 ## 정보 5분류
-- **A 내장**: 회의비 판별(음식점·카페), 인원 산정(⌈금액÷5만⌉+1, **식대+음료 합산**), 회의시간 융통성(USETIME 참고), 별지1호 hwpx 셀매핑(옵션, 한글 불요), 회의록 엑셀 9컬럼, fam_0704 자동작성 11단계, 회의내용 가이드, 분류코드 면제(**I·S·B·F·부서운영비**).
+- **A 내장**: 회의비 판별(음식점·카페), 인원 산정(⌈금액÷5만⌉+1, **식대+음료 합산**), 회의시간 융통성(USETIME 참고), 별지1호 hwpx 셀매핑(요청 시만, 한글 불요), 회의록 엑셀 9컬럼, fam_0704 자동작성 11단계, 회의내용 가이드, 분류코드 면제(**I·S·B·F·부서운영비**).
 - **B 런타임조회**: 카드내역(fam_0711 법인+연구비)·참여과제(rdm_2011)·사전결재(fam_0100)·발의자 사번. → `scripts/portal_ops.js`
-- **C 환경준비**: **Claude 전용 새 Chrome 창**(chrome-devtools-mcp — 회의록 팝업 첨부 때문; 그 창에서 포탈 `e.kist.re.kr` 로그인 **한 번 더**, 평소 Chrome 로그인은 넘어오지 않는다고 미리 안내) + KIST 사내망(밖이면 VPN) / Python `openpyxl`(엑셀 작성 직전에 확인·설치) / (옵션) hwpx 회의록 — **추가 설치 없음**(표준 라이브러리, 한글 불요·모든 OS; 열람은 한글 또는 무료 HOP) / (옵션) Dooray 로그인 + `token.txt`.
-- **D config**: 공통(이름·카드책임자·참여과제)은 `~/.claude/kiki/kiki.config.json`(형제 공유), kk-dining 고유(**저장 모드**·upload_via_rpa·폴더)는 `kk-dining.config.json`. → `../_shared/personal_config.md`.
+- **C 환경준비**: **Claude 전용 새 Chrome 창**(chrome-devtools-mcp — 회의록 팝업 첨부 때문; 그 창에서 포탈 `e.kist.re.kr` 로그인 **한 번 더**, 평소 Chrome 로그인은 넘어오지 않는다고 미리 안내) + KIST 사내망(밖이면 VPN) / Python `openpyxl`(엑셀 작성 직전에 확인·설치) / (요청 시) hwpx 회의록 — **추가 설치 없음**(표준 라이브러리, 한글 불요·모든 OS; 열람은 한글 또는 무료 HOP) / (옵션) Dooray 로그인 + `token.txt`.
+- **D config**: 공통(이름·카드책임자·참여과제)은 `~/.claude/kiki/kiki.config.json`(형제 공유), kk-dining 고유(upload_via_rpa·폴더)는 `kk-dining.config.json`. → `../_shared/personal_config.md`.
 - **E 격리**: Dooray 토큰(`<kiki_root>/token.txt`)·사번·참석자 실명. skill 텍스트엔 0건.
 
 ## 설치/부트스트랩 (`kk-dining 설정해줘`)
-**0. 환경 점검** — `../_shared/environment_setup.md` 0단계(새 Chrome 창·통합정보 로그인[포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`]; python `openpyxl` 은 엑셀 작성 시점에; hwpx 동봉 여부는 아래 4).
+**0. 환경 점검** — `../_shared/environment_setup.md` 0단계(새 Chrome 창·통합정보 로그인[포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`]; python `openpyxl` 은 엑셀 작성 시점에; hwpx 는 설치 때 묻지 않는다 — 작업마다 요청 시).
 **공통 식별정보는 `~/.claude/kiki/kiki.config.json` 에서 읽는다**(없으면 1회 수집·저장, 다른 skill 재사용). kk-dining 고유만 `kk-dining.config.json`. (`../_shared/personal_config.md`)
 
 1. **성함·카드책임자·참여과제** *(공통 `user`/`card_holder`/`projects`)* — kiki.config 에 없으면 묻는다. 카드책임자 본인 여부 확인 + 사번 1회(없으면 fam_0711 에서). 참여과제는 `queryProjects` 자동조회 → 분류코드 포함 확인.
 2. **사전결재 면제 판정** *(자동 + 확인)* — 참여과제 분류코드(`projects[].code`)로 **I·S·B·F·부서운영비** 면제 자동 판정. **N(정부수탁) 과제는 소관부처에 따라 달라** 사용자가 답할 수 있게 부처 목록을 같이 보여준다: *"사전 내부결재 폐지 대상 = 과기정통부·산업통상자원부·문체부·식약처·국방부·환경부·복지부·경찰청·기상청 과제 + 주요사업(E). 이 과제의 소관부처가 이 중 하나인가요?"* → "맞나요?" 확인 (`project_code.md`). 과제별 저장 불필요.
 3. (질문 X) 카드 조회는 **법인+연구비 항상 둘 다**.
-4. **"회의록을 엑셀 외에 한글 파일(hwpx)로도 저장할까요?"** *(kk-dining 고유 저장 모드 — 부서 관행에 따라 엑셀만 쓰는 곳도 많다)* — 아니요(기본) = `xlsx_only` / 예 = `xlsx_and_hwpx`(구 `xlsx_and_hwp` 도 같은 뜻). Claude 는 어느 쪽이든 **엑셀만 조회**.
+4. (질문 X) **회의록은 엑셀에 자동 저장**. 한글(hwpx)은 설치 때 묻지 않고, **작업 완료 보고 때마다 "한글 회의록 파일도 만들까요?"** 로 묻고 원할 때만 만든다(2026-09-24 사용자 지시). 옛 `log_format: xlsx_and_hwpx` 설정이 있어도 **자동 생성하지 않는다**(무시). Claude 는 **엑셀만 조회**.
    - hwpx 는 `scripts/make_dininglog_hwpx.py` 가 **아래아한글 없이**(모든 OS, 추가 설치 없음) 별지1호 양식(`assets/minutes_template.hwpx`)의 값 셀만 치환해 만든다 → 한글 설치 여부를 묻거나 확인할 필요가 없다. hwp(구형)는 더 이상 만들지 않는다.
    - 열람: 아래아한글 2014+ 또는 무료 오픈소스 **HOP**(Open HWP, Windows/macOS/Linux, https://github.com/golbin/hop). 한글이 없는 PC 에서 파일을 열어보고 싶어하면 HOP 을 안내(설치는 사용자 몫, **작성엔 불필요**). **HOP 0.4.4 에서 표시 확인(2026-09-24).** 회의 목적이 길면 셀 안에서 줄바꿈된다(생성기가 줄 배치 캐시를 제거해 한글이 재계산 — 2026-09-24 수정). 그래도 제목은 간결하게, 상세는 회의내용에.
 5. **"Dooray 드라이브 업로드 RPA 처리? (예/아니요)"** — 아니요(기본)면 fam_0704 직접 자동작성. 예면 토큰(`<kiki_root>/token.txt`) + 담당 행정원 폴더(공통 `payment_admin.folder_url`).
@@ -35,7 +36,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 ### 경로 (설치 시 지침으로 안내)
 - 📁 **카드영수증/증빙**: 카페·마트·편의점·호텔 결제건만 명세서 jpg 필요 (식당은 카드전표 갈음). 사용자 폴더 경로 알려주거나 그때그때 첨부. → `meeting_form.md`
 - 📁 **회의록 엑셀**: `{kiki_root}\dining\meeting_log\{yymm}_회의록.xlsx` — **한 폴더, 월별 1파일**(하위 폴더 없음; `{kiki_root}` = 설치 때 고른 kiki 폴더, 기본 `C:\kiki` / `~/kiki`). **주된 목적 = 이전 회의 주제·내용과의 중복 방지 기록**(회의록 파일은 지급신청에 첨부하지 않는다). → `meeting_log_excel.md`
-- 📁 **회의록 hwpx**(저장 모드 `xlsx_and_hwpx`): 엑셀과 **같은 폴더**에 `{yymmdd}_{과제번호}_{과제이름 아주 간략히}_회의록.hwpx` (hwpx 는 1건씩, 한글 불요), 별지1호 양식. → `meeting_form.md`
+- 📁 **회의록 hwpx**(사용자가 요청한 때만): 엑셀과 **같은 폴더**에 `{yymmdd}_{과제번호}_{과제이름 아주 간략히}_회의록.hwpx` (hwpx 는 1건씩, 한글 불요), 별지1호 양식. → `meeting_form.md`
 - 📁 **근거자료**(회의내용 작성용 과제제안서·보고서): `{kiki_root}\dining\project_report\` — 부트스트랩 6 에서 복사를 요청한다.
 
 ## 작업 (`회의비 처리하자`)
@@ -52,7 +53,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 
 ### 단계 8-9: 회의내용 + 엑셀 작성
 8. **회의시간** — 카드승인시간(USETIME) 참고 융통성. 예: USETIME 14:38 → 회의 13:00~14:30 (결제 직전 종료).
-9. **회의내용**(10만원↑만) — 사용자가 직접 적어 준 경우 그대로 기록. **사용자가 작성을 부탁한 경우에만** 주제 + `project_report\` 의 제안서·보고서를 근거로 작성 후 확인(괄호 금지, 1.·2. 항목 사이 빈 줄, 항목당 하위불릿 4개 정도). 10만 미만은 목적 1줄. 작성 전 **중복 검사**(아래). **엑셀 행 추가** (`scripts/meeting_log_xlsx.py` `open_or_create(yymm)`+`append_row`): `{kiki_root}\dining\meeting_log\{yymm}_회의록.xlsx` (월별 1파일, 하위 폴더 없음). 저장 모드 `xlsx_and_hwpx` 면 `make_dininglog_hwpx.make_batch([{'data': …, 'hwpx': 경로}])` 로 **같은 폴더**에 `{yymmdd}_{과제번호}_{과제이름 간략}_회의록.hwpx` (건당 1파일, 한글 불요). → `meeting_log_excel.md`, `meeting_form.md`
+9. **회의내용**(10만원↑만) — 사용자가 직접 적어 준 경우 그대로 기록. **사용자가 작성을 부탁한 경우에만** 주제 + `project_report\` 의 제안서·보고서를 근거로 작성 후 확인(괄호 금지, 1.·2. 항목 사이 빈 줄, 항목당 하위불릿 4개 정도). 10만 미만은 목적 1줄. 작성 전 **중복 검사**(아래). **엑셀 행 추가 = 자동**(묻지 않음, fam 임시저장 직후) (`scripts/meeting_log_xlsx.py` `open_or_create(yymm)`+`append_row`): `{kiki_root}\dining\meeting_log\{yymm}_회의록.xlsx` (월별 1파일, 하위 폴더 없음, yymm = 처리 연월). 참석자는 **실제 등록 결과**(내부 = 참여연구원으로 통과한 사람, 외부 = 미참여 KIST·외부기관)로 적는다. **hwpx 는 완료 보고에서 "한글 회의록 파일도 만들까요?" 묻고 원할 때만** `make_dininglog_hwpx.make_batch([{'data': …, 'hwpx': 경로}])` 로 **같은 폴더**에 `{회의일 yymmdd}_{과제번호}_{과제이름 간략}_회의록.hwpx` (건당 1파일, 한글 불요). → `meeting_log_excel.md`, `meeting_form.md`
 
 ### 단계 10-11: fam_0704 자동작성 + 결재상신
 10. **fam_0704 직접 자동작성**(`회의록 작성 화면`, NEXACRO `fam_0704_02`):
@@ -69,6 +70,17 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 
 ### ⭐ 중복 방지 (작업마다 검사)
 회의록 엑셀의 **주된 목적이 이 중복 방지 기록**이다(회의록 파일은 지급신청에 첨부하지 않는다). 새 회의록을 쓰기 전 `meeting_log\*_회의록.xlsx` 전부를 `meeting_log_xlsx.all_titles()` 로 스캔 → 사용자가 준 주제가 과거 제목과 같거나 비슷하면 알리고 다른 각도의 주제를 제안, 회의내용도 과거와 겹치지 않게 쓴다(같은 제목/내용 재사용 금지).
+
+## ⚠️ 반복 실수 방지 — 2026-09-24 법인카드 국내 2건 처리에서 얻은 교훈 (같은 실수 2번 금지)
+진행 순서대로. 상세 코드는 `references/fam_0704_automation.md` §9-c·"한 상신에 행추가"·"2026-09-24 예방표".
+1. **카드 조회(단계 1)**: 사번은 fam_0711 화면 `ds_search.SEARCHID` 에 이미 있다(묻지 말 것). **미처리 = `PRGRSSTATNM`='영수증함'** 만 후보. 네이버페이·커넥트웨이브·OPENAI·ANTHROPIC·학회 등은 회의비 아님으로 따로 묶어 보여준다.
+2. **질문은 한 번에 모아서**: 회의시간 제안에 필요한 **승인시각 `USETIME` 은 fam_0711 에 없고 fam_0704_02 영수증함(`ds_datagrid1.USETIME`)에만 있다** → 사용자 답을 받은 직후 `doNew` 로 작성 화면을 먼저 열어(쓰기 아님) USETIME 을 읽고, **회의내용 작성 방식 / 회의시간 / 모호한 소속**을 AskUserQuestion 1회로 묻는다. Claude 가 쓴 회의내용은 초안을 보여주고 승인받은 뒤 입력.
+3. **참석자 내부 등록**: `DSColChangeEventInfo` 로 부르면 **아무 일도 안 일어난다** → `g.set_rowposition(r)` + `C.ds_datagrid1_oncolumnchanged.call(C,g,{columnid:'KORNM',row:r})`. **한 명씩 순차**(3초 대기 후 결과 확인) — 루프로 몰아 돌리면 팝업이 겹쳐 결과가 뒤섞인다. 결과 3갈래: 자동 반영 / "참여연구원이 아닙니다"(→ 행 삭제 후 외부 `한국과학기술연구원`·`PROJJOINYN N`) / 검색팝업 `pop_fam_0703_02_4`(여러 명 → `PARTIYN='Y'` 쪽 선택, 동명 2인이면 보고).
+4. **사용자가 "모두 KIST" 라고 해도 참여연구원은 일부뿐일 수 있다**(2026-09-24: 7명 중 3명만 참여) → 서버 판정대로 내부/외부를 나누고, 완료 보고에 누가 외부로 갔는지 밝힌다.
+5. **중복 참석 경고 `DUPLICATE_EAT_YN`**(같은 날 다른 회의록에 이미 참석자로 등록): 발의자 본인도 걸릴 수 있다 → **저장하지 말고** 상대 회의(시간·계정·장소·목적)를 그대로 보여주고 제외/유지/중단을 묻는다. 제외하면 인원·`JOINPEOPLE`·적요 대표자(`남은 첫 참석자 외 N명`)를 함께 고친다.
+6. **행 전환은 `rqstGrid_oncellclick.call(F,F.rqstGrid,{row:i})`** — `{}` 면 둘째 행 회의록 버튼이 **첫 행 카드 회의록**을 연다. 회의록을 열면 입력 전 `C.ds_param.CARDUSEMGRNO == 그 행 CARDUSEMGRNO` 이고 목적이 비었는지 **가드** 후 입력.
+7. `javascript_tool` 에서 팝업을 여는 호출을 마지막 값으로 두면 `Object reference chain is too long` 오류가 나도 **실행은 된 것** → 재호출하지 말고 다음 호출에서 상태를 읽는다(중복 실행 방지). 마지막 값은 항상 문자열로.
+8. **임시저장 직후 엑셀 자동 기록**(묻지 않음), hwpx 는 완료 보고에서 물어보고 요청 시만.
 
 ## ⭐ 2026-08-01 규정 변경 + 해외 회의비 (2026-09-07 실증)
 - ⚠️ **fam_0704 신규 직후 식비안내 팝업(`imp_pop_fam_intro`)은 하단 확인을 눌러 닫고 `visible===false` 검증까지**(호출만 하고 방치 금지, 2026-09-08). 팝업 원문 = 8/1 개정 안내: **사전결재 폐지는 과기정통부·산업부·문체부·식약처·국방부·환경부·복지부·경찰청·기상청·주요사업 과제만** — 기타부처 과제는 아직 사전결재 필요(소관부처 확인). **모든 정산과제는 과제 미참여자 최소 1명 참석 필수**(외부참석자 `PROJJOINYN` 전부 Y면 집행 불가; KIST 미참여자·외부기관 인원은 외부 grid). 다과: 액체류=영수증, 과자·빵·캡슐커피=사전결재. → `references/project_code.md`, `references/meeting_form.md`.
@@ -89,8 +101,8 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 - `references/fam_0703_automation.md` — ⭐ **연구비카드 회의비(fam_0703_02) 전용 절차서** (정찰 스니펫 / 이름표 / closure curRow 행 전환 `goRow()` / 매핑→계정→적요 순서 / DESP_LIST 오염 검증·복구 / 저장 체크리스트 / 2026-09-08 버벅거림 13건→예방).
 - `../_shared/nexacro_file_upload.md` — ⭐ **NEXACRO `ExtFileUpload` 첨부 자동화 공통 가이드**(2026-06-07 codex 실증, A/B/C 3 패턴). kk-pay·kk-dining·kk-inspect 공유. **C(정공법, `extUp._input_node` 직접) 우선 시도** 권장.
 - `references/meeting_log_excel.md` — 회의록 엑셀 9컬럼 관리 표준 (처리일 1파일).
-- `references/meeting_form.md` — (옵션) hwpx 별지1호 양식·셀매핑·인원·증빙·중복.
+- `references/meeting_form.md` — (요청 시) hwpx 별지1호 양식·셀매핑·인원·증빙·중복.
 - `references/project_code.md` — 분류코드·비목·면제(I·S·B·F·부서운영비)·발의자.
 - `references/fam0100_reference.md` — 사전결재 fetch 명세.
 - `references/hwp_automation.md` — (구형·미사용) 한글 COM 자동화·WPF팝업 — hwpx 생성기로 대체.
-- scripts: `portal_ops.js`(조회) · **`meeting_log_xlsx.py`(엑셀 헬퍼)** · **`make_dininglog_hwpx.py`**(옵션 hwpx — 한글 불요·모든 OS) · (구형·미사용) `make_dininglog.py`/`popup_watcher.py`(한글 COM .hwp) · `dooray_drive.py`(옵션 업로드).
+- scripts: `portal_ops.js`(조회) · **`meeting_log_xlsx.py`(엑셀 헬퍼)** · **`make_dininglog_hwpx.py`**(요청 시 hwpx — 한글 불요·모든 OS) · (구형·미사용) `make_dininglog.py`/`popup_watcher.py`(한글 COM .hwp) · `dooray_drive.py`(옵션 업로드).

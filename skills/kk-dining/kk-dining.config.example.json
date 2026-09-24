@@ -1,7 +1,6 @@
 {
   "_comment": "kk-dining 고유 설정만. 실제 파일은 ~/.claude/kiki/kk-dining.config.json (repo 밖).",
   "_common": "이름·사번·카드책임자·참여과제(분류코드 code 포함)는 공통 ~/.claude/kiki/kiki.config.json 에서 읽는다. 토큰은 <kiki_root>/token.txt (Dooray token: 다음 줄). 사전결재 면제·회의비 비목은 과제 분류코드(code)로 자동 판정(project_code.md) — 과제별로 저장하지 않음. 상세 ../_shared/personal_config.md.",
-
   "log_format": "xlsx_only",
   "log_root": "{kiki_root}/dining/meeting_log",
   "_log_root": "회의록 엑셀·hwpx 폴더(한 폴더, 월별 {yymm}_회의록.xlsx + 건별 hwpx). 클라우드 동기화 폴더로 바꿔도 됨.",
@@ -14,15 +13,28 @@
   "output_dir": "{kiki_root}/dining",
   "project_report_dir": "{kiki_root}/dining/project_report",
   "_project_report_dir": "근거자료(과제제안서·보고서) 폴더 — 부트스트랩에서 사용자에게 복사를 요청. 파일명에 과제번호 포함 권장.",
-
   "_notes": {
-    "pre_approval_exempt_codes": ["I", "S", "B", "F", "부서운영비"],
-    "bimok_17_448_codes": ["S", "I", "F", "B", "K", "G"],
+    "pre_approval_exempt_codes": [
+      "I",
+      "S",
+      "B",
+      "F",
+      "부서운영비"
+    ],
+    "bimok_17_448_codes": [
+      "S",
+      "I",
+      "F",
+      "B",
+      "K",
+      "G"
+    ],
     "amount_per_person": 50000,
     "amount_includes": "식대+음료(액체 다과) 합산",
     "log_format_options": {
       "xlsx_only": "엑셀만 — 기본 권장 (Claude 는 항상 엑셀만 조회)",
       "xlsx_and_hwpx": "엑셀 + 별지1호 hwpx 동봉(아래아한글 불요, 모든 OS) — 보관 선호 사용자. 구 xlsx_and_hwp 와 동일"
     }
-  }
+  },
+  "_log_format": "회의록 엑셀은 항상 자동 저장. hwpx 는 설정과 무관하게 작업마다 물어보고 요청 시만 생성(2026-09-24~). 키는 호환용."
 }

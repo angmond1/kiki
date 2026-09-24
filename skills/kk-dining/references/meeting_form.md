@@ -1,6 +1,6 @@
 # 회의록 양식(hwpx 옵션)·인원·회의시간·증빙·중복방지
 
-> 2026-06-05~ **회의록 master = 엑셀** (→ `meeting_log_excel.md`). 본 파일의 hwpx 별지1호 양식은 사용자 옵션(`log_format: xlsx_and_hwpx`)일 때만 사용 — **아래아한글 없이 생성**(`scripts/make_dininglog_hwpx.py`).
+> 2026-06-05~ **회의록 master = 엑셀** (→ `meeting_log_excel.md`). 본 파일의 hwpx 별지1호 양식은 **사용자가 요청할 때만** 사용(완료 보고 때 묻는다, 2026-09-24~ 자동 생성 안 함) — **아래아한글 없이 생성**(`scripts/make_dininglog_hwpx.py`).
 > fam_0704 지급신청서 직접 자동작성 워크플로(권장)에서는 hwp 양산 자체가 불필요 (엑셀이 master + fam_0704 입력에 그대로 사용). → `fam_0704_automation.md`.
 
 ## (옵션) hwpx 별지1호 양식 = 회의비 사용내역서(회의록), 7x7 표 1개
@@ -76,7 +76,7 @@
 - 파일명: **`{yymm}_회의록.xlsx`** (yymm = 지급신청 처리 연월). **그 달 처리 건 = 동일 엑셀에 행 추가**. 주된 목적은 중복 방지 기록.
 - 9컬럼 형식: → `meeting_log_excel.md`
 
-### (옵션) hwpx — 저장 모드 `xlsx_and_hwpx` 일 때만
+### (요청 시) hwpx — 사용자가 원할 때만
 - 출력: 엑셀과 **같은** `{kiki_root}\dining\meeting_log\` 폴더.
 - 파일명: `{yymmdd}_{과제번호}_{과제이름 아주 간략히}_회의록.hwpx` (예 `260924_26E0001_e-Chemical_회의록.hwpx`; hwpx 는 회의록 1건만 담으므로 건당 1파일). 생성: `make_dininglog_hwpx.make_batch([{'data': {...}, 'hwpx': 경로}])` — 한글 불요. **비목 = 계정 분류코드별**: 일반 `33_523`, 수탁·소액·자체(S·I·F·B·K·G) `17_448` (→ `project_code.md`).
 

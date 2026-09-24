@@ -393,3 +393,17 @@ C.fileDiv2.gfn_upload("", "fn_endFileCallBack1", "ds_file", "RQST_NO="+rqst, "02
 - 계정 팝업: `ds_main_RNDCARD.setColumn(0,"BUDGSBJCD",계정)` + `openBudgPopup()`; 예: 어느 연구비카드 계정은 예산항목 33 이 row 3·비용 523 이 row 18 이었고 다른 법인카드 계정은 8/20 — **계정마다 행번호가 달라 항상 코드로 검색**.
 - 거래처구분 핸들러 = `switch1_RNDCARD_combo_custcls_onitemchanged`, 거래처명 = `switch1_RNDCARD_formDetail_Custnm_onchanged`(killfocus 아님). **거래처구분 코드표(인라인 innerdataset)**: `""`=선택 / `0`=거래처코드 / `1`=직원번호 / **`2`=거래처명** / `3`=주민등록번호 / `4`=사업자등록번호(국내 가맹점 기본). 해외 가맹점은 `2` 거래처명.
 - 콤보 innerdataset 이 인라인이면 `cb.innerdataset` 은 문자열 id 이고 실체는 `cb[id]` (예 `cb["combo_custcls_innerdataset"]`), 컬럼명은 `codecolumn`/`datacolumn`.
+
+## 2026-09-24 예방표 — 법인카드 국내 2건(9/1 강경불고기·9/4 신창돼지국밥) 1상신에서 막힌 곳
+| # | 증상 | 원인 | 예방 |
+|---|---|---|---|
+| 1 | 내부 참석자 7명 등록했는데 아무도 조회 안 됨(PAYNO 빈칸) | `new nexacro.DSColChangeEventInfo(...)` 인자 매핑이 달라 `e.columnid` 가 'KORNM' 이 아님 → 핸들러 `if(e.columnid=="KORNM")` 불통과 | 평범 객체 `{columnid:'KORNM',row:r}` + 먼저 `g.set_rowposition(r)` (§9-c) |
+| 2 | 여러 명을 루프로 등록하니 일부 NORES·다른 행에 반영·행 삭제 | 사원검색 팝업 open/close 가 비동기로 겹침 | **한 명씩**: 등록 → 3초 → 결과 확인 → 다음 |
+| 3 | 동명 2인(같은 센터, 학생연구원 PARTIYN Y / 별정직 N) | 검색팝업 여러 행 | `PARTIYN='Y'` 쪽 선택, 보고에 명시 |
+| 4 | KIST 인원 4명이 "참여연구원이 아닙니다"로 거부, 행엔 이름만 남음 | 8/1 규정(내부 = 계정 참여연구원만) | 이름만 남은 행 삭제 → 외부 grid `한국과학기술연구원`/`PROJJOINYN N`, 총원 유지 |
+| 5 | 발의자 본인에게 "이미 등록된 회의" 경고 | `DUPLICATE_EAT_YN` — 같은 날 다른 회의비 회의록 참석자 | 저장 보류, 상대 회의 정보 보여주고 사용자 결정(이번엔 제외 → 적요 대표자·인원 수정) |
+| 6 | 둘째 행에서 회의록을 열었는데 첫 행 카드 회의록이 열림 | `rqstGrid_oncellclick` 에 `{}` → `this.curRow=e.row` undefined → `ds_temp_popup_CONFERENCE` 가 이전 행 그대로 | `{row:i}` 전달 + 입력 전 `ds_param.CARDUSEMGRNO` 가드(가드가 잡아 오입력 0) |
+| 7 | `Object reference chain is too long` | 팝업 여는 호출이 식의 마지막 값 | 호출은 실행됨 → 재호출 금지, 마지막 값은 문자열 |
+| 8 | `doDecision()` 뒤 같은 식에서 `P.ds_main` 읽다 TypeError | popBudgList 가 닫혀 P 의 dataset 이 null | 결정 호출 뒤엔 P 를 읽지 말고 F.ds_rqstGrid 로 다음 호출에서 확인 |
+| 9 | 저장 직전 통장표기 컴포넌트 값이 빈칸으로 보임 | 화면 컴포넌트는 현재 행 기준 표시, 실제 값은 문서당 1개 `import2.ds_main_DPST.DPSTDISPNM` | 컴포넌트가 아니라 `ds_main_DPST` 로 확인(첫 행 가맹점명이면 OK) |
+| 10 | 회의시간 제안하려는데 fam_0711 결과에 시각 없음 | USETIME 은 fam_0704_02 영수증함에만 | 사용자 답 직후 doNew 로 영수증함 USETIME 을 먼저 읽고 질문을 한 번에 |
