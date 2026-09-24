@@ -50,7 +50,7 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 
 ### 5. Dooray 토큰 (카드결제건 RPA 업로드용)
 토큰 생성페이지 https://kist.gov-dooray.com/setting/api/token 에서 토큰 생성하고  
-kiki 설치폴더에 token.txt (예 `C:\kiki\token.txt`)에 토큰 붙여넣고 저장,  
+kiki 설치폴더에 token.txt 파일에(예 `C:\kiki\token.txt`) 토큰 값 붙여넣고 저장,  
 claude code 대화창에 "두레이 토큰 저장했다"  
 ⚠️ 토큰·API 키를 채팅창에 입력하면 타인에게 노출될 수 있습니다.  
 
