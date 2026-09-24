@@ -39,7 +39,7 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 ### 2. Google Chrome + 확장 "Claude in Chrome"
 - Chrome 에서 설치 → https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn  
 
-그리고 나서 claude desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" 켜기  
+  그리고 나서 claude desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" 켜기  
 
 ### 3. chrome-devtools-mcp (파일첨부용)
 - claude desktop: 대화창에서 "chrome-devtools-mcp 설치해줘"  
