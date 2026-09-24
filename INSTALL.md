@@ -141,9 +141,9 @@ mkdir -p budget dining inspect _tmp
 |------|---------|---------------|
 | 설치 스크립트 | `powershell -ExecutionPolicy Bypass -File .\install.ps1` (실행정책 우회 필요) | `bash ./install.sh` (실행 권한 불필요 — bash 로 호출). macOS 기본 셸은 zsh 지만 그대로 됨 |
 | 경로 | `C:\Users\<이름>\.claude\skills`, 기본 폴더 `C:\kiki`, config 에 `\\` | `~/.claude/skills`(=`/Users/<이름>/.claude/skills`), 기본 폴더 `~/kiki`, config 에 `/`. `.claude` 는 Finder 에서 숨김(⌘⇧. 로 표시) |
-| Python | python.org 설치 시 **"Add python.exe to PATH"** 체크. Microsoft Store 의 가짜 `python.exe`(스토어를 여는 스텁) 주의 | `python` 명령이 없고 **`python3`**. 새 Mac 은 `python3` 첫 실행 때 **Xcode 명령줄 도구 설치 창**이 뜸(설치하면 됨). 또는 `brew install python` |
+| Python | python.org 설치 시 **"Add python.exe to PATH"** 체크. Microsoft Store 의 가짜 `python.exe`(스토어를 여는 스텁) 주의 | 새 Mac 은 Python 이 **없음** — `python3` 는 스텁이라 실행하면 **Xcode 명령줄 도구 설치 창**이 뜸. 에이전트가 `xcode-select --install` 로 그 창을 띄워 주니 "설치 → 동의" 만 누르면 됨(5~10분). Linux 는 python3 기본 포함, pip 은 `sudo apt install python3-pip`(암호 필요 → 명령을 받아 직접 실행) |
 | pip | `python -m pip install X` | `python3 -m pip install --user X` → `externally-managed-environment` 오류면 `--break-system-packages` 추가 |
-| Node.js | nodejs.org 설치 파일(PATH 자동) | nodejs.org `.pkg` 또는 `brew install node`. Homebrew 는 기본 미설치(brew.sh 의 설치 명령, Apple Silicon 은 설치 후 안내대로 `~/.zprofile` 에 PATH 추가) |
+| Node.js | nodejs.org 설치 파일(PATH 자동) | nodejs.org `.pkg`(에이전트가 열어 줌 → "계속 → 동의 → 설치 → Mac 암호") 또는 `brew install node`. Homebrew 는 기본 미설치이고 설치 스크립트가 암호를 물어 사용자가 직접 해야 함(Apple Silicon 은 설치 후 안내대로 `~/.zprofile` 에 PATH 추가). Linux 는 `sudo apt install nodejs npm`(직접) 또는 에이전트가 `~/.local` 에 tar 설치 |
 | Claude 재시작 | 트레이 아이콘 → Quit | Dock 아이콘 → Quit(⌘Q). 창 닫기(빨간 버튼)는 종료가 아님 |
 | chrome-devtools-mcp 등록 | `claude mcp add --scope user …` / `.claude.json` = `C:\Users\<이름>\.claude.json` | 동일 명령 / `~/.claude.json`. Chrome 은 `/Applications/Google Chrome.app` 에 있어야 함 |
 | 파일 열기(token.txt 등) | `notepad` | `open -e`(TextEdit — .txt 라 서식 없는 텍스트로 저장됨) |
