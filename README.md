@@ -37,6 +37,7 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 - codex (chatgpt) https://openai.com/ko-KR/codex/  
 
 ### 2. Chrome 브라우저 + 확장 프로그램 Claude in Chrome 설치
+- Chrome 브라우저 설치 https://www.google.com/chrome/  
 - Chrome 에서 설치 → https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn  
 
   그리고 나서 claude desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" 켜기  
