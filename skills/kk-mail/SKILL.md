@@ -3,15 +3,17 @@ name: kk-mail
 description: |
   KIST Dooray 메일 관리 skill (kiki 패키지). 받은편지함을 조회해 광고성/predatory 메일을
   스팸 처리하고, 원하면 광고/학회/공고 등 폴더로 분류하며, 자연어 명령으로 자동분류 규칙을 수립한다.
+  키워드로 찾기 어려운 메일을 자연어 설명(기간·발신처·주제·본문 단서)으로 찾아 준다.
   트리거: "메일 정리", "스팸 골라줘", "광고메일 분류", "지난주 메일 봐줘", "받은편지함 정리",
-  "앞으로 ~~ 메일은 ~~ 폴더로 자동분류해줘", "kk-mail" 등 KIST Dooray 메일 정리·분류·자동분류 요청 시 활성.
+  "앞으로 ~~ 메일은 ~~ 폴더로 자동분류해줘", "~~ 메일 찾아줘", "그 메일 어디 있지", "지난달 학회에서 온 메일",
+  "kk-mail" 등 KIST Dooray 메일 정리·분류·자동분류·검색 요청 시 활성.
   KIST 구성원 누구나 본인 계정으로 사용 (개인 토큰·식별자 불필요, 본인 브라우저 로그인 세션으로 동작).
 ---
 
 # kk-mail — KIST Dooray 메일 관리
 
 ## 핵심 한 줄
-받은편지함을 조회 → **광고성 스팸은 신고(기본)**, **폴더 분류는 물어보고(선택)**, **"앞으로 X 메일은 Y 폴더로" 자연어 규칙을 수립(핵심 능력)**. 모든 쓰기 작업은 **사용자 confirm 후**.
+받은편지함을 조회 → **광고성 스팸은 신고(기본)**, **폴더 분류는 물어보고(선택)**, **"앞으로 X 메일은 Y 폴더로" 자연어 규칙을 수립(핵심 능력)**, **자연어로 메일 찾기(Tier 4, 조회 전용)**. 모든 쓰기 작업은 **사용자 confirm 후**.
 
 ## 전제 (환경)
 - **환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계를 따른다** — **평소 쓰는 Chrome 창**(Claude in Chrome 확장, 새 창·chrome-devtools 불필요) + **Dooray SSO 로그인**(`kist.gov-dooray.com`, =인증, 토큰·비번 없음) + KIST 사내망(밖이면 VPN). Python 불필요.
@@ -26,13 +28,14 @@ description: |
 2. **탭 확보 + Dooray 이동**: `tabs_context_mcp` → `navigate` `https://kist.gov-dooray.com/mail`.
    - 로그인 페이지가 뜨면(세션 만료) 사용자에게 "Dooray에 로그인해 달라" 안내 후 중단.
 3. **코어 주입(1회)**: `scripts/kk_mail_ops.js`를 Read → `javascript_tool`로 inject.
-   - 반환값이 `kk-mail-ops/1.0`이면 성공. 이후 `window.kkMail.*` 호출.
+   - 반환값이 `kk-mail-ops/1.2`(버전 문자열)이면 성공. 이후 `window.kkMail.*` 호출.
    - 페이지가 새로고침되면 `window.kkMail`이 사라지므로 재주입.
    - ⚠️ **async 반환이 `{}`로 비면**(특히 `/mail` → 특정 메일 redirect 직후 탭에서 발생): `javascript_tool`이 Promise 결과를 회수 못 하는 현상. 결과를 `window.__x = ...`에 저장하고 마지막 식은 동기 마커(`"go";`)로 즉시 반환 → **다음 호출에서 `JSON.parse(JSON.stringify(window.__x))`로 동기 회수**(2-스텝). sync 반환(`1+1`)은 정상이라 이 우회로가 통한다. 쓰기(`reportSpam`/`moveMails`)도 같은 패턴으로 실행 후 결과 회수.
+4. **출력 제약(2026-09-24 실측)**: `javascript_tool` 반환 문자열은 **약 1,000자에서 잘리고**(`[TRUNCATED]`), 출력 필터가 **`a=b` 꼴이 섞인 결과를 통째로 `[BLOCKED: Cookie/query string]`** 처리하며 URL·8자리 이상 숫자열(메일 id)도 가린다. → 결과는 window 에 두고 코어의 **`fmtList(mails, from, to)` / `fmtBody(b, chars, offset)` / `sanitize()`** 로 조각내어 회수(`=` 금지, id 는 `hyId` 하이픈 꼴). 모든 Tier 공통.
 
 ---
 
-## 동작 모델 (3-Tier)
+## 동작 모델 (4-Tier)
 
 ### ⛔ 공통 mandate — "걸러낸 메일을 먼저 보여주고, 그 다음 묻는다" (모든 Tier·부트스트랩, 예외 없음)
 어떤 처리(스팸 신고·폴더 이동·규칙 생성·소급)든 **사용자에게 confirm 을 요청하기 전에, 대상 메일 전체를 대화창 본문에 markdown 표로 먼저 출력한다**:
@@ -75,12 +78,27 @@ description: |
 
 ---
 
+### Tier 4 — 자연어로 메일 찾기 (조회 전용, confirm 불필요 · 2026-09-24 실증)
+"지난달쯤 학회에서 온 등록비 안내 메일", "첨부에 견적서 있던 업체 메일 어디 있지" 처럼 **키워드로는 안 잡히는** 메일을 대화로 찾는다. Dooray 검색창이 못 하는 것 = 뜻으로 고르기 · 본문 단서 · 긴 기간 두루 보기.
+
+1. **조건 뽑기** — 기간(없으면 최근 90일), 폴더(기본 받은편지함; "보낸" = `sent`; 분류 폴더명이 나오면 `findFolderId`), 발신처 힌트(기관·도메인·사람), 주제·본문 단서. 애매하면 **한 번만** 되묻고 시작.
+2. **목록 수집(2-스텝)** — `window.__x=null; window.kkMail.listMails({folder:'inbox', sinceDays:90}).then(r=>window.__x=r); 'started'` → 다음 호출부터 `window.__x.mails` 사용. 페이징 자동(500건/페이지, 1,500건 ≈ 2.5초), 기간이 길면 `maxPages` 를 올린다. 목록엔 **본문 미리보기가 없다**(날짜·발신·제목·첨부수·읽음만).
+3. **1차 선별** — 사용자의 말을 **동의어·영문·약어까지 넓힌 정규식**으로 바꿔 `window.__c = window.kkMail.pick(window.__x.mails, /학회|conference|symposium|workshop|초록|abstract/i); window.kkMail.fmtList(window.__c, 0, 12)` → 12줄씩 읽는다(더 있으면 `12, 24` …). 후보 0이면 정규식을 넓히거나 기간·폴더를 바꿔 다시. 정규식은 거르기용일 뿐 **최종 판단은 제목·발신·날짜·첨부수를 읽고 뜻으로**(10건 이내로 좁힌다). 선별이 애매하면 목록 전체를 12줄씩 훑어도 된다(14일 ≈ 140건 ≈ 12회).
+4. **본문 확인(필요할 때만)** — `window.__b=null; window.kkMail.getMails(window.__c.slice(0,5)).then(r=>window.__b=r); 'started'` → `window.kkMail.fmtBody(window.__b[0], 700)`(긴 본문은 세 번째 인자 offset 으로 이어 읽기). 전체 목록에 돌리지 말 것(건당 0.3초 + rate limit). 첨부 파일명은 머리줄 `files (…)`.
+   - ⚠️ 본문 GET 은 서버가 그 메일을 **읽음으로 바꾼다** → `getMails` 는 목록의 `read=false` 였던 메일을 조회 직후 **`markUnread` 로 자동 복원**한다(그래서 목록 항목(`read` 포함)을 그대로 넘겨야 하며, id 문자열만 넘기면 복원 못 함). 실측: 안 읽은 3건 본문 조회 후 전부 `read=false` 복원 확인. `opened`(열어본 적 있음)는 남지만 화면의 읽음/안 읽음 표시는 `read` 기준이라 사용자에게 보이지 않는다.
+5. **결과 제시** — 본문 표(번호·날짜·발신·제목·판단 근거 한 줄)로 최종 1~5건. 링크는 `window.kkMail.fmtList(window.__c, 0, 5, {ids:true})` 로 받은 **하이픈 id 의 `-` 를 지워** `https://kist.gov-dooray.com/mail/systems/inbox/<id>` 로 조합(분류 폴더의 메일은 `/mail/folders/<folderId>/<id>`). 원하면 본문 요약·첨부 목록까지. "열어줘" 하면 `window.kkMail.openMail(window.__c[i])` 로 **현재 탭에서 이동**(열면 읽음 처리되므로 사용자가 말했을 때만). 조회 전용이라 confirm 은 필요 없다.
+- 실행 전 코어 주입(실행 준비 3) 필수. async 결과가 `{}` 로 비면 위 2-스텝이 정답(실행 준비 3 ⚠️). 출력이 잘리거나 `[BLOCKED…]` 면 실행 준비 4.
+- 사용자 화면에 열려 있는 메일이나 다른 메일의 읽음 상태를 건드리지 않는다(스팸·이동은 Tier 1·2 절차로만).
+
+---
+
 ## 안전 규칙 (필수 준수)
 
 - **모든 쓰기(스팸신고·이동·규칙생성·삭제)는 사용자 confirm 후.** Claude는 분류·제안만 자동. **단 confirm 전에 대상 메일을 본문 표로 먼저 보여준다(위 ⛔ 공통 mandate).**
 - **발신자 차단(addReject)·과거 소급(applyBefore)** 영향을 confirm 시 명시.
 - **개인 발신 학술 메일은 폴더로 옮기지 않는다.** 교수 개인의 연사 섭외·공동연구 제안 등 **답장·후속 대응이 필요한 메일**은 받은편지함 유지. 폴더 분류는 학회 *사무국/단체 공식 발신* 위주.
 - **도메인 양면성 주의.** 같은 도메인이 정상+광고 섞이면(예: 출판사 시스템 도메인이 본인 투고 확인 + 마케팅 동시 발송) 도메인 단위 일괄 규칙/차단 금지, 건별 처리.
+- **찾기(Tier 4)는 조회 전용** — 본문 조회로 바뀐 읽음 상태는 즉시 복원하고(`getMails` 자동), 그 외 어떤 상태도 바꾸지 않는다. 찾은 메일의 본문·첨부는 사용자에게 보여주는 용도로만 쓰고 파일에 남기지 않는다.
 - **개인 학습은 skill에 누적하지 않는다.** 특정 발신처→폴더 같은 개인 규칙은 사용자 config(`~/.claude/kiki/kk-mail.config.json`)에만 저장. skill 본문/references에는 보편 판별 패턴만.
 
 ---
@@ -121,7 +139,7 @@ description: |
 
 ## 참고 문서 / 문제 해결
 - `references/classification_policy.md` — 광고성/predatory **판별 패턴**(보편) + 처리 가이드.
-- `references/wapi_reference.md` — wapi endpoint·body·헤더(조회/스팸/이동/규칙/폴더 생성·삭제).
+- `references/wapi_reference.md` — wapi endpoint·body·헤더(조회/페이징/본문/읽음·안읽음/스팸/이동/규칙/폴더 생성·삭제).
 - `../_shared/dooray_wapi.md` — wapi 공통(필수헤더·rate limit). `../_shared/security_policy.md` — 보안 규약.
 - `../_shared/dooray_api_guide.md` — Dooray **공식 API 가이드·토큰 발급·문제 해결 참조**(원문 링크 포함).
 - **호출 실패 시 순서**: `header.resultMessage` 확인 → `-200200`/빈 응답이면 필수헤더 점검(`dooray_wapi.md`) → 정확한 body 미상이면 **DevTools Network 캡처**(폴더 `create-path`도 이렇게 확정) → 공식 API(토큰) 문제면 `dooray_api_guide.md` + 원문 가이드 참조.

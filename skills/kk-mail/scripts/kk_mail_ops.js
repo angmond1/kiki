@@ -5,6 +5,7 @@
 //   → API 토큰/비번 불필요 (credential 0). 본인 SSO 로그인 세션만 있으면 동작.
 // 사용법: 이 파일을 Read → Chrome MCP javascript_tool 로 1회 inject →
 //   이후 window.kkMail.<함수>() 호출. (개인정보·하드코딩 식별자 없음)
+// 출력 제약: javascript_tool 반환은 ~1,000자 truncation + `a=b`/URL/긴 숫자 필터 → 아래 "출력 도우미" 참조.
 // ============================================================
 (function () {
   // internal wapi 필수 헤더 — 없으면 일부 endpoint가 -200200 거부 또는
@@ -90,7 +91,9 @@
     return c.map(summarize);
   }
 
-  // 메일 1건 → 분류 판단용 핵심 필드. (발신자/제목/날짜/읽음/id)
+  // 메일 1건 → 분류·검색 판단용 핵심 필드. (발신자/제목/날짜/읽음/첨부수/id)
+  //   read   = 사용자 화면의 읽음/안 읽음 표시 (POST /mails/read|unread 로 토글)
+  //   opened = 한 번이라도 열린 적 있음 (상세 GET 시 true 로 굳음, 되돌릴 수 없음) — 표시용으로는 read 를 쓸 것
   function summarize(m) {
     const f = (m.users && m.users.from && m.users.from.emailUser) ? m.users.from.emailUser : {};
     const flags = (m.mailSummary && m.mailSummary.flags) ? m.mailSummary.flags : {};
@@ -100,8 +103,83 @@
       fromName: f.name || '',
       fromEmail: f.emailAddress || '',
       subject: m.subject || '',
+      read: !!flags.read,
       opened: !!flags.opened,
+      fileCount: m.fileCount || 0,
+      folderId: m.folderId || '',
     };
+  }
+
+  // ---------- Tier 4: 찾기 — 페이징 목록 + 본문 (2026-09-24 실증) ----------
+  // 폴더의 메일을 최신순으로 페이지를 넘기며 수집. since(YYYY-MM-DD)/sinceDays 보다 오래된 메일이 나오면 중단.
+  //   opt = { folder:'inbox'|'sent'|... (시스템 folderName) | folderId:'...', sinceDays?:90, since?:'YYYY-MM-DD', until?:'YYYY-MM-DD', maxPages?:6, size?:500 }
+  // 반환 { total, fetched, pages, mails:[summarize + url] }. 실측: size 500 × 3페이지(1,500건) ≈ 2.5초. size 1000 도 허용.
+  // ⚠️ 목록엔 본문 미리보기(previewText)가 비어 있다 → 본문 단서는 getMail 로.
+  async function listMails(opt = {}) {
+    const size = opt.size || 500, maxPages = opt.maxPages || 6;
+    const sinceTs = opt.since ? new Date(opt.since).getTime() : (opt.sinceDays ? Date.now() - opt.sinceDays * 86400000 : 0);
+    const untilTs = opt.until ? new Date(opt.until).getTime() + 86400000 : Infinity;
+    const folder = opt.folder || 'inbox';
+    const base = opt.folderId ? `folderId=${opt.folderId}` : `folderName=${folder}`;
+    const urlOf = (m) => opt.folderId ? `/mail/folders/${opt.folderId}/${m.id}` : `/mail/systems/${folder}/${m.id}`;
+    const out = { total: null, fetched: 0, pages: 0, mails: [] };
+    for (let p = 0; p < maxPages; p++) {
+      const d = await dfetch(`/v2/wapi/mails?${base}&size=${size}&page=${p}&order=-createdAt`);
+      const c = (d.result && d.result.contents) ? d.result.contents : [];
+      if (out.total == null && d.result) out.total = d.result.totalCount;
+      out.fetched += c.length; out.pages++;
+      let stop = c.length < size;
+      for (const m of c) {
+        const ts = new Date(m.createdAt).getTime();
+        if (ts < sinceTs) { stop = true; break; }
+        if (ts < untilTs) { const s = summarize(m); s.url = 'https://kist.gov-dooray.com' + urlOf(m); out.mails.push(s); }
+      }
+      if (stop) break;
+    }
+    return out;
+  }
+
+  // HTML 본문 → 읽기용 텍스트 (style/script 제거, 블록 요소 줄바꿈)
+  function htmlToText(html) {
+    if (!html) return '';
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('style,script,head,title').forEach(e => e.remove());
+    doc.querySelectorAll('br,p,div,tr,li,h1,h2,h3,h4,h5,h6,blockquote').forEach(e => e.insertAdjacentText('afterend', '\n'));
+    return (doc.body ? doc.body.textContent : '').replace(/[ \t\u00a0]+/g, ' ').replace(/\s*\n\s*/g, '\n').trim();
+  }
+
+  // 읽음/안 읽음 표시 (UI 툴바 "읽음"/"안 읽음" 과 동일 호출, 2026-09-24 캡처)
+  async function markRead(mailIdList) { return dfetch('/v2/wapi/mails/read', { method: 'POST', body: { mailIdList } }); }
+  async function markUnread(mailIdList) { return dfetch('/v2/wapi/mails/unread', { method: 'POST', body: { mailIdList } }); }
+
+  // 메일 1건 본문. GET /v2/wapi/mails/{id} → result.content.{subject, createdAt, users, body:{mimeType,content(HTML)}, fileList[]}
+  // ⚠️ 이 GET 은 서버가 그 메일을 읽음(read=true, opened=true)으로 바꾼다(실측). 목록에서 read=false 였던 메일은
+  //    조회 직후 markUnread 로 read 를 복원한다(wasRead 를 넘길 것). opened 는 되돌릴 수 없지만 화면 표시엔 read 만 쓰인다.
+  async function getMail(id, { wasRead = null, restoreUnread = true, maxChars = 20000 } = {}) {
+    const d = await dfetch(`/v2/wapi/mails/${id}`);
+    const c = (d.result && d.result.content) || {};
+    const html = (c.body && c.body.content) || '';
+    const text = htmlToText(html).slice(0, maxChars);
+    const from = (c.users && c.users.from && c.users.from.emailUser) || {};
+    const to = ((c.users && c.users.to) || []).map(u => (u.emailUser && u.emailUser.emailAddress) || '').filter(Boolean);
+    const files = (c.fileList || []).map(f => f.name || f.fileName || f.originalName || f.originalFileName || '').filter(Boolean);
+    let restored = false;
+    if (restoreUnread && wasRead === false) { await markUnread([id]); restored = true; }
+    return { id, subject: c.subject || '', date: (c.createdAt || '').slice(0, 16).replace('T', ' '), fromName: from.name || '', fromEmail: from.emailAddress || '',
+      to, files, text, textLen: text.length, htmlLen: html.length, restoredUnread: restored };
+  }
+
+  // 후보 여러 건 본문 순차 조회 (rate limit: burst 20/초당 5 → 건당 delayMs 간격). items = listMails 의 mails 항목(id·read 포함) 또는 id 문자열.
+  async function getMails(items, { delayMs = 300, maxChars = 8000 } = {}) {
+    const out = [];
+    for (const it of items) {
+      const id = typeof it === 'string' ? it : it.id;
+      const wasRead = typeof it === 'string' ? null : it.read;
+      try { out.push(await getMail(id, { wasRead, maxChars })); }
+      catch (e) { out.push({ id, error: String(e).slice(0, 120) }); }
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+    return out;
   }
 
   // ---------- Tier 1: 스팸 신고 (휴지통 + 학습 + 발신자 차단) ----------
@@ -160,13 +238,44 @@
     return dfetch(`/v2/wapi/mail-rules/${ruleId}`, { method: 'DELETE' });
   }
 
+  // ---------- 출력 도우미 (Claude in Chrome javascript_tool 제약 대응, 2026-09-24 실측) ----------
+  // (1) 반환 문자열은 약 1,000자에서 [TRUNCATED] → 결과를 window 에 두고 fmtList/fmtBody 로 조각내어 회수한다.
+  // (2) 출력 필터: `a=b` 꼴이 있으면 통째로 [BLOCKED: Cookie/query string], URL·긴 숫자열(메일 id)도 가려진다
+  //     → sanitize: = & ? ; 제거, URL→[url], 8자리 이상 숫자→#, '/'→'>'. 메일 id 는 hyId(4자리마다 '-')로만 노출.
+  //     링크는 https://kist.gov-dooray.com/mail/systems/inbox/<id> (hyId 의 '-' 를 지워 조합).
+  function sanitize(s) {
+    return String(s == null ? '' : s).replace(/https?:\S+/gi, '[url]').replace(/[=&?;]/g, ' ').replace(/\d{8,}/g, '#').replace(/\//g, '>');
+  }
+  function hyId(id) { return String(id).replace(/(\d{4})(?=\d)/g, '$1-'); }
+  // 목록 정규식 1차 선별(제목·발신자·발신주소). Claude 가 동의어·영문·약어를 넓혀 만든 정규식을 넘긴다.
+  function pick(mails, re) { return (mails || []).filter(m => re.test(m.subject) || re.test(m.fromName) || re.test(m.fromEmail)); }
+  // 목록 한 조각: idx | 날짜 | R/U | 첨부수 | 발신 | 제목 [| id(하이픈)]. 12줄 ≈ 800자.
+  function fmtList(mails, from = 0, to = 12, { subj = 44, who = 14, ids = false } = {}) {
+    mails = mails || [];
+    const rows = mails.slice(from, to).map((m, k) =>
+      sanitize(`${from + k} | ${m.date.slice(5)} | ${m.read ? 'R' : 'U'} | att${m.fileCount} | ${(m.fromName || m.fromEmail).slice(0, who)} | ${m.subject.slice(0, subj)}`) + (ids ? ' | ' + hyId(m.id) : ''));
+    return `[${from}-${Math.min(to, mails.length)} of ${mails.length}]\n` + rows.join('\n');
+  }
+  // 본문 1건: 머리 1줄(제목·날짜·발신·첨부·복원 여부) + 본문 chars 자. 긴 본문은 offset 을 옮겨 이어 읽는다.
+  function fmtBody(b, chars = 700, offset = 0) {
+    if (!b) return 'no body';
+    if (b.error) return 'ERR ' + sanitize(b.error);
+    const files = b.files.length ? ` (${b.files.slice(0, 3).join(', ').slice(0, 80)})` : '';
+    const head = `${b.subject.slice(0, 40)} | ${b.date.slice(5)} | ${b.fromName || b.fromEmail} | files ${b.files.length}${files} | txt ${b.textLen}${b.restoredUnread ? ' | unread restored' : ''}`;
+    return sanitize(head + '\n' + b.text.slice(offset, offset + chars));
+  }
+  // "그 메일 열어줘" 할 때만: 현재 탭에서 그 메일로 이동(열면 읽음 처리됨 → 사용자가 말했을 때만).
+  function openMail(m) { location.assign(m.url || ('https://kist.gov-dooray.com/mail/systems/inbox/' + m.id)); return 'opening'; }
+
   // ---------- export ----------
   window.kkMail = {
     dfetch, findAllFolders, findFolderId, ensureFolder, deleteFolder,
     listInbox, listFolderMails, summarize,
+    listMails, getMail, getMails, htmlToText, markRead, markUnread,
+    pick, fmtList, fmtBody, sanitize, hyId, openMail,
     reportSpam, moveMails,
     createRule, listMailRules, deleteMailRule,
-    _version: 'kk-mail-ops/1.1',
+    _version: 'kk-mail-ops/1.2',
   };
   return window.kkMail._version;
 })();

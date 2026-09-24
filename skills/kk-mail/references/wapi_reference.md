@@ -14,7 +14,25 @@
 | 사용자 폴더 목록 | `GET /v2/wapi/mail-folders?type=user&size=1000` |
 
 - 응답: `result.contents[]` = 메일/폴더 배열, `result.totalCount`.
-- 메일 발신자: `users.from.emailUser.{name,emailAddress}`. 날짜: `createdAt`. 읽음: `mailSummary.flags.opened`.
+- 메일 발신자: `users.from.emailUser.{name,emailAddress}`. 날짜: `createdAt`. 첨부 수: `fileCount`. `mailSummary.previewText` 는 **비어 있음**(본문 단서는 상세 GET 필요).
+- **읽음 플래그 두 종류**(`mailSummary.flags`): `read` = 사용자 화면의 읽음/안 읽음(토글 가능) / `opened` = 한 번이라도 열린 적 있음(상세 GET 시 true 로 굳고 되돌릴 수 없음). **표시용은 `read`**.
+- **페이징**: `page=0,1,2…` 로 넘긴다. `size` 는 500·1000 도 허용(실측 2026-09-24: 500×3페이지 1,500건 ≈ 2.5초). 코어 `listMails({folder|folderId, sinceDays|since, until, maxPages, size})` 가 기간 컷오프까지 자동으로 넘긴다.
+
+## 메일 본문 (Tier 4 찾기, ✅ 확정 2026-09-24 실측)
+```
+GET /v2/wapi/mails/{mailId}          // Dooray 웹이 메일을 열 때 부르는 것과 동일 (withBody 파라미터 불필요)
+```
+- 응답 `result.content`: `subject, createdAt, users.{from,to,cc,…}.emailUser.{name,emailAddress}, body:{mimeType:"text/html", content:"<html…>", showImage}, fileList[](첨부), mail.flags`.
+- `/mails/{id}/body`·`/content`·`/detail` 은 **-300000 서비스 오류** — 위 형식만 유효.
+- ⚠️ **이 GET 은 그 메일을 읽음(read=true)·opened=true 로 바꾼다.** 화면 표시를 원래대로 두려면 목록에서 `read=false` 였던 메일만 조회 직후 아래 `unread` 로 복원(코어 `getMails` 자동).
+- HTML→텍스트는 코어 `htmlToText`(style/script 제거, 블록 요소 줄바꿈). 실측 21KB HTML → 1.6KB 텍스트.
+
+## 읽음 / 안 읽음 표시 (UI 툴바 "읽음"·"안 읽음" 과 동일, ✅ 2026-09-24 캡처)
+```
+POST /v2/wapi/mails/read     { "mailIdList": ["..."] }
+POST /v2/wapi/mails/unread   { "mailIdList": ["..."] }
+```
+- 응답 `header.resultCode 0`. 목록의 `flags.read` 가 바뀐다(`opened` 는 불변).
 
 ## 스팸 신고 (Tier 1)
 ```
