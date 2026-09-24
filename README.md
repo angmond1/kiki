@@ -36,9 +36,9 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 - claude desktop app https://claude.com/download  
 - codex (chatgpt) https://openai.com/ko-KR/codex/  
 
-### 2. Chrome 브라우저 + 확장 프로그램 Claude in Chrome 설치
-- Chrome 브라우저 설치 https://www.google.com/chrome/  
-- Chrome 에서 설치 → https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn  
+### 2. chrome 브라우저 + 확장 프로그램 Claude in Chrome 설치
+- chrome 브라우저 설치 https://www.google.com/chrome/  
+- chrome 에서 설치 → https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn  
 
   그리고 나서 claude desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" 켜기  
 
@@ -46,7 +46,7 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 - claude desktop: 대화창에서 "chrome-devtools-mcp 설치해줘"  
 - codex: 설정 → MCP 서버 → 서버 추가 → 이름 chrome-devtools  
 
-### 4. Chrome 브라우저로 KIST 포탈 로그인 필요
+### 4. chrome 브라우저로 KIST 포탈 로그인 필요
 - 파일첨부 스킬 (kk-pay, kk-dining, kk-inspect)은 claude가 새 chrome 브라우저를 띄워주면서 새 로그인을 한번 더 요구함  
 
 ### 5. Dooray 토큰 (카드결제건 RPA 업로드용)
