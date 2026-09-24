@@ -14,7 +14,7 @@ KIST 포탈 제어 claude code, codex skill 모음.
 ## 구성
 | skill | 용도 | 기능 | 권장모델 |
 |-------|------|------|:--------:|
-| **kk-pay** | 지급신청 | 카드결제건 RPA, 세금계산서 지급신청서 자동작성 | Opus (RPA 업로드는 sonnet) |
+| **kk-pay** | 지급신청 | 카드결제건 RPA, 세금계산서 지급신청서 자동작성 | Opus (RPA는 Sonnet) |
 | **kk-dining** | 회의비처리 | 회의록, 회의비 지급신청서 자동 작성  | Opus |
 | **kk-inspect** | 물품검수 | 소액 검수 신청서 자동 작성 | Sonnet |
 | **kk-budget** | 예산조회 | 과제 예실대비표 예산현황 자동조회  | Sonnet |
