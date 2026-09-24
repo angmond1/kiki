@@ -52,10 +52,10 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
 
 ### Step 4 — 토큰 파일 안내 (Dooray 토큰)
 설치로 `<root>/token.txt` 가 생겼다. **절대경로를 그대로 보여주며** 안내한다:
-> "Dooray 드라이브 업로드(kk-pay 카드결제건 RPA)를 쓰려면 토큰이 필요합니다. https://kist.gov-dooray.com/setting/api/token 에서 개인 인증 토큰을 만들어 **`C:\kiki\token.txt`** 의 `Dooray token:` 다음 줄에 붙여넣고 저장한 뒤 '토큰 넣었어' 라고 알려주세요. 지금 안 해도 되고 kk-pay 쓸 때 해도 됩니다.
+> "Dooray 드라이브 업로드(kk-pay 카드결제건 RPA)를 쓰려면 토큰이 필요합니다. https://kist.gov-dooray.com/setting/api/token 에서 개인 인증 토큰을 만들어 **`C:\kiki\token.txt`** 의 `Dooray token:` 다음 줄에 붙여넣고 저장한 뒤 '두레이 토큰 저장했다' 라고 알려주세요. 지금 안 해도 되고 kk-pay 쓸 때 해도 됩니다.
 > ⚠️ 토큰·API 키를 **채팅창에 직접 붙여넣지 마세요** — 대화 기록에 남아 타인에게 노출될 수 있습니다."
 
-원하면 파일을 열어준다(Windows `notepad <경로>`, macOS `open -e <경로>`). 사용자가 "넣었어" 라고 하면 파일을 읽어 **값은 출력하지 말고 형식만 확인**(길이·공백 없음) 후 진행. 채팅에 토큰이 붙여넣어지면 즉시 파일로 옮기고 채팅 노출 위험을 다시 알린다.
+원하면 파일을 열어준다(Windows `notepad <경로>`, macOS `open -e <경로>`). 사용자가 "두레이 토큰 저장했다"(또는 "토큰 넣었어") 라고 하면 파일을 읽어 **값은 출력하지 말고 형식만 확인**(길이·공백 없음) 후 진행. 채팅에 토큰이 붙여넣어지면 즉시 파일로 옮기고 채팅 노출 위험을 다시 알린다.
 
 ### Step 5 — ⚠️ 재시작 (반드시 안내, 건너뛰지 말 것)
 `~/.claude/skills/` 에 **새 skill 디렉토리가 생기면 그 세션에서는 인식되지 않는다**(Code·Desktop 공통). 설치 직후 사용자에게:

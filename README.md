@@ -49,9 +49,9 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 - 파일첨부 스킬 (kk-pay, kk-dining, kk-inspect)은 claude가 새 chrome 브라우저를 띄워주면서 새 로그인을 한번 더 요구함  
 
 ### 5. Dooray 토큰 (카드결제건 RPA 업로드용)
-토큰 생성페이지 https://kist.gov-dooray.com/setting/api/token  
-kiki 설치폴더에 token.txt 가 생깁니다 (예 `C:\kiki\token.txt`).  
-개인 인증 토큰을 만들어 그 파일의 `Dooray token:` 다음 줄에 붙여넣고 저장한 뒤 "토큰 넣었어" 라고만 알려주세요.  
+토큰 생성페이지 https://kist.gov-dooray.com/setting/api/token 에서 토큰 생성하고  
+kiki 설치폴더에 token.txt (예 `C:\kiki\token.txt`)에 토큰 붙여넣고 저장,  
+claude code 대화창에 "두레이 토큰 저장했다"  
 ⚠️ 토큰·API 키를 채팅창에 직접 붙여넣지 마세요. 대화 기록에 남아 타인에게 노출될 수 있습니다.  
 
 <br><br>

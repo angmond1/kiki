@@ -50,7 +50,7 @@ KIST 내부망에서 실행. KIST 밖(재택·출장)이면 **KIST VPN 접속 �
 - KIST 포탈은 **매일 정오 전체 세션 리셋** → 오후 작업은 다시 로그인.
 
 ### 0-7. Dooray 토큰 (kk-pay 카드 RPA 업로드 · kk-dining RPA 옵션만)
-설치 스크립트가 kiki 폴더에 `token.txt` 를 만든다(§2). 발급 https://kist.gov-dooray.com/setting/api/token → 파일의 `Dooray token:` 다음 줄에 붙여넣고 저장 → 채팅엔 "토큰 넣었어" 만. **채팅창에 토큰을 붙여넣지 말 것**(대화 기록 노출).
+설치 스크립트가 kiki 폴더에 `token.txt` 를 만든다(§2). 발급 https://kist.gov-dooray.com/setting/api/token → 파일의 `Dooray token:` 다음 줄에 붙여넣고 저장 → 채팅엔 "두레이 토큰 저장했다" 만. **채팅창에 토큰을 붙여넣지 말 것**(대화 기록 노출).
 
 ### 0-8. 아래아한글 · MS Office (선택)
 - 증빙이 hwp/docx/xlsx 일 때 pdf 변환(kk-pay), 회의록 hwp 저장 옵션(kk-dining)에만 쓴다. 대부분 KIST PC 에 설치돼 있다.

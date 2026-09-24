@@ -39,7 +39,7 @@ description: |
 **0. 환경 점검** — `../_shared/environment_setup.md` 0단계(어느 창·로그인·`token.txt`; python 패키지는 필요 시점에).
 **공통 식별정보는 먼저 `~/.claude/kiki/kiki.config.json` 에서 읽는다**(이미 있으면 재질문 X). 없는 공통 항목만 물어 거기 저장(다른 skill 재사용). kk-pay 고유만 `kk-pay.config.json`. (`../_shared/personal_config.md`)
 
-1. **dooray 토큰** *(공통, `token.txt`)* — `<kiki_root>/token.txt`(예 `C:\kiki\token.txt`) 가 비어 있으면 **절대경로를 보여주며** 안내: 발급 `https://kist.gov-dooray.com/setting/api/token` → 파일의 `Dooray token:` **다음 줄**에 붙여넣고 저장 → "토큰 넣었어". ⚠️ **채팅에 토큰을 붙여넣지 말라고 항상 경고**(대화 기록에 남아 노출). 넣었다고 하면 값은 출력하지 않고 형식만 확인. 원하면 파일을 열어준다(`notepad`/`open -e`). (구형 `kiki.env` 도 읽힘)
+1. **dooray 토큰** *(공통, `token.txt`)* — `<kiki_root>/token.txt`(예 `C:\kiki\token.txt`) 가 비어 있으면 **절대경로를 보여주며** 안내: 발급 `https://kist.gov-dooray.com/setting/api/token` → 파일의 `Dooray token:` **다음 줄**에 붙여넣고 저장 → "두레이 토큰 저장했다". ⚠️ **채팅에 토큰을 붙여넣지 말라고 항상 경고**(대화 기록에 남아 노출). 넣었다고 하면 값은 출력하지 않고 형식만 확인. 원하면 파일을 열어준다(`notepad`/`open -e`). (구형 `kiki.env` 도 읽힘)
 2. **카드책임자** *(공통 `card_holder`)* — 보통 본인(fam_0711 조회 키, 사번 1회 확인). kiki.config 에 없으면 묻는다.
 3. **담당 연구행정원** *(공통 `payment_admin`)* — 옵션1(권장) **폴더 링크 붙여넣기** → folderId / 옵션2 **이름 검색**(`dooray_drive.find_admin_folder`, "최대 5분" 진행표시). 후보 복수면 1개 선택.
 4. **업로드 범위 분기** *(kk-pay 고유)* — 행정원 폴더 구조 자동파악 후: 세금계산서·회의비 별도 폴더 있으면 "따로 업로드?" / 없으면 "어디까지 RPA?".

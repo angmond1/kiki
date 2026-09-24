@@ -33,7 +33,7 @@ kiki 는 Chrome 창 두 종류를 쓴다. **skill 마다 쓰는 창이 정해져
 
 ### 3. 토큰 (`token.txt`) *(kk-pay 카드 RPA 업로드 · kk-dining RPA 업로드 옵션만)*
 - 위치: **`<kiki_root>/token.txt`**(설치 스크립트가 생성, 예 `C:\kiki\token.txt`). `kiki_root` 는 `~/.claude/kiki/kiki.config.json` 에 기록돼 있다. (구형 `~/.claude/kiki/kiki.env` 도 계속 읽힌다.)
-- 토큰이 비어 있으면 **절대경로를 보여주며** 안내: *"https://kist.gov-dooray.com/setting/api/token 에서 개인 인증 토큰을 만들어 `C:\kiki\token.txt` 의 `Dooray token:` 다음 줄에 붙여넣고 저장한 뒤 '토큰 넣었어' 라고 알려주세요. ⚠️ 채팅창에 토큰을 붙여넣지 마세요(대화 기록 노출)."* 원하면 파일을 열어준다(`notepad`/`open -e`).
+- 토큰이 비어 있으면 **절대경로를 보여주며** 안내: *"https://kist.gov-dooray.com/setting/api/token 에서 개인 인증 토큰을 만들어 `C:\kiki\token.txt` 의 `Dooray token:` 다음 줄에 붙여넣고 저장한 뒤 '두레이 토큰 저장했다' 라고 알려주세요. ⚠️ 채팅창에 토큰을 붙여넣지 마세요(대화 기록 노출)."* 원하면 파일을 열어준다(`notepad`/`open -e`).
 - 사용자가 넣었다고 하면 파일을 읽어 **값은 출력하지 않고** 형식(공백 없음·길이)만 확인. 채팅에 값이 붙여넣어졌으면 즉시 파일로 옮기고 노출 위험을 알린다. 상세 `personal_config.md`.
 - 조회 전용(kk-budget·kk-inspect)·세션쿠키(kk-mail)·세금계산서 직접작성은 토큰 불요.
 
