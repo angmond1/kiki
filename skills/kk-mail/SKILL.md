@@ -28,7 +28,7 @@ description: |
 2. **탭 확보 + Dooray 이동**: `tabs_context_mcp` → `navigate` `https://kist.gov-dooray.com/mail`.
    - 로그인 페이지가 뜨면(세션 만료) 사용자에게 "Dooray에 로그인해 달라" 안내 후 중단.
 3. **코어 주입(1회)**: `scripts/kk_mail_ops.js`를 Read → `javascript_tool`로 inject.
-   - 반환값이 `kk-mail-ops/1.2`(버전 문자열)이면 성공. 이후 `window.kkMail.*` 호출.
+   - 반환값이 `kk-mail-ops/1.3`(버전 문자열)이면 성공. 이후 `window.kkMail.*` 호출.
    - 페이지가 새로고침되면 `window.kkMail`이 사라지므로 재주입.
    - ⚠️ **async 반환이 `{}`로 비면**(특히 `/mail` → 특정 메일 redirect 직후 탭에서 발생): `javascript_tool`이 Promise 결과를 회수 못 하는 현상. 결과를 `window.__x = ...`에 저장하고 마지막 식은 동기 마커(`"go";`)로 즉시 반환 → **다음 호출에서 `JSON.parse(JSON.stringify(window.__x))`로 동기 회수**(2-스텝). sync 반환(`1+1`)은 정상이라 이 우회로가 통한다. 쓰기(`reportSpam`/`moveMails`)도 같은 패턴으로 실행 후 결과 회수.
 4. **출력 제약(2026-09-24 실측)**: `javascript_tool` 반환 문자열은 **약 1,000자에서 잘리고**(`[TRUNCATED]`), 출력 필터가 **`a=b` 꼴이 섞인 결과를 통째로 `[BLOCKED: Cookie/query string]`** 처리하며 URL·8자리 이상 숫자열(메일 id)도 가린다. → 결과는 window 에 두고 코어의 **`fmtList(mails, from, to)` / `fmtBody(b, chars, offset)` / `sanitize()`** 로 조각내어 회수(`=` 금지, id 는 `hyId` 하이픈 꼴). 모든 Tier 공통.
@@ -78,15 +78,16 @@ description: |
 
 ---
 
-### Tier 4 — 자연어로 메일 찾기 (조회 전용, confirm 불필요 · 2026-09-24 실증)
-"지난달쯤 학회에서 온 등록비 안내 메일", "첨부에 견적서 있던 업체 메일 어디 있지" 처럼 **키워드로는 안 잡히는** 메일을 대화로 찾는다. Dooray 검색창이 못 하는 것 = 뜻으로 고르기 · 본문 단서 · 긴 기간 두루 보기.
+### Tier 4 — 자연어로 메일 찾기 (조회 전용, confirm 불필요 · 2026-09-24 실증 2회)
+"2024년에 한양대 세미나 하러 간 적이 있어, 관련 메일 찾아줘", "첨부에 견적서 있던 업체 메일 어디 있지" 처럼 **검색창 한 번으로는 안 잡히는** 메일을 대화로 찾는다. Dooray 검색엔진이 자연어를 이해하는 게 아니라 **Claude 가 목록·미리보기·본문을 읽고 뜻으로 고르는** 방식이며, 수집 경로는 둘이다.
 
-1. **조건 뽑기** — 기간(없으면 최근 90일), 폴더(기본 받은편지함; "보낸" = `sent`; 분류 폴더명이 나오면 `findFolderId`), 발신처 힌트(기관·도메인·사람), 주제·본문 단서. 애매하면 **한 번만** 되묻고 시작.
-2. **목록 수집(2-스텝)** — `window.__x=null; window.kkMail.listMails({folder:'inbox', sinceDays:90}).then(r=>window.__x=r); 'started'` → 다음 호출부터 `window.__x.mails` 사용. 페이징 자동(500건/페이지, 1,500건 ≈ 2.5초), 기간이 길면 `maxPages` 를 올린다. 목록엔 **본문 미리보기가 없다**(날짜·발신·제목·첨부수·읽음만).
-3. **1차 선별** — 사용자의 말을 **동의어·영문·약어까지 넓힌 정규식**으로 바꿔 `window.__c = window.kkMail.pick(window.__x.mails, /학회|conference|symposium|workshop|초록|abstract/i); window.kkMail.fmtList(window.__c, 0, 12)` → 12줄씩 읽는다(더 있으면 `12, 24` …). 후보 0이면 정규식을 넓히거나 기간·폴더를 바꿔 다시. 정규식은 거르기용일 뿐 **최종 판단은 제목·발신·날짜·첨부수를 읽고 뜻으로**(10건 이내로 좁힌다). 선별이 애매하면 목록 전체를 12줄씩 훑어도 된다(14일 ≈ 140건 ≈ 12회).
-4. **본문 확인(필요할 때만)** — `window.__b=null; window.kkMail.getMails(window.__c.slice(0,5)).then(r=>window.__b=r); 'started'` → `window.kkMail.fmtBody(window.__b[0], 700)`(긴 본문은 세 번째 인자 offset 으로 이어 읽기). 전체 목록에 돌리지 말 것(건당 0.3초 + rate limit). 첨부 파일명은 머리줄 `files (…)`.
-   - ⚠️ 본문 GET 은 서버가 그 메일을 **읽음으로 바꾼다** → `getMails` 는 목록의 `read=false` 였던 메일을 조회 직후 **`markUnread` 로 자동 복원**한다(그래서 목록 항목(`read` 포함)을 그대로 넘겨야 하며, id 문자열만 넘기면 복원 못 함). 실측: 안 읽은 3건 본문 조회 후 전부 `read=false` 복원 확인. `opened`(열어본 적 있음)는 남지만 화면의 읽음/안 읽음 표시는 `read` 기준이라 사용자에게 보이지 않는다.
-5. **결과 제시** — 본문 표(번호·날짜·발신·제목·판단 근거 한 줄)로 최종 1~5건. 링크는 `window.kkMail.fmtList(window.__c, 0, 5, {ids:true})` 로 받은 **하이픈 id 의 `-` 를 지워** `https://kist.gov-dooray.com/mail/systems/inbox/<id>` 로 조합(분류 폴더의 메일은 `/mail/folders/<folderId>/<id>`). 원하면 본문 요약·첨부 목록까지. "열어줘" 하면 `window.kkMail.openMail(window.__c[i])` 로 **현재 탭에서 이동**(열면 읽음 처리되므로 사용자가 말했을 때만). 조회 전용이라 confirm 은 필요 없다.
+1. **조건 뽑기** — 기간(연도·"지난달"·없으면 최근 90일), 핵심어(기관·사람·주제어 — 동의어·영문·약어까지), 발신처 힌트, 본문 단서, 폴더. "관련 메일" 이면 **받은 것과 보낸 것 모두**. 애매하면 **한 번만** 되묻고 시작.
+2. **경로 A — 서버 검색(기본, 빠름)**: 핵심어가 하나라도 있으면 `window.__x=null; window.kkMail.searchMany([['한양대'],['hanyang']], {since:'2024-01-01', before:'2024-12-31'}).then(r=>window.__x=r); 'started'` → 다음 호출에서 `window.kkMail.fmtList(window.__x.mails, 0, 10, {pv:60})`. Dooray 검색창과 같은 호출이라 **제목·본문·발신자 전체**가 대상이고 폴더 무관(받은·보낸 모두, 스팸·휴지통 제외), 기간은 서버가 거른다(2024년 '한양대' 34건 즉시). 배열 원소끼리 AND, 한 원소 안 띄어쓰기는 구절 매칭이므로 **동의어는 묶음을 따로** 넣는다. 넓은 토큰(도메인 조각 `hanyang` 등)은 수신자 목록에 그 주소가 든 단체 메일까지 끌어오므로(실측 `한양대` 34건 → `hanyang` 추가 시 137건) **구체어 먼저**, 부족할 때만 넓힌다. 미리보기(`pv`)에 본문 앞부분이 실려 1차 판단에 쓴다. 결과 항목에 `url`·`folder` 가 들어 있다.
+3. **경로 B — 목록 훑기(핵심어를 못 정할 때)**: "그 업체 이름이 기억 안 나", "첨부 있던 거" 처럼 검색어가 없으면 `listMails({folder:'inbox', since, until, size:1000, maxPages:40})` 로 기간 목록을 받아 `pick(정규식)` 후 12줄씩 읽는다. 최신부터 넘기므로 **1년 전 구간은 11페이지·20여 초**(실측) → 가능하면 A. 보낸편지함은 `folder:'sent'` 로 한 번 더.
+4. **뜻으로 고르기** — 제목·발신·날짜·첨부수·미리보기를 읽고 10건 이내로 좁힌다. 검색어·정규식은 거르기용일 뿐이다. 함정: 약어는 대소문자 구분·단어경계(`/HYU/i` 는 "Hyun" 에 걸린다), 사내 공지는 `pick(mails, re, {excludeFrom:/kist\.re\.kr$/i})` 로 제외, 같은 이름의 다른 기관(거래처 "한양정밀", "현장실습지원팀")은 제목으로 걸러낸다.
+5. **본문 확인(필요할 때만)** — `window.__b=null; window.kkMail.getMails(window.__c.slice(0,5)).then(r=>window.__b=r); 'started'` → `window.kkMail.fmtBody(window.__b[0], 700)`(이어 읽기는 세 번째 인자 offset). 전체에 돌리지 말 것(건당 0.3초 + rate limit). 첨부 파일명은 머리줄 `files (…)`.
+   - ⚠️ 본문 GET 은 서버가 그 메일을 **읽음으로 바꾼다** → `getMails` 는 목록의 `read=false` 건을 조회 직후 **`markUnread` 로 자동 복원**한다(목록 항목(`read` 포함)을 그대로 넘겨야 하며 id 문자열만 넘기면 복원 못 함). 실측 3건 복원 확인. `opened`(열어본 적 있음)는 남지만 화면 표시는 `read` 기준이라 보이지 않는다.
+6. **결과 제시** — **같은 사건끼리 묶어**(안내 → 일정 조율 → 감사 인사 순) 표(날짜·발신·제목·비고)로 보여주고 건마다 링크. 서버 검색 결과는 `url` 을 그대로, 목록 훑기 결과는 `fmtList(..., {ids:true})` 의 하이픈 id 에서 `-` 를 지워 `https://kist.gov-dooray.com/mail/systems/inbox/<id>`(보낸 = `/mail/systems/sent/<id>`, 분류 폴더 = `/mail/folders/<folderId>/<id>`). 무엇을 제외했는지 한 줄 덧붙인다. "열어줘" 하면 `window.kkMail.openMail(항목)` 으로 현재 탭 이동(읽음 처리되므로 사용자가 말했을 때만). 조회 전용이라 confirm 은 필요 없다.
 - 실행 전 코어 주입(실행 준비 3) 필수. async 결과가 `{}` 로 비면 위 2-스텝이 정답(실행 준비 3 ⚠️). 출력이 잘리거나 `[BLOCKED…]` 면 실행 준비 4.
 - 사용자 화면에 열려 있는 메일이나 다른 메일의 읽음 상태를 건드리지 않는다(스팸·이동은 Tier 1·2 절차로만).
 

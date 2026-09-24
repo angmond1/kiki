@@ -238,6 +238,51 @@
     return dfetch(`/v2/wapi/mail-rules/${ruleId}`, { method: 'DELETE' });
   }
 
+  // ---------- Tier 4-A: 서버 검색 (POST /v2/wapi/mails/search — Dooray 검색창과 동일 호출, 2026-09-24 캡처·실측) ----------
+  // terms: ['한양대'] 단어 배열. 원소끼리 AND, 한 원소 안의 띄어쓰기('한양대 화공세미나')는 구절(인접) 매칭. 대상 = 제목·본문·발신자 전체.
+  //   기간: since/before ('YYYY-MM-DD' 또는 ISO 시각; 서버는 ISO 시각+타임존만 받으므로 날짜면 보정) 또는 sinceDays. until/period 등 다른 이름은 조용히 무시된다.
+  //   폴더 지정 파라미터 없음(folderName 무시, 받은·보낸 모두) — exceptFolders(시스템 폴더 이름, 기본 draft/spam/trash 제외)만. 결과 folder 로 사후 필터.
+  //   응답: result.contents[{id}] + references.mailMap[id](목록과 같은 메일 객체 + mailSummary.previewText 본문 앞 ~300자) + references.folderMap[id]{name,type}.
+  //   실측: size 100 OK / '한양대' 전체 237건, 2024년 34건 즉시 / 본문에만 있는 구절도 hit.
+  async function searchMails(terms, opt = {}) {
+    const size = opt.size || 100, maxPages = opt.maxPages || 5;
+    const iso = (d, end) => /T/.test(d) ? d : d + (end ? 'T23:59:59+09:00' : 'T00:00:00+09:00');
+    const body = { exceptFolders: opt.exceptFolders || ['draft', 'spam', 'trash'], all: Array.isArray(terms) ? terms : [String(terms)],
+      page: 0, order: opt.order || '-createdAt', highlight: true, size };
+    if (opt.since) body.since = iso(opt.since, false); else if (opt.sinceDays) body.since = new Date(Date.now() - opt.sinceDays * 86400000).toISOString();
+    if (opt.before) body.before = iso(opt.before, true);
+    const out = { total: null, fetched: 0, pages: 0, mails: [] }, folders = {};
+    for (let p = 0; p < maxPages; p++) {
+      body.page = p;
+      const d = await dfetch('/v2/wapi/mails/search?preview=true', { method: 'POST', body });
+      if (!d.result) { out.error = (d.header && (d.header.resultMessage || d.header.resultCode)) || 'no result'; break; }
+      const cs = d.result.contents || [], refs = d.result.references || {}, mm = refs.mailMap || {};
+      Object.assign(folders, refs.folderMap || {});
+      if (out.total == null) out.total = d.result.totalCount;
+      out.fetched += cs.length; out.pages++;
+      for (const c of cs) {
+        const m = mm[c.id]; if (!m) continue;
+        const s = summarize(m), f = folders[m.folderId] || {};
+        s.preview = ((m.mailSummary && m.mailSummary.previewText) || '').slice(0, 400);
+        s.folder = f.name || '';
+        s.url = 'https://kist.gov-dooray.com' + (f.type === 'system' ? `/mail/systems/${f.name}/${m.id}` : `/mail/folders/${m.folderId}/${m.id}`);
+        out.mails.push(s);
+      }
+      if (cs.length < size) break;
+    }
+    return out;
+  }
+  // 동의어 묶음별로 검색해 합치고 중복 제거(최신순). groups = [['한양대'], ['hanyang'], ['한양대학교', '세미나']]
+  async function searchMany(groups, opt = {}) {
+    const seen = new Map(); let totalSum = 0;
+    for (const g of groups) {
+      const r = await searchMails(g, opt); totalSum += r.total || 0;
+      for (const m of r.mails) if (!seen.has(m.id)) seen.set(m.id, m);
+      await new Promise(res => setTimeout(res, 200));
+    }
+    return { totalSum, mails: Array.from(seen.values()).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)) };
+  }
+
   // ---------- 출력 도우미 (Claude in Chrome javascript_tool 제약 대응, 2026-09-24 실측) ----------
   // (1) 반환 문자열은 약 1,000자에서 [TRUNCATED] → 결과를 window 에 두고 fmtList/fmtBody 로 조각내어 회수한다.
   // (2) 출력 필터: `a=b` 꼴이 있으면 통째로 [BLOCKED: Cookie/query string], URL·긴 숫자열(메일 id)도 가려진다
@@ -248,12 +293,16 @@
   }
   function hyId(id) { return String(id).replace(/(\d{4})(?=\d)/g, '$1-'); }
   // 목록 정규식 1차 선별(제목·발신자·발신주소). Claude 가 동의어·영문·약어를 넓혀 만든 정규식을 넘긴다.
-  function pick(mails, re) { return (mails || []).filter(m => re.test(m.subject) || re.test(m.fromName) || re.test(m.fromEmail)); }
-  // 목록 한 조각: idx | 날짜 | R/U | 첨부수 | 발신 | 제목 [| id(하이픈)]. 12줄 ≈ 800자.
-  function fmtList(mails, from = 0, to = 12, { subj = 44, who = 14, ids = false } = {}) {
+  //   excludeFrom: 발신 주소 제외 정규식(예 /kist\.re\.kr$/i 로 사내 공지 제외). ⚠️ 약어는 대소문자 구분·단어경계로(/HYU/i 는 'Hyun' 에 걸린다).
+  function pick(mails, re, { excludeFrom } = {}) {
+    return (mails || []).filter(m => (re.test(m.subject) || re.test(m.fromName) || re.test(m.fromEmail)) && !(excludeFrom && excludeFrom.test(m.fromEmail)));
+  }
+  // 목록 한 조각: idx | 날짜 | R/U | 첨부수 | 발신 | 제목 [폴더] [| 미리보기 pv자] [| id(하이픈)]. 12줄 ≈ 800자(pv 를 주면 줄을 줄일 것).
+  function fmtList(mails, from = 0, to = 12, { subj = 44, who = 14, ids = false, pv = 0 } = {}) {
     mails = mails || [];
     const rows = mails.slice(from, to).map((m, k) =>
-      sanitize(`${from + k} | ${m.date.slice(5)} | ${m.read ? 'R' : 'U'} | att${m.fileCount} | ${(m.fromName || m.fromEmail).slice(0, who)} | ${m.subject.slice(0, subj)}`) + (ids ? ' | ' + hyId(m.id) : ''));
+      sanitize(`${from + k} | ${m.date.slice(5)} | ${m.read ? 'R' : 'U'} | att${m.fileCount} | ${(m.fromName || m.fromEmail).slice(0, who)} | ${m.subject.slice(0, subj)}`
+        + (m.folder && m.folder !== 'inbox' ? ` [${m.folder}]` : '') + (pv && m.preview ? ' | ' + m.preview.slice(0, pv) : '')) + (ids ? ' | ' + hyId(m.id) : ''));
     return `[${from}-${Math.min(to, mails.length)} of ${mails.length}]\n` + rows.join('\n');
   }
   // 본문 1건: 머리 1줄(제목·날짜·발신·첨부·복원 여부) + 본문 chars 자. 긴 본문은 offset 을 옮겨 이어 읽는다.
@@ -272,10 +321,11 @@
     dfetch, findAllFolders, findFolderId, ensureFolder, deleteFolder,
     listInbox, listFolderMails, summarize,
     listMails, getMail, getMails, htmlToText, markRead, markUnread,
+    searchMails, searchMany,
     pick, fmtList, fmtBody, sanitize, hyId, openMail,
     reportSpam, moveMails,
     createRule, listMailRules, deleteMailRule,
-    _version: 'kk-mail-ops/1.2',
+    _version: 'kk-mail-ops/1.3',
   };
   return window.kkMail._version;
 })();

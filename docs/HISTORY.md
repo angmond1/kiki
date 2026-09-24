@@ -23,7 +23,7 @@ kiki/
 ## skill 빌드 상태 (전부 사용 가능)
 | skill | 핵심 | 인증 |
 |-------|------|------|
-| kk-mail | Tier1 스팸 / Tier2 폴더분류 / Tier3 자연어 규칙 / **Tier4 자연어 찾기**(페이징 목록 + 본문 GET + 읽음 복원, 2026-09-24) + 권장분류 23규칙 + 폴더 자동생성·삭제 + confirm 전 본문 표 + async `{}` 우회 + 출력 1,000자·필터 대응 | Dooray 세션 쿠키 |
+| kk-mail | Tier1 스팸 / Tier2 폴더분류 / Tier3 자연어 규칙 / **Tier4 자연어 찾기**(서버 검색 API + 페이징 목록 + 본문 GET + 읽음 복원, 2026-09-24) + 권장분류 23규칙 + 폴더 자동생성·삭제 + confirm 전 본문 표 + async `{}` 우회 + 출력 1,000자·필터 대응 | Dooray 세션 쿠키 |
 | kk-pay | 좌표0 fetch(카드·과제·이름→사번) + 비목 3단조회 + Dooray 폴더 업로드(RPA) + **세금계산서 직접작성 fam_0702 end-to-end**(계정·검수·계좌 실명검증·첨부·상신, 2026-07-08) | 통합정보 SSO + Dooray 토큰 (첨부는 chrome-devtools-mcp) |
 | kk-dining | 카드 회의비 추출 + 사전결재 매칭 + 회의록 엑셀 master + **fam_0704_02(법인)·fam_0703_02(연구비카드)** 자동작성·임시저장·결재상신 + 2026-08-01 규정(사전결재 폐지 대상·PROJJOINYN) 반영 | 통합정보 SSO (좌표0 부모탭 JS) |
 | kk-budget | 좌표0 fetch 예실대비표(`BUDGYEAR=9999`+`ACCCLSCD` LEV1) + 직접비 소계 + 개인지분(적요+신청인 합산) | 통합정보 SSO (조회 전용) |
@@ -50,6 +50,7 @@ kiki/
 재사용 패턴(NEXACRO 부모탭 JS 완전자동·fetch backend 직접호출·form 직접제어·hwp 자동화·과제분류코드·데이터 master·임시저장↔결재상신 분리·killfocus 동기화 등)은 전부 **[DEVELOPMENT.md](DEVELOPMENT.md)** 에 통합. skill 별 화면·필드 캡처 상세는 각 skill 의 `references/`.
 
 ## 빌드 이력 (요약)
+- **2026-09-24 v0.2.6 (kk-mail Tier 4 공식화 — 서버 검색 경로 + 실전 1회)**: 실전 검색("2024년 한양대 세미나 관련 메일" → 세미나 3건·메일 12건)으로 절차 확정 — 받은·보낸 모두, 사건별 묶기, 정규식 함정(`/HYU/i`→"Hyun"), 동명 기관 제외, 1년 전 구간 목록 훑기 11페이지·23초. 그 대안으로 **Dooray 검색 API `POST /v2/wapi/mails/search?preview=true`**(검색창과 동일: `all` 제목·본문·발신 AND/구절, `since`/`before` ISO 시각, `exceptFolders`, `references.mailMap/folderMap`, `previewText` 본문 앞부분; 기간 이름 후보 20여 개 대조로 확정)를 코어 1.3 `searchMails/searchMany` 로 추가 → 경로 A(서버 검색, 기본)·경로 B(목록 훑기, 핵심어 없을 때) 이원화. `fmtList {pv}` 미리보기, `pick {excludeFrom}`. README 구성표에 "자연어로 메일 찾기".
 - **2026-09-24 v0.2.5 (kk-mail Tier 4 자연어 찾기)**: 코어 1.2 — `listMails`(기간 컷오프 페이징, size 500) · `getMail/getMails`(`GET /v2/wapi/mails/{id}` → HTML→텍스트·첨부명, **상세 GET 이 read/opened 를 true 로 만들어 목록의 `read=false` 건은 `POST /mails/unread` 로 자동 복원**) · `markRead/markUnread` · `pick`(정규식 1차 선별) · `fmtList/fmtBody/sanitize/hyId`(javascript_tool 출력 ~1,000자 truncation + `a=b`/URL/긴 숫자 필터 대응) · `openMail`. SKILL 에 Tier 4 절차(조건→페이징 수집→정규식+뜻 선별 ≤10→본문 확인→표+링크), `wapi_reference.md` 에 상세/읽음/페이징/플래그(read vs opened) 기록. 실측: 14일 137건 0.2초, 안 읽은 3건 본문 후 read=false 복원 확인.
 - **2026-09-24 (hwpx 생성기 수정)**: `make_dininglog_hwpx.py` 가 템플릿 단락의 `<hp:linesegarray>` 를 제거하고(남기면 한글이 자간을 눌러 한 줄에 우겨 넣음 → 긴 문장 줄바꿈 안 됨), `_fill_cell(para_pr=, char_pr=)` 로 문단·글자모양 지정 가능. AIX 성과공유회 신청서(hwp 양식) 채우기에 같은 생성기를 재사용하며 발견·수정.
 - **2026-09-24 (테스트 종료)**: 배포 전 검증은 **1단계 격리 검증(80/100, HIGH 0)까지로 마무리**(사용자 결정). 2단계 Windows Sandbox 실환경·새 로컬 계정 테스트는 준비 자료만 남기고 보류(`_tmp/sandbox/`, gitignore). 3단계 파일럿은 배포 후 피드백으로 대체. 설치본(`~/.claude/skills`) = 배포본 동기화 확인.

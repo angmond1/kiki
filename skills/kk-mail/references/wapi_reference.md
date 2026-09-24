@@ -16,7 +16,7 @@
 - 응답: `result.contents[]` = 메일/폴더 배열, `result.totalCount`.
 - 메일 발신자: `users.from.emailUser.{name,emailAddress}`. 날짜: `createdAt`. 첨부 수: `fileCount`. `mailSummary.previewText` 는 **비어 있음**(본문 단서는 상세 GET 필요).
 - **읽음 플래그 두 종류**(`mailSummary.flags`): `read` = 사용자 화면의 읽음/안 읽음(토글 가능) / `opened` = 한 번이라도 열린 적 있음(상세 GET 시 true 로 굳고 되돌릴 수 없음). **표시용은 `read`**.
-- **페이징**: `page=0,1,2…` 로 넘긴다. `size` 는 500·1000 도 허용(실측 2026-09-24: 500×3페이지 1,500건 ≈ 2.5초). 코어 `listMails({folder|folderId, sinceDays|since, until, maxPages, size})` 가 기간 컷오프까지 자동으로 넘긴다.
+- **페이징**: `page=0,1,2…` 로 넘긴다(최신부터 — 1년 전 구간까지 11페이지×1000건 ≈ 23초 실측 → 오래된 기간은 아래 검색 API). `size` 는 500·1000 도 허용(실측 2026-09-24: 500×3페이지 1,500건 ≈ 2.5초). 코어 `listMails({folder|folderId, sinceDays|since, until, maxPages, size})` 가 기간 컷오프까지 자동으로 넘긴다.
 
 ## 메일 본문 (Tier 4 찾기, ✅ 확정 2026-09-24 실측)
 ```
@@ -33,6 +33,19 @@ POST /v2/wapi/mails/read     { "mailIdList": ["..."] }
 POST /v2/wapi/mails/unread   { "mailIdList": ["..."] }
 ```
 - 응답 `header.resultCode 0`. 목록의 `flags.read` 가 바뀐다(`opened` 는 불변).
+
+## 검색 — Dooray 검색창과 동일 호출 (Tier 4-A, ✅ 2026-09-24 캡처·실측)
+```
+POST /v2/wapi/mails/search?preview=true
+{ "exceptFolders": ["draft","spam","trash"], "all": ["한양대"], "page": 0, "order": "-createdAt", "highlight": true, "size": 100,
+  "since": "2024-01-01T00:00:00+09:00", "before": "2024-12-31T23:59:59+09:00" }
+```
+- `all` = 제목·본문·발신자 전체 대상. 배열 원소끼리 **AND**(`["한양대","세미나"]` → 54건), 한 원소 안의 띄어쓰기는 **구절 매칭**(`["한양대 세미나"]` → 9건). 본문에만 있는 구절도 hit(실측).
+- 기간: **`since` / `before` 만 유효**(`until`·`period`·`createdAt`·`startDate`·`sentAt` 등은 조용히 무시). **ISO 시각+타임존 필수** — 날짜만(`2024-01-01`) 넣으면 -200200. 오름차순은 `order:"createdAt"`.
+- 폴더 지정 없음(`folderName` 무시 → 받은·보낸 모두). `exceptFolders`(시스템 폴더 이름) 만 동작. 결과의 `folderId` 를 `references.folderMap` 으로 이름 매핑해 사후 필터.
+- `subject` / `body` / `from` 같은 대상 한정 필드는 무시되고 totalCount 2000(cap) 전체가 돌아온다 → 대상 한정은 없다.
+- 응답: `result.totalCount`, `result.contents[{id, uid, subject}]`(하이라이트용 껍데기, body 비어 있음), **`result.references.mailMap[id]`** = 목록 API 와 같은 메일 객체(`createdAt, subject, users, folderId, fileCount, mailSummary{flags, previewText}`), `references.folderMap[id]{name,type}`. `preview=true` 면 `mailSummary.previewText` 에 **본문 앞부분(~300자, 인용 포함)** 이 실린다. `size` 100 OK(50건 응답 ≈ 600KB).
+- UI: 검색창 Enter → URL `/mail/all?query=all%3D<단어>&period=keyword%3Dall`, 기간 직접입력 → `period=keyword%3Ddirect%26startedAt%3D…%26endedAt%3D…`. 검색 결과 화면은 첫 메일을 자동으로 연다(읽음 처리) — 코어 `searchMails` 는 API 만 부르므로 화면·읽음 상태를 건드리지 않는다.
 
 ## 스팸 신고 (Tier 1)
 ```
