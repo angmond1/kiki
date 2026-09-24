@@ -32,7 +32,7 @@
 - Python: https://www.python.org/downloads/ — Windows 는 설치 화면 **"Add python.exe to PATH"** 체크. (`winget install -e --id Python.Python.3.12` / macOS `brew install python` / Ubuntu `sudo apt install python3 python3-pip`; macOS 에 Homebrew 가 없으면 위 링크의 설치 파일로, 새 Mac 은 `python3` 첫 실행 때 Xcode 개발자 도구 설치 창이 뜰 수 있음)
 - Node.js(LTS): https://nodejs.org/ (`winget install -e --id OpenJS.NodeJS.LTS` / `brew install node` / `sudo apt install nodejs npm`)
 - 확인: 새 터미널에서 `python --version`(macOS/Linux `python3 --version`), `node --version`, `npx --version`.
-- **Python 패키지는 미리 설치하지 않는다** — 각 skill 이 필요한 시점에 확인 후 `pip install`(아래 §5 표).
+- **Python 패키지는 미리 설치하지 않는다** — 각 skill 이 필요한 시점에 확인 후 설치(아래 §5 표). 명령은 Windows `python -m pip install X` / macOS·Linux `python3 -m pip install --user X`(`externally-managed-environment` 오류면 `--break-system-packages` 추가). 에이전트가 confirm 후 대신 실행한다.
 
 ### 0-5. KIST 사내망
 KIST 내부망에서 실행. KIST 밖(재택·출장)이면 **KIST VPN 접속 후** 진행. (포탈 `e.kist.re.kr`·`p.kist.re.kr:8081`, Dooray API 모두)

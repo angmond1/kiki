@@ -39,6 +39,9 @@ kiki 는 Chrome 창 두 종류를 쓴다. **skill 마다 쓰는 창이 정해져
 
 ### 4. Python 패키지 — **필요한 시점에, 그때그때** (부트스트랩에서 일괄 설치 X)
 `python -c "import X"` 로 확인 → 없으면 *"`pip install X` 가 필요합니다(용도). 설치할까요?"* → confirm 후 설치. 크래시 X.
+- **OS 별 설치 명령**(에이전트가 셸에서 실행): Windows `python -m pip install X` / macOS·Linux `python3 -m pip install --user X`.
+  - macOS(Homebrew Python)·최신 Ubuntu 는 `externally-managed-environment` 오류로 막힐 수 있다 → `python3 -m pip install --user --break-system-packages X` (여기 쓰는 패키지는 순수 라이브러리라 시스템에 영향 없음). 그래도 안 되면 `python3 -m venv ~/.claude/kiki/venv` 후 그 venv 의 python 으로 skill 스크립트 실행.
+  - `pywin32` 는 Windows 전용(macOS·Linux 는 건너뜀). `Pillow`·`PyMuPDF`·`openpyxl`·`requests` 는 세 OS 모두 wheel 로 설치된다.
 
 | skill | 패키지 | 필요한 시점 |
 |-------|--------|------------|
