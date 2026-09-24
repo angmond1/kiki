@@ -132,8 +132,28 @@ mkdir -p budget dining inspect _tmp
 
 > **쓰기 작업(업로드·제출·결재상신·검수 신청·파일 첨부)은 항상 본인 확인 후** 진행된다.
 
-## 6. macOS / Linux
-- 설치 `install.sh`, 경로 `~/.claude/skills/`·`~/.claude/kiki/`·`~/kiki`. 기능 동일하되 **hwp→pdf 자동 변환(kk-pay 증빙)만 Windows+아래아한글 전용**(회의록 hwpx 생성은 모든 OS). docx/xlsx→pdf 는 LibreOffice 로 자동.
+## 6. macOS / Linux — Windows 와 다른 점
+> ⚠️ **macOS/Linux 는 실기기 검증을 못 했다**(2026-09-24 기준 Windows 에서만 실측). 아래는 알려진 차이를 정리한 것이니, 막히면 그 지점을 알려주기 바란다(문의 dnklee@kist.re.kr).
+
+| 항목 | Windows | macOS / Linux |
+|------|---------|---------------|
+| 설치 스크립트 | `powershell -ExecutionPolicy Bypass -File .\install.ps1` (실행정책 우회 필요) | `bash ./install.sh` (실행 권한 불필요 — bash 로 호출). macOS 기본 셸은 zsh 지만 그대로 됨 |
+| 경로 | `C:\Users\<이름>\.claude\skills`, 기본 폴더 `C:\kiki`, config 에 `\\` | `~/.claude/skills`(=`/Users/<이름>/.claude/skills`), 기본 폴더 `~/kiki`, config 에 `/`. `.claude` 는 Finder 에서 숨김(⌘⇧. 로 표시) |
+| Python | python.org 설치 시 **"Add python.exe to PATH"** 체크. Microsoft Store 의 가짜 `python.exe`(스토어를 여는 스텁) 주의 | `python` 명령이 없고 **`python3`**. 새 Mac 은 `python3` 첫 실행 때 **Xcode 명령줄 도구 설치 창**이 뜸(설치하면 됨). 또는 `brew install python` |
+| pip | `python -m pip install X` | `python3 -m pip install --user X` → `externally-managed-environment` 오류면 `--break-system-packages` 추가 |
+| Node.js | nodejs.org 설치 파일(PATH 자동) | nodejs.org `.pkg` 또는 `brew install node`. Homebrew 는 기본 미설치(brew.sh 의 설치 명령, Apple Silicon 은 설치 후 안내대로 `~/.zprofile` 에 PATH 추가) |
+| Claude 재시작 | 트레이 아이콘 → Quit | Dock 아이콘 → Quit(⌘Q). 창 닫기(빨간 버튼)는 종료가 아님 |
+| chrome-devtools-mcp 등록 | `claude mcp add --scope user …` / `.claude.json` = `C:\Users\<이름>\.claude.json` | 동일 명령 / `~/.claude.json`. Chrome 은 `/Applications/Google Chrome.app` 에 있어야 함 |
+| 파일 열기(token.txt 등) | `notepad` | `open -e`(TextEdit — .txt 라 서식 없는 텍스트로 저장됨) |
+| 휴지통 | PowerShell 로 휴지통 이동 | Finder 를 통해 이동 → **첫 실행 때 "Finder 제어 허용" 권한 창**이 뜸(거부해도 파일 옆 `_trash/` 폴더로 대체 이동) |
+| 엑셀 | 파일이 열려 있으면 `PermissionError` → 닫고 재시도 | 열려 있어도 저장은 되지만 Excel 이 나중에 덮어쓸 수 있음 → 작업 전 닫기 |
+| 증빙 hwp/docx/xlsx → pdf | 아래아한글·MS Office COM 으로 자동 | **hwp→pdf 자동 변환 불가**(HOP 에서 PDF 내보내기 수동). docx/xlsx 는 LibreOffice(`/Applications/LibreOffice.app`) 있으면 자동 |
+| 회의록 hwpx (kk-dining) | 생성 가능 | **생성 가능**(한글 불요). 열람은 HOP(`brew install hop` 또는 dmg) — 한글 글꼴이 없어 줄바꿈·자간이 조금 다를 수 있음 |
+| 다운로드 파일 경고 | SmartScreen "PC 보호" → 추가 정보 → 실행 | Gatekeeper — HOP 은 서명·공증돼 있어 그대로 열림 |
+| KIST VPN | 회사 배포 클라이언트 | mac 용 클라이언트 필요(데이터정보팀 확인) |
+| Linux 추가 | — | Claude Desktop 미지원 → **Claude Code CLI** 로 사용. 휴지통은 `gio trash`(없으면 `_trash/`) |
+
+- 기능 차이는 결국 두 가지: **hwp→pdf 자동 변환 없음**, **`pywin32` 계열 스크립트(구형 hwp COM) 없음**. 그 외 5개 skill 전부 동일하게 동작하도록 만들어져 있다.
 
 ## 7. 트러블슈팅
 - **install.ps1 이 "running scripts is disabled"** → `powershell -ExecutionPolicy Bypass -File .\install.ps1`.

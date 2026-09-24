@@ -22,6 +22,7 @@ KIST 행정 자동화 skill 5종(`kk-mail`·`kk-pay`·`kk-dining`·`kk-budget`·
   - 설치 직후엔 이 세션의 셸이 새 PATH 를 못 볼 수 있다 → 재확인이 실패해도 설치 실패로 단정하지 말고, 재시작(Step 5) 후 다시 확인하자고 안내한다.
 - **git 은 필요 없다.** 있으면 clone 에 써도 되지만 없다고 설치를 요구하지 말 것(ZIP/폴더로 진행).
 - **KIST 사내망**에서만 동작. 밖이면 KIST VPN 접속을 안내.
+- OS 가 macOS/Linux 면 [INSTALL.md](INSTALL.md) §6 의 차이표(python3·pip 옵션·Homebrew·Xcode 도구·Finder 권한·hwp 변환 불가)를 먼저 읽고 그에 맞춰 안내한다. **macOS 는 미실측**이니 막히는 지점을 사용자에게 솔직히 말하고 우회한다.
 
 ### Step 1 — kiki 폴더 위치 정하기 + 패키지 확보
 1. **먼저 묻는다**(AskUserQuestion 등 선택 프롬프트): *"kiki 를 어디에 둘까요? ① 기본 `C:\kiki`(권장, macOS/Linux `~/kiki`) ② 직접 지정"*. 이 폴더가 **skill 원본 + 엑셀·회의록·검수 파일 + `token.txt`** 의 집(`kiki_root`)이 된다.

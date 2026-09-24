@@ -56,6 +56,18 @@ kiki 는 Chrome 창 두 종류를 쓴다. **skill 마다 쓰는 창이 정해져
 - **없을 때** 단정하지 말고 묻는다: docx/xlsx → *"MS Office 가 없어 무료 LibreOffice(https://www.libreoffice.org/download/)를 설치하면 자동 변환됩니다. 설치할까요?"* / hwp → *"아래아한글이 없습니다. 무료 오픈소스 한글 편집기 HOP(Open HWP, Windows/macOS/Linux, https://github.com/golbin/hop)을 설치하면 hwp 를 열어 편집하고 PDF 로 내보낼 수 있습니다(자동 변환은 안 됨 — 내보낸 PDF 를 주시면 됩니다). 설치할까요?"* (Windows `.msi` / macOS `brew install hop` / Linux `.deb`·`.rpm`·`.AppImage`; rhwp 엔진 기반, MIT) 설치는 사용자 confirm 후. 거절하면 "직접 pdf 로 저장해 주세요" 로 진행.
 - kk-dining **hwpx 회의록 생성은 한글 불요·모든 OS**(`scripts/make_dininglog_hwpx.py`, 표준 라이브러리 — 양식 hwpx 의 값 셀 XML 치환). 한글이 없는 PC 에서 열어보려면 무료 HOP(https://github.com/golbin/hop) 안내(**작성엔 불필요**; HOP 0.4.4 에서 hwpx 표시 확인 2026-09-24). hwp(구형)는 더 이상 만들지 않는다.
 
+## OS 차이 (실행 중 에이전트가 알아야 할 것 — macOS/Linux 는 미실측, 알려진 차이)
+- 명령: Python 은 Windows `python` / macOS·Linux `python3`(첫 실행 때 Xcode 명령줄 도구 설치 창이 뜰 수 있음 — 사용자에게 설치하라고 안내). pip 는 4단계 표기대로.
+- 경로: `~` 는 Windows `C:\Users\<이름>`, macOS `/Users/<이름>`. config JSON 의 Windows 경로는 `\\`, macOS 는 `/`. `{kiki_root}` 기본 `C:\kiki` / `~/kiki`.
+- 파일 열어주기: Windows `notepad <경로>` / macOS `open -e <경로>` / Linux `xdg-open <경로>`.
+- 휴지통: `convert.py`·`rename_evidence.py` 가 OS 별로 처리(Windows PowerShell / macOS Finder — **첫 실행 때 "Finder 제어" 권한 창**, 거부되면 `_trash/` 폴더로 / Linux `gio trash`). 권한 창이 뜨면 사용자에게 허용을 안내.
+- 변환 엔진: hwp→pdf 는 **Windows+아래아한글에서만 자동**. macOS/Linux 에서 hwp 증빙이 오면 "HOP 으로 열어 PDF 내보내기" 안내. docx/xlsx→pdf 는 MS Office(Windows) 또는 LibreOffice(모든 OS, `convert.py --check` 로 확인).
+- `pywin32`·`pyhwpx`·`pywinauto`(구형 hwp COM) 는 Windows 전용 — macOS/Linux 에서 설치 시도하지 말 것. hwpx 회의록 생성은 표준 라이브러리라 모든 OS.
+- 엑셀 잠금: Windows 는 열려 있으면 `PermissionError` → 닫아달라 안내. macOS 는 오류 없이 저장되지만 Excel 이 덮어쓸 수 있으니 작업 전 닫아달라 안내.
+- 재시작 안내 문구: Windows "트레이 아이콘 → Quit" / macOS "Dock 아이콘 → Quit(⌘Q), 창 닫기는 종료 아님". Linux 는 Claude Desktop 이 없으므로 CLI 세션 재시작.
+- 콘솔 한글: Windows PowerShell 5.1 은 BOM 없는 스크립트의 한국어를 깨뜨린다(`install.ps1` 은 BOM 포함). Python 출력은 `PYTHONIOENCODING=utf-8` 이 설정돼 있어 깨져 보여도 파일 내용은 정상.
+- 상세 비교표 → `INSTALL.md` §6.
+
 ## 안내 문구 표준
 - 멈춰야 할 때: 무엇이/왜 안 됐는지 + 사용자가 할 일 한 문장으로. (조용히 실패 금지)
 - KIST 사내망/계정 권한이 필요한 접속은 그 사실을 함께 안내.
