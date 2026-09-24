@@ -18,7 +18,7 @@ KIST 포탈 제어 claude code, codex skill 모음.
 | **kk-dining** | 회의비처리 | 회의록, 회의비 지급신청서 자동 작성  | Opus |
 | **kk-inspect** | 물품검수 | 소액 검수 신청서 자동 작성 | Sonnet |
 | **kk-budget** | 예산조회 | 과제 예실대비표 예산현황 자동조회  | Sonnet |
-| **kk-mail** | 메일관리 | 자연어 메일검색, 자동 폴더분류, 불건전 학회/저널 메일 자동스팸 | Sonnet (메일검색은 Opus) |
+| **kk-mail** | 메일관리 | 자연어 메일검색, 자동 폴더분류, 불건전 학회/저널 메일 자동스팸 | Opus (분류, 스팸처리는 Sonnet) |
 
 <br><br>
 
