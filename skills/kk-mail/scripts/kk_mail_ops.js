@@ -205,7 +205,8 @@
   }
 
   // ---------- Tier 3: 자연어 자동분류 규칙 엔진 ----------
-  // 규칙 1건 생성. 조건은 from(발신) 또는 subject(제목 키워드).
+  // 규칙 1건 생성. 조건은 from(발신) 또는 subject(제목 키워드) — 둘 다 주면 AND.
+  // 정책(2026-09-24): 기본은 fromEmails(정확 주소) 만 넘긴다. subjectKeywords 는 사용자가 명시했을 때만 — 발신+제목 AND 규칙은 제목이 조금만 바뀌어도 빠져나간다.
   //   spec = { fromEmails?:[], subjectKeywords?:[], toFolderName, applyBefore?, operator?, applyOrder? }
   // ⚠️ Dooray 제약: 배열 POST 시 "첫 1건만" 생성 → 단건 호출. from.type은 include만(not_include -200200).
   // ⚠️ 같은 도메인 두 용도 분기는 applyOrder로 — 정확주소(예 nzine@nrf.re.kr)를 도메인(nrf.re.kr)보다 작게(먼저).
