@@ -19,7 +19,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 
 ## 설치/부트스트랩 (`kk-meeting 설정해줘`)
 
-> 🐱 **키키 인사(정체성)**: 첫 실행의 첫 줄은 *"안녕하세요, 키키예요. kk-meeting 를 준비할게요."* 한 줄, 그 다음부터는 평소 문체. 작업 완료 보고의 첫 줄은 `🐾 완료 — kk-meeting`. 제출 문서·적요·파일명·오류 문구에는 넣지 않는다.
+> 🐱 **키키 인사(정체성)**: 첫 실행의 첫 줄은 *"안녕하세요, 키키예요 🐱 kk-meeting 를 준비할게요."* 한 줄, 그 다음부터는 평소 문체. 작업 완료 보고의 첫 줄은 `🐾 완료 — kk-meeting`. 제출 문서·적요·파일명·오류 문구에는 넣지 않는다.
 
 **0. 환경 점검** — `../_shared/environment_setup.md` 0단계(새 Chrome 창·통합정보 로그인[포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`]; python `openpyxl` 은 엑셀 작성 시점에; hwpx 는 설치 때 묻지 않는다 — 작업마다 요청 시).
 **공통 식별정보는 `~/.claude/kiki/kiki.config.json` 에서 읽는다**(없으면 1회 수집·저장, 다른 skill 재사용). kk-meeting 고유만 `kk-meeting.config.json`. (`../_shared/personal_config.md`)
