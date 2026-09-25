@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""kk-wiki 검색 — 로컬 스냅샷(pages/*.md)에서 키워드 AND 검색 + 발췌. Claude 가 후보를 넓게 뽑을 때 쓴다(최종 판단은 본문 Read).
+"""kk-wiki 검색 — 로컬 스냅샷(pages/*.md + ocr/*.md 이미지 판독본)에서 키워드 AND 검색 + 발췌. Claude 가 후보를 넓게 뽑을 때 쓴다(최종 판단은 본문 Read).
 
 사용:
   python wiki_search.py 재료비 이월                 # 모든 단어를 포함하는 페이지 (제목·경로·본문, 대소문자 무시)
@@ -24,9 +24,38 @@ def load_index(root: str) -> list:
     return json.load(open(p, encoding="utf-8")).get("pages", [])
 
 
-def read_body(root: str, rel: str) -> str:
+def load_ocr(root: str) -> list:
+    """`ocr/*.md` — 위키 페이지의 이미지 표(등급표 등)를 판독해 저장한 파일도 검색 대상에 넣는다.
+    frontmatter 의 title / source_url / transcribed 를 목록에 쓴다(형식은 SKILL 기능 1 의 '이미지 표 판독' 참고)."""
+    out = []
+    d = os.path.join(root, "ocr")
+    if not os.path.isdir(d):
+        return out
+    for fn in sorted(os.listdir(d)):
+        if not fn.lower().endswith(".md"):
+            continue
+        fp = os.path.join(d, fn)
+        try:
+            s = io.open(fp, encoding="utf-8").read()
+        except Exception:
+            continue
+        fm = {}
+        m = re.match(r"---\n(.*?)\n---\n", s, re.S)
+        if m:
+            for line in m.group(1).splitlines():
+                k, sep, v = line.partition(":")
+                if sep:
+                    fm[k.strip()] = v.strip().strip('"')
+        body = s[m.end():] if m else s
+        out.append({"id": "ocr:" + fn, "title": fm.get("title", fn), "path": "ocr/" + fn, "rel": "", "file": fp,
+                    "url": fm.get("source_url", ""), "updatedAt": fm.get("transcribed", ""), "len": len(body), "files": []})
+    return out
+
+
+def read_body(root: str, p: dict) -> str:
     try:
-        s = io.open(os.path.join(root, "pages", rel.replace("/", os.sep)), encoding="utf-8").read()
+        fp = p.get("file") or os.path.join(root, "pages", p["rel"].replace("/", os.sep))
+        s = io.open(fp, encoding="utf-8").read()
     except Exception:
         return ""
     m = re.match(r"---\n.*?\n---\n", s, re.S)
@@ -71,7 +100,7 @@ def main(argv=None):
     ap.add_argument("--list", metavar="PATHPART", help="검색 없이 경로 목록만")
     a = ap.parse_args(argv)
     root = snapshot_root(a.root)
-    pages = load_index(root)
+    pages = load_index(root) + load_ocr(root)
     if a.list is not None:
         for p in pages:
             if a.list.lower() in p["path"].lower():
@@ -84,7 +113,7 @@ def main(argv=None):
     for p in pages:
         if a.path and a.path.lower() not in p["path"].lower():
             continue
-        body = read_body(root, p["rel"])
+        body = read_body(root, p)
         head = p["path"] + " " + p["title"]
         score, ok = 0, True
         for pat in pats:
@@ -100,7 +129,7 @@ def main(argv=None):
     print(f"[kk-wiki] '{' AND '.join(a.terms)}' → {len(hits)}건 (상위 {min(a.top, len(hits))}건, 스냅샷 {root})")
     for i, (score, p, body) in enumerate(hits[: a.top], 1):
         att = f", 첨부 {len(p['files'])}" if p.get("files") else ""
-        print(f"\n{i}. [{(p.get('updatedAt') or '')[:10]}] {p['path']}  ({p['len']}자{att}, 점수 {score})\n   {p['url']}   pages/{p['rel']}")
+        print(f"\n{i}. [{(p.get('updatedAt') or '')[:10]}] {p['path']}  ({p['len']}자{att}, 점수 {score})\n   {p['url']}   {('pages/' + p['rel']) if p.get('rel') else p['path'] + ' (이미지 판독본)'}")
         for s in snippets(body, pats, a.snip):
             print(f"   · {s}")
 
