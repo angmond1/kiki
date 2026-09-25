@@ -26,7 +26,7 @@ cp -R skills/_shared ~/.codex/skills/_shared
 cp -R skills/kk-mail ~/.codex/skills/kk-mail            # 원하는 kk-* 나열 (또는 skills/kk-* 전체)
 cp skills/_shared/kiki.config.example.json ~/.codex/kiki/kiki.config.json
 cp skills/_shared/token.txt.example ./token.txt          # kiki 폴더(기본 ~/kiki)에 토큰 파일
-mkdir -p budget dining inspect _tmp
+mkdir -p budget meeting inspect _tmp
 ```
 ```powershell
 # Windows (PowerShell)
@@ -35,11 +35,11 @@ Copy-Item -Recurse "skills\_shared" "$env:USERPROFILE\.codex\skills\_shared"
 Copy-Item -Recurse "skills\kk-mail" "$env:USERPROFILE\.codex\skills\kk-mail"
 Copy-Item "skills\_shared\kiki.config.example.json" "$env:USERPROFILE\.codex\kiki\kiki.config.json"
 Copy-Item "skills\_shared\token.txt.example" ".\token.txt"   # kiki 폴더(기본 C:\kiki)에 토큰 파일
-New-Item -ItemType Directory -Force budget,dining,inspect,_tmp | Out-Null
+New-Item -ItemType Directory -Force budget,meeting,inspect,_tmp | Out-Null
 ```
 
 - Codex Desktop 은 시작 시 skill 목록을 로드 → **새 skill 설치 후 Codex 재시작**으로 인식 확인.
-- `~/.codex/kiki/kiki.config.json`의 `kiki_root`에 선택한 폴더의 절대경로를 기록한다. `token.txt`·기본 저장 폴더(`budget/ dining/ inspect/ _tmp/`)는 이 경로를 기준으로 찾는다. 토큰 입력은 §3과 [CLAUDE.md Step 4](CLAUDE.md)를 따른다.
+- `~/.codex/kiki/kiki.config.json`의 `kiki_root`에 선택한 폴더의 절대경로를 기록한다. `token.txt`·기본 저장 폴더(`budget/ meeting/ inspect/ _tmp/`)는 이 경로를 기준으로 찾는다. 토큰 입력은 §3과 [CLAUDE.md Step 4](CLAUDE.md)를 따른다.
 - Codex의 브라우저 작업은 **chrome-devtools 창**에서 한다. 그 창에서 필요한 시스템(포탈 `e.kist.re.kr`·Dooray)에 로그인한다(평소 Chrome과 로그인 공유 안 됨; KIST 사내망/VPN, 포탈은 매일 정오 세션 리셋). 브라우저 도구가 준비돼 있으면 **kk-mail은 Dooray 로그인 세션만으로 동작하며 토큰·추가 설치가 없다**. 도구 자체가 없어서 `npx`로 chrome-devtools-mcp를 새로 등록할 때 필요한 Node.js는 메일 코어의 의존성과 구분한다. 등록은 [INSTALL.md](INSTALL.md)의 Codex 안내를 따른다.
 - **권장 모델은 [README 「구성」](README.md#구성)을 참조**한다. 표의 Claude 모델을 Codex 모델에 임의 대응시키거나 Codex 권장 모델명을 추정하지 않는다.
 - (Claude 는 `~/.claude/skills/` + `~/.claude/kiki/`. 경로만 다르고 내용 동일.)
@@ -56,7 +56,7 @@ skill 본문의 "Claude in Chrome" 도구를 Codex의 Chrome DevTools 도구로 
 | 화면/DOM 확인 (`screenshot`/`read_page`/`find`) | `take_snapshot` (필요시 `take_screenshot`) |
 | 클릭/입력/업로드 fallback | `click` / `fill` / `press_key` / `upload_file` |
 
-- **JS 코어 주입·호출은 `evaluate_script`**: 각 skill의 `scripts/*.js`를 읽어 대상 탭에 주입 → `window.kkPay.*` / `window.kkBudget.*` / `window.kkdining.*` / `window.kkMail.*` 함수 호출. kk-mail도 chrome-devtools의 Dooray 탭에서 [코어 `kk_mail_ops.js` 1.3](skills/kk-mail/scripts/kk_mail_ops.js)을 주입·호출한다.
+- **JS 코어 주입·호출은 `evaluate_script`**: 각 skill의 `scripts/*.js`를 읽어 대상 탭에 주입 → `window.kkPay.*` / `window.kkBudget.*` / `window.kkmeeting.*` / `window.kkMail.*` 함수 호출. kk-mail도 chrome-devtools의 Dooray 탭에서 [코어 `kk_mail_ops.js` 1.3](skills/kk-mail/scripts/kk_mail_ops.js)을 주입·호출한다.
 - ⚠️ **페이지 새로고침 시 주입한 `window.*` 객체가 사라진다 → 재주입** 필요.
 
 ## 3. 인증·개인설정 분리 (repo 밖)
@@ -101,7 +101,7 @@ s.textContent = `[id*="_form_modalPopDiv"], [id*="modalPopDivScrollableInnerCont
 - **kk-pay**: 카드 승인번호·과제·금액 fetch 조회 + 파일명 규칙 변환 + Dooray Drive 업로드(`DOORAY_TOKEN`). 세금계산서 직접작성 경로는 **첨부는 Codex 에서도 됨**, 단 **계좌 실명검증**은 통과법 확정 후 end-to-end 활성(공휴일·주말 미가동 추정).
 - **kk-inspect**: `mcs_0003` 필드맵·팝업 제어. 검수신청구분은 보통 **비자산** 선택 후 조회. **첨부는 건별 행 선택 후 해당 세금계산서·거래명세서 1개씩** (여러 건 한꺼번에 4개 X — 행 바꿔가며 해당 증빙만). 숨은 input 패턴으로 첨부 가능.
 - **kk-meeting**: [SKILL](skills/kk-meeting/SKILL.md) 기준으로 **회의 주제를 먼저 묻고, 회의내용은 사용자가 작성을 부탁할 때만** 근거자료로 채운다(직접 준 내용은 그대로 기록). 사전결재 적용 시점·회의시간·참석자 판단은 SKILL을 따른다. Codex도 chrome-devtools에서 `evaluate_script`로 제어하며, 계정/비목은 **`doDecision()` 콜백**, 통장표기는 **`common_onkillfocus` 동기화**를 사용한다.
-  회의록 엑셀은 임시저장 직후 `{kiki_root}/dining/meeting_log/{yymm}_회의록.xlsx`에 자동 기록한다(처리 연월별 1파일, 연월 하위폴더 없음). 회의록 파일은 **hwpx로 통일**하고 요청 시에만 [make_dininglog_hwpx.py](skills/kk-meeting/scripts/make_dininglog_hwpx.py)로 같은 폴더에 `{yymmdd}_{과제번호}_{과제이름 간략}_회의록.hwpx`를 만든다(건당 1파일). 생성은 표준 라이브러리로 모든 OS에서 **아래아한글 없이** 가능하고, 열람은 한글 또는 HOP을 쓴다. 세부 저장·중복 검사 규칙은 [회의록 엑셀 안내](skills/kk-meeting/references/meeting_log_excel.md)를 따른다.
+  회의록 엑셀은 임시저장 직후 `{kiki_root}/meeting/meeting_log/{yymm}_회의록.xlsx`에 자동 기록한다(처리 연월별 1파일, 연월 하위폴더 없음). 회의록 파일은 **hwpx로 통일**하고 요청 시에만 [make_meetinglog_hwpx.py](skills/kk-meeting/scripts/make_meetinglog_hwpx.py)로 같은 폴더에 `{yymmdd}_{과제번호}_{과제이름 간략}_회의록.hwpx`를 만든다(건당 1파일). 생성은 표준 라이브러리로 모든 OS에서 **아래아한글 없이** 가능하고, 열람은 한글 또는 HOP을 쓴다. 세부 저장·중복 검사 규칙은 [회의록 엑셀 안내](skills/kk-meeting/references/meeting_log_excel.md)를 따른다.
 - **kk-mail**: [SKILL](skills/kk-mail/SKILL.md)의 기능 번호는 **1 자연어로 메일 찾기(가장 많이 쓰는 기능) · 2 폴더 분류 · 3 자동분류 규칙 · 4 스팸 처리**. 로그인 세션 쿠키로 동작하며 토큰·추가 설치는 불필요하다(§1의 Codex 브라우저 도구 준비 전제).
   기능 1은 코어 1.3의 **`searchMails`/`searchMany` → Dooray 검색 API `POST /v2/wapi/mails/search`** 경로가 기본이고, 검색어를 정하기 어려우면 **`listMails`로 목록 훑기** 경로를 쓴다. 검색·읽음 상태 보존의 상세는 [SKILL](skills/kk-mail/SKILL.md)·[wapi 참조](skills/kk-mail/references/wapi_reference.md)를 따른다.
   첫 실행(`kk-mail 설정해줘`)은 **환경 점검 → 기존 폴더·규칙 파악 → 4가지 기능 안내로 종료**한다. 폴더 분류·권장 규칙 설정은 사용자가 원할 때만 진행한다. 기능 3의 기본 조건은 **발신 주소만**이며, 제목 조건은 사용자가 명시할 때만 추가한다.

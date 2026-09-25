@@ -1,4 +1,4 @@
-> ⚠️ **구형(legacy, 2026-09-23 이후 미사용)** — 회의록 파일은 `scripts/make_dininglog_hwpx.py` 가 **아래아한글 없이 hwpx** 로 생성한다(모든 OS). 아래 한글 COM 자동화(pyhwpx·보안팝업 watcher)는 참고용으로만 보존.
+> ⚠️ **구형(legacy, 2026-09-23 이후 미사용)** — 회의록 파일은 `scripts/make_meetinglog_hwpx.py` 가 **아래아한글 없이 hwpx** 로 생성한다(모든 OS). 아래 한글 COM 자동화(pyhwpx·보안팝업 watcher)는 참고용으로만 보존.
 
 # (옵션) 한글(hwp) 회의록 자동 생성 — 환경·함정
 
@@ -11,7 +11,7 @@
 3. python 패키지: `pyhwpx`, `pywin32`, `pywinauto`
 → 부트스트랩에서 **한글 연결 + 빈 양식 1장 생성 테스트**. 안 되면 친절히 안내(이 skill 사용 불가).
 
-## 핵심 동작 (`make_dininglog.py`)
+## 핵심 동작 (`make_meetinglog.py`)
 - 샘플 양식 hwp 를 **템플릿으로 열어 값 셀만 교체** → 새 hwp `save_as`. 양식·병합·서식 보존.
 - 진입 `get_into_nth_table(0)`, 순회 `TableRightCell()`(직접 메서드 — `Run("TableRightCell")` 은 안 됨).
 - 셀 비우기 **`Erase()`** 필수 (⚠️ `Delete`/`Run('Delete')` 는 셀 내용 안 지워짐).

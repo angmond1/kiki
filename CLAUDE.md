@@ -37,7 +37,7 @@ KIST 행정 자동화 skill 6종(`kk-mail`·`kk-wiki`·`kk-pay`·`kk-meeting`·`
 
 ### Step 2 — skill 설치 (OS 자동 감지)
 현재 OS 를 판단해 **하나만** 실행한다. `-Root`/`--root` 에 Step 1 의 폴더를 넘긴다(패키지 폴더 = root 면 생략 가능).
-- 기존 설치본 갱신이면: 2026-09-26 부터 `kk-dining` 은 **`kk-meeting`** 으로 이름이 바뀌었다. 설치 스크립트가 옛 `~/.claude/skills/kk-dining` 폴더를 지우고 개인 설정 `~/.claude/kiki/kk-dining.config.json` 을 `kk-meeting.config.json` 으로 바꾼다(수동 설치면 직접). 데이터 폴더 `{kiki_root}/dining/` 은 그대로 쓴다.
+- 기존 설치본 갱신이면: 2026-09-26 부터 `kk-dining` 은 **`kk-meeting`** 으로 이름이 바뀌었다. 설치 스크립트가 옛 `~/.claude/skills/kk-dining` 폴더를 지우고 개인 설정 `~/.claude/kiki/kk-dining.config.json` 을 `kk-meeting.config.json` 으로 바꾼다(수동 설치면 직접). 데이터 폴더도 `{kiki_root}/dining/` → `{kiki_root}/meeting/` 으로 바뀌었다(설치 스크립트가 기존 `dining/` 폴더 이름을 `meeting/` 으로 바꾼다. 수동 설치면 직접).
 - **Windows** (PowerShell) — 신규 PC 는 실행정책이 `Restricted` 라 `./install.ps1` 이 막힌다. **Bypass 로 호출**:
   ```powershell
   powershell -ExecutionPolicy Bypass -File .\install.ps1 -Root C:\kiki            # 전체 (또는 끝에 kk-mail kk-pay ...)
@@ -46,7 +46,7 @@ KIST 행정 자동화 skill 6종(`kk-mail`·`kk-wiki`·`kk-pay`·`kk-meeting`·`
   ```bash
   bash ./install.sh --root ~/kiki                                                 # 전체 (또는 kk-mail ...)
   ```
-스크립트는 `_shared` + 선택 skill → `~/.claude/skills/`, 개인설정 템플릿 → `~/.claude/kiki/`(+ `kiki_root` 기록), root 에 `budget/ dining/ inspect/ _tmp/` + **`token.txt`** 를 만든다. 스크립트를 못 쓰면 [INSTALL.md](INSTALL.md) §2 방법 B(수동 복사) — `_shared`·`~/.claude/kiki/`·`token.txt`·`kiki_root` 누락 주의.
+스크립트는 `_shared` + 선택 skill → `~/.claude/skills/`, 개인설정 템플릿 → `~/.claude/kiki/`(+ `kiki_root` 기록), root 에 `budget/ meeting/ inspect/ _tmp/` + **`token.txt`** 를 만든다. 스크립트를 못 쓰면 [INSTALL.md](INSTALL.md) §2 방법 B(수동 복사) — `_shared`·`~/.claude/kiki/`·`token.txt`·`kiki_root` 누락 주의.
 
 ### Step 3 — 브라우저 도구 2개 (없으면 지금 설치·안내)
 1. **"Claude in Chrome" 확장** — Chrome 웹스토어 https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn 설치 → 연결(Desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" ON / Code: `claude --chrome` 또는 `/chrome`). `list_connected_browsers` 로 확인.

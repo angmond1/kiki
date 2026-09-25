@@ -3,7 +3,7 @@
   kiki 설치 스크립트 (Windows)
   - 선택한 skill + 공통(_shared) 을 ~/.claude/skills/ 로 복사 (Claude 가 skill 을 찾는 곳)
   - 개인설정 폴더(~/.claude/kiki/) 준비 + kiki_root 기록
-  - kiki 작업 폴더(-Root) 에 budget/ dining/ inspect/ _tmp/ 와 token.txt 생성
+  - kiki 작업 폴더(-Root) 에 budget/ meeting/ inspect/ _tmp/ 와 token.txt 생성
   - Python / Node.js 설치 여부만 확인해 안내 (자동 설치 X)
   개인 config·토큰은 repo 밖(~/.claude/kiki/, <root>/token.txt) 에만 둔다.
 
@@ -59,7 +59,9 @@ if (Test-Path $legacy) { Remove-Item -Recurse -Force $legacy; Write-Host "[정�
 
 # 3) kiki 작업 폴더 (root) — 데이터 폴더 + token.txt
 New-Item -ItemType Directory -Force -Path $Root | Out-Null
-foreach ($sub in @("budget", "dining", "inspect", "_tmp")) {
+$legacyData = Join-Path $Root "dining"; $newData = Join-Path $Root "meeting"
+if ((Test-Path $legacyData) -and -not (Test-Path $newData)) { Move-Item $legacyData $newData; Write-Host "[정리] 데이터 폴더 dining/ → meeting/ (skill 개명)" }
+foreach ($sub in @("budget", "meeting", "inspect", "_tmp")) {
   New-Item -ItemType Directory -Force -Path (Join-Path $Root $sub) | Out-Null
 }
 $tok = Join-Path $Root "token.txt"
@@ -99,7 +101,7 @@ if ($hasNode) { Write-Host "[확인] Node.js 있음" } else { Write-Warning "Nod
 Write-Host ""
 Write-Host "완료. [!] Claude Code(또는 Claude Desktop)를 재시작한 뒤 'kk-<skill> 설정해줘' 로 첫 실행하세요."
 Write-Host "    (새 skill 은 재시작해야 인식됩니다. Desktop 은 트레이 아이콘 → Quit 으로 완전 종료 후 재실행)"
-Write-Host "kiki 작업 폴더: $Root   (엑셀·회의록·검수 파일은 여기 하위 budget/ dining/ inspect/ 에)"
+Write-Host "kiki 작업 폴더: $Root   (엑셀·회의록·검수 파일은 여기 하위 budget/ meeting/ inspect/ 에)"
 Write-Host "토큰 파일     : $tok    (채팅창에 토큰을 붙여넣지 말고 이 파일에 저장)"
 Write-Host "개인 config   : $cfgDir  (repo 에는 올라가지 않습니다)"
 if ($unknown) { Write-Warning "일부 skill 이름을 찾지 못했습니다 — 철자를 확인하세요."; exit 1 }

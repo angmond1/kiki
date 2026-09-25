@@ -2,7 +2,7 @@
 # kiki 설치 스크립트 (macOS / Linux) — install.ps1 의 bash 등가.
 #   - 선택한 skill + 공통(_shared) 을 ~/.claude/skills/ 로 복사 (Claude 가 skill 을 찾는 곳)
 #   - 개인설정 폴더(~/.claude/kiki/) 준비 + kiki_root 기록
-#   - kiki 작업 폴더(--root) 에 budget/ dining/ inspect/ _tmp/ 와 token.txt 생성
+#   - kiki 작업 폴더(--root) 에 budget/ meeting/ inspect/ _tmp/ 와 token.txt 생성
 #   - Python / Node.js 설치 여부만 확인해 안내 (자동 설치 X)
 #   개인 config·토큰은 repo 밖(~/.claude/kiki/, <root>/token.txt) 에만 둔다.
 #
@@ -62,7 +62,8 @@ done
 if [ -d "$dst/kk-dining" ]; then rm -rf "$dst/kk-dining"; echo "[정리] 옛 이름 kk-dining 폴더 삭제 (지금은 kk-meeting)"; fi
 
 # 3) kiki 작업 폴더 (root) — 데이터 폴더 + token.txt
-mkdir -p "$root/budget" "$root/dining" "$root/inspect" "$root/_tmp"
+if [ -d "$root/dining" ] && [ ! -d "$root/meeting" ]; then mv "$root/dining" "$root/meeting"; echo "[정리] 데이터 폴더 dining/ → meeting/ (skill 개명)"; fi
+mkdir -p "$root/budget" "$root/meeting" "$root/inspect" "$root/_tmp"
 tok="$root/token.txt"
 if [ ! -f "$tok" ]; then
   cp "$src/_shared/token.txt.example" "$tok"
@@ -99,7 +100,7 @@ else echo "[주의] Node.js 가 없습니다 — 파일첨부(chrome-devtools-mc
 echo ""
 echo "완료. ⚠️  Claude Code(또는 Claude Desktop)를 재시작한 뒤 'kk-<skill> 설정해줘' 로 첫 실행하세요."
 echo "    (새 skill 은 재시작해야 인식됩니다. Desktop 은 Dock 아이콘 → Quit 으로 완전 종료 후 재실행)"
-echo "kiki 작업 폴더: $root   (엑셀·회의록·검수 파일은 여기 하위 budget/ dining/ inspect/ 에)"
+echo "kiki 작업 폴더: $root   (엑셀·회의록·검수 파일은 여기 하위 budget/ meeting/ inspect/ 에)"
 echo "토큰 파일     : $tok    (채팅창에 토큰을 붙여넣지 말고 이 파일에 저장)"
 echo "개인 config   : $cfg  (repo 에는 올라가지 않습니다)"
 echo "※ macOS/Linux 제한: hwp→pdf 자동 변환(kk-pay 증빙)만 Windows+아래아한글 전용. 회의록 hwpx 생성은 모든 OS(열람은 HOP: brew install hop). 그 외 기능은 동일."

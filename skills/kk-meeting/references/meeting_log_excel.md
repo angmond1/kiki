@@ -5,7 +5,7 @@
 > 저장 규칙(2026-09-24 사용자 지시): **엑셀 = 항상 자동 저장**(fam 임시저장 직후, 묻지 않음). **hwpx = 완료 보고 때 묻고 사용자가 원할 때만**(한글 불요). **엑셀의 주된 목적 = 이전 회의 주제·내용과의 중복 방지 기록**(회의록 파일은 지급신청에 첨부하지 않는다).
 
 ## 파일명/위치 표준 (2026-09-24 개정)
-- 위치: `{kiki_root}\dining\meeting_log\` **한 폴더**(연월 하위폴더 없음, 기본 `C:\kiki\dining\meeting_log\`).
+- 위치: `{kiki_root}\meeting\meeting_log\` **한 폴더**(연월 하위폴더 없음, 기본 `C:\kiki\meeting\meeting_log\`).
 - 파일명: **`{yymm}_회의록.xlsx`** (yymm = **지급신청 처리 연월**, 예 `2609_회의록.xlsx`) — 그 달 처리 건은 모두 이 파일에 행 추가. 상신을 나눠도 파일은 월 단위 1개.
 - hwpx 를 요청받은 경우 **같은 폴더**에 `{yymmdd}_{과제번호}_{과제이름 아주 간략히}_회의록.hwpx` (hwpx 는 1건씩).
 - **주된 목적 = 중복 방지 기록** — 새 회의록을 쓰기 전 이 폴더의 모든 `*_회의록.xlsx` 를 `all_titles()` 로 스캔해 주제·내용이 과거와 겹치지 않게 한다.
@@ -58,7 +58,7 @@
 ## 파이썬 헬퍼 (`scripts/meeting_log_xlsx.py`)
 - `openpyxl` 만 필요. `pyhwpx` 와 달리 한글·COM 불요.
 - 9컬럼 양식 자동 생성 + 행 추가 + 회의목적 셀 wrap_text + 금액 `#,##0` 포맷.
-- 사용자가 hwpx 를 요청하면(그때그때) → kk-meeting 이 같은 데이터로 `make_dininglog_hwpx.py` 로 hwpx 도 생성(엑셀이 master, 한글 불요). 중복 검사는 `all_titles(root)`.
+- 사용자가 hwpx 를 요청하면(그때그때) → kk-meeting 이 같은 데이터로 `make_meetinglog_hwpx.py` 로 hwpx 도 생성(엑셀이 master, 한글 불요). 중복 검사는 `all_titles(root)`.
 
 ## 한글파일 동시 저장 (사용자 옵션)
 설치 시 묻는 항목 (`kk-meeting.config.json`):
@@ -73,4 +73,4 @@
 
 ## 표본 위치
 - (구 표본, 연월 폴더 시절) `…\meeting_log\2026.02\1-2월 회의록.xlsx` — 9컬럼 형식만 참고. 현행은 `{yymm}_회의록.xlsx` 한 폴더.
-- `C:\kiki\dining\meeting_log\2026.04\처리완료\연구비\4월 회의록 ○○분야 26X0001.xlsx` (과제별 분리 표본)
+- `C:\kiki\meeting\meeting_log\2026.04\처리완료\연구비\4월 회의록 ○○분야 26X0001.xlsx` (과제별 분리 표본)

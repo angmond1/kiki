@@ -21,7 +21,7 @@ _tmp/
 
 # kiki 작업 폴더 데이터 (root = 이 repo 폴더일 때 생김) — 개인 파일, 배포 X
 /budget/
-/dining/
+/meeting/
 /inspect/
 
 # Python 캐시

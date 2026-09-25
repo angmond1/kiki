@@ -46,7 +46,7 @@ HEADERS = ["순번", "사용일자", "금액", "장소(거래처)", "처리계�
 WIDTHS = [6, 20, 11, 18, 10, 12, 26, 18, 55]
 
 # 기본 루트 (사용자별로 다를 수 있음, config 로 오버라이드)
-DEFAULT_ROOT = r"C:\kiki\dining\meeting_log"
+DEFAULT_ROOT = r"C:\kiki\meeting\meeting_log"
 
 
 def expected_path(yymm: str, root: Optional[str] = None) -> str:

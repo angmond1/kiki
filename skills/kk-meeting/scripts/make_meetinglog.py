@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 kk-meeting (구형·미사용) — 회의비 회의록(별지1호) .hwp 생성 (pyhwpx, Windows+한글 COM)
-⚠️ 2026-09-23 부터 표준은 make_dininglog_hwpx.py (hwpx, 아래아한글 불요, 모든 OS). 이 파일은 참고용.
+⚠️ 2026-09-23 부터 표준은 make_meetinglog_hwpx.py (hwpx, 아래아한글 불요, 모든 OS). 이 파일은 참고용.
 - 샘플 양식 hwp 를 템플릿으로 열어 표 값 셀만 교체 -> 새 hwp 저장 (양식/병합/서식 100% 보존)
 - 보안팝업은 popup_watcher.py (Alt+N) 가 자동 처리 -> 완전 무인
 - credential 없음. 템플릿/출력 경로는 인자로 받음(하드코딩 X).
 
 전제: 아래아한글 설치 + HwpObject COM + python 패키지(pyhwpx, pywin32, pywinauto).
-사용: from make_dininglog import make_batch; make_batch(items, template, watcher_path)
+사용: from make_meetinglog import make_batch; make_batch(items, template, watcher_path)
 """
 import sys, subprocess, time, os
 if not sys.platform.startswith("win"):

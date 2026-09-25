@@ -1,10 +1,10 @@
 // ============================================================
-// kk-meeting 코어 (1) — KIST 통합정보시스템 조회 (window.kkdining)
+// kk-meeting 코어 (1) — KIST 통합정보시스템 조회 (window.kkmeeting)
 // ------------------------------------------------------------
 // 동작: p.kist.re.kr:8081 (NEXACRO) 탭의 세션쿠키 + window.application.authTk 로
 //   backend 를 fetch 직접 호출. 화면 클릭·좌표 0, 해상도/모니터 무관.
 //   (kk-pay/portal_ops.js 의 카드·과제 조회 패턴 재사용 + 사전결재 fam_0100 추가)
-// 사용법: 통합정보 NEXACRO 화면 1개 연 뒤(아무 화면, authTk 확보용) inject → window.kkdining.*
+// 사용법: 통합정보 NEXACRO 화면 1개 연 뒤(아무 화면, authTk 확보용) inject → window.kkmeeting.*
 // credential 없음(세션쿠키 + 페이지 authTk). 개인 식별자 하드코딩 없음.
 // ============================================================
 (function () {
@@ -106,11 +106,11 @@
     return null;   // 매칭 실패 → 호출측에서 회의제목 자동산출/확인
   }
 
-  window.kkdining = {
+  window.kkmeeting = {
     authTk: authTk, ready: ready, nexBody: nexBody, ds: ds, post: post, parseRows: parseRows,
     queryCards: queryCards, queryCardsBoth: queryCardsBoth, queryProjects: queryProjects,
     queryPreApprovals: queryPreApprovals, matchPreApproval: matchPreApproval,
     _version: 'kk-meeting-portal/1.0',
   };
-  return window.kkdining._version;
+  return window.kkmeeting._version;
 })();

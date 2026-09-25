@@ -69,7 +69,7 @@ KIST 내부망에서 실행. KIST 밖(재택·출장)이면 **KIST VPN 접속 �
 
 ## 2. skill 설치 — `~/.claude/skills/` 로
 
-> **이름 변경(2026-09-26)**: `kk-dining` 은 `kk-meeting` 으로 바뀌었다. 기존 설치본은 설치 스크립트를 다시 실행하면 옛 `kk-dining` 폴더가 지워지고 개인 설정 파일 이름(`kk-dining.config.json` → `kk-meeting.config.json`)이 바뀐다. 수동 복사(방법 B)면 직접 정리한다. 데이터 폴더 `dining/` 은 그대로.
+> **이름 변경(2026-09-26)**: `kk-dining` 은 `kk-meeting` 으로 바뀌었다. 기존 설치본은 설치 스크립트를 다시 실행하면 옛 `kk-dining` 폴더가 지워지고 개인 설정 파일 이름(`kk-dining.config.json` → `kk-meeting.config.json`)이 바뀐다. 수동 복사(방법 B)면 직접 정리한다. 데이터 폴더 `dining/` 도 `meeting/` 으로 바뀐다(스크립트가 기존 폴더 이름을 바꿈).
 
 ### 방법 A — 설치 스크립트 (권장)
 패키지 폴더 안에서, OS 에 맞는 것 **하나**:
@@ -85,7 +85,7 @@ bash ./install.sh                          # 전체, root = 이 폴더
 bash ./install.sh --root ~/kiki            # 작업 폴더 지정
 bash ./install.sh kk-mail kk-pay           # 일부 skill 만
 ```
-스크립트가 하는 일: `_shared` + 선택 skill → `~/.claude/skills/` 복사 / 작업 폴더에 `budget/ dining/ inspect/ _tmp/` + **`token.txt`** 생성 / `~/.claude/kiki/kiki.config.json` 생성(+ `kiki_root` 기록) / Python·Node.js 유무 안내.
+스크립트가 하는 일: `_shared` + 선택 skill → `~/.claude/skills/` 복사 / 작업 폴더에 `budget/ meeting/ inspect/ _tmp/` + **`token.txt`** 생성 / `~/.claude/kiki/kiki.config.json` 생성(+ `kiki_root` 기록) / Python·Node.js 유무 안내.
 
 ### 방법 B — 수동 복사 (스크립트를 못 쓸 때)
 skill **과 공통 폴더 `_shared` 를 반드시 함께** 복사하고, 개인설정 폴더와 token.txt 도 만든다.
@@ -96,7 +96,7 @@ Copy-Item -Recurse "skills\kk-mail" "$env:USERPROFILE\.claude\skills\kk-mail"
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\kiki" | Out-Null
 Copy-Item "skills\_shared\kiki.config.example.json" "$env:USERPROFILE\.claude\kiki\kiki.config.json"
 Copy-Item "skills\_shared\token.txt.example" ".\token.txt"
-New-Item -ItemType Directory -Force budget, dining, inspect, _tmp | Out-Null
+New-Item -ItemType Directory -Force budget, meeting, inspect, _tmp | Out-Null
 ```
 ```bash
 # macOS/Linux
@@ -105,7 +105,7 @@ cp -R skills/kk-mail ~/.claude/skills/kk-mail
 mkdir -p ~/.claude/kiki
 cp skills/_shared/kiki.config.example.json ~/.claude/kiki/kiki.config.json
 cp skills/_shared/token.txt.example ./token.txt
-mkdir -p budget dining inspect _tmp
+mkdir -p budget meeting inspect _tmp
 ```
 그리고 `~/.claude/kiki/kiki.config.json` 의 `"kiki_root"` 에 패키지 폴더 경로를 적는다(Windows 는 `C:\\kiki` 처럼 백슬래시 2개).
 

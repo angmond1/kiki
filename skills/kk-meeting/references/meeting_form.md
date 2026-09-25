@@ -1,10 +1,10 @@
 # 회의록 양식(hwpx 옵션)·인원·회의시간·증빙·중복방지
 
-> 2026-06-05~ **회의록 master = 엑셀** (→ `meeting_log_excel.md`). 본 파일의 hwpx 별지1호 양식은 **사용자가 요청할 때만** 사용(완료 보고 때 묻는다, 2026-09-24~ 자동 생성 안 함) — **아래아한글 없이 생성**(`scripts/make_dininglog_hwpx.py`).
+> 2026-06-05~ **회의록 master = 엑셀** (→ `meeting_log_excel.md`). 본 파일의 hwpx 별지1호 양식은 **사용자가 요청할 때만** 사용(완료 보고 때 묻는다, 2026-09-24~ 자동 생성 안 함) — **아래아한글 없이 생성**(`scripts/make_meetinglog_hwpx.py`).
 > fam_0704 지급신청서 직접 자동작성 워크플로(권장)에서는 hwp 양산 자체가 불필요 (엑셀이 master + fam_0704 입력에 그대로 사용). → `fam_0704_automation.md`.
 
 ## (옵션) hwpx 별지1호 양식 = 회의비 사용내역서(회의록), 7x7 표 1개
-`scripts/make_dininglog_hwpx.py` 가 `assets/minutes_template.hwpx`(zip) 의 `Contents/section0.xml` 에서 표의 `<hp:tc>` 를 문서 순서로 세어 **값 셀만 텍스트 치환**한다(한글 불요, 모든 OS, 표준 라이브러리). **값 셀 인덱스**(구 pyhwpx `TableRightCell()` 순회 순서와 동일):
+`scripts/make_meetinglog_hwpx.py` 가 `assets/minutes_template.hwpx`(zip) 의 `Contents/section0.xml` 에서 표의 `<hp:tc>` 를 문서 순서로 세어 **값 셀만 텍스트 치환**한다(한글 불요, 모든 OS, 표준 라이브러리). **값 셀 인덱스**(구 pyhwpx `TableRightCell()` 순회 순서와 동일):
 
 | 셀 | 값(data 키) | 셀 | 값(data 키) |
 |:--:|------|:--:|------|
@@ -16,7 +16,7 @@
 | 11 | purpose 회의목적(=회의록 제목) | 22 | int_mem 내부명단 `성명, 성명` |
 
 라벨 셀(0,2,4,6,8,10,12,14,16,17,20)은 **건드리지 않음** → 원본 양식 100% 보존.
-- 셀 채우기: 셀의 첫 단락(`<hp:p>`)을 원형으로 복제해 **줄마다 단락 1개**(`\n` = 새 단락, 빈 줄 = 빈 run), 첫 run 의 글자모양(charPrIDRef) 유지, `& < >` 는 XML 이스케이프, `Preview/PrvText.txt` 도 갱신. 한글 2014+·HOP 에서 열림 — 2026-09-23 한글 COM 라운드트립(재저장 후 셀 매핑 동일)·PDF 내보내기로 검증. 디버그: `python make_dininglog_hwpx.py --dump <파일>`. (구형 한글 COM 방식은 `hwp_automation.md`, 미사용)
+- 셀 채우기: 셀의 첫 단락(`<hp:p>`)을 원형으로 복제해 **줄마다 단락 1개**(`\n` = 새 단락, 빈 줄 = 빈 run), 첫 run 의 글자모양(charPrIDRef) 유지, `& < >` 는 XML 이스케이프, `Preview/PrvText.txt` 도 갱신. 한글 2014+·HOP 에서 열림 — 2026-09-23 한글 COM 라운드트립(재저장 후 셀 매핑 동일)·PDF 내보내기로 검증. 디버그: `python make_meetinglog_hwpx.py --dump <파일>`. (구형 한글 COM 방식은 `hwp_automation.md`, 미사용)
 - ⚠️ **템플릿의 `<hp:linesegarray>`(줄 배치 캐시)는 복제하지 않는다** — 남기면 한글이 그 줄 폭에 맞춰 자간을 눌러 한 줄에 우겨 넣는다(31자 목적이 눌린 원인, 2026-09-24 실측·수정). 생성기가 제거하므로 긴 목적·내용도 정상 줄바꿈. 필요 시 `_fill_cell(cell, text, para_pr=, char_pr=)` 로 문단·글자모양 ID 를 지정(양식 힌트의 빨간 글자·가운데 정렬 회피). **HOP 0.4.4 에서 hwpx 표시 확인**(2026-09-24, 사용자 확인).
 
 ## 인원 산정 (2026-06-05 정정)
@@ -72,13 +72,13 @@
 ## 저장 경로 + 파일명
 
 ### 엑셀 (기본, 모든 모드)
-- 위치: `{kiki_root}\dining\meeting_log\` **한 폴더**(하위 폴더 없음).
+- 위치: `{kiki_root}\meeting\meeting_log\` **한 폴더**(하위 폴더 없음).
 - 파일명: **`{yymm}_회의록.xlsx`** (yymm = 지급신청 처리 연월). **그 달 처리 건 = 동일 엑셀에 행 추가**. 주된 목적은 중복 방지 기록.
 - 9컬럼 형식: → `meeting_log_excel.md`
 
 ### (요청 시) hwpx — 사용자가 원할 때만
-- 출력: 엑셀과 **같은** `{kiki_root}\dining\meeting_log\` 폴더.
-- 파일명: `{yymmdd}_{과제번호}_{과제이름 아주 간략히}_회의록.hwpx` (예 `260924_26E0001_e-Chemical_회의록.hwpx`; hwpx 는 회의록 1건만 담으므로 건당 1파일). 생성: `make_dininglog_hwpx.make_batch([{'data': {...}, 'hwpx': 경로}])` — 한글 불요. **비목 = 계정 분류코드별**: 일반 `33_523`, 수탁·소액·자체(S·I·F·B·K·G) `17_448` (→ `project_code.md`).
+- 출력: 엑셀과 **같은** `{kiki_root}\meeting\meeting_log\` 폴더.
+- 파일명: `{yymmdd}_{과제번호}_{과제이름 아주 간략히}_회의록.hwpx` (예 `260924_26E0001_e-Chemical_회의록.hwpx`; hwpx 는 회의록 1건만 담으므로 건당 1파일). 생성: `make_meetinglog_hwpx.make_batch([{'data': {...}, 'hwpx': 경로}])` — 한글 불요. **비목 = 계정 분류코드별**: 일반 `33_523`, 수탁·소액·자체(S·I·F·B·K·G) `17_448` (→ `project_code.md`).
 
 ## 해외 회의비 (2026-09-07 실증, 재무팀 매뉴얼·해외출장 세부기준)
 - 참고: 인사경영팀 「1-3. 해외출장 FAQ」(2026-08-25 신설, `wiki/3538560283559420253/4341540776265539338`) — 출장 식비·숙박 정산(호텔 조식 포함 시 식비, 기내 식사 공제, 공동숙박 등)·항공권 **과제카드 결제 시 카드 결제일 전 지급신청** 규칙. 회의비로 쓴 식사는 출장식비 공제·반납 여부 확인.

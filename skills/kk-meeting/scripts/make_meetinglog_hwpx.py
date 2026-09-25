@@ -5,17 +5,17 @@
 원리: hwpx = zip 안의 OWPML XML. 양식(assets/minutes_template.hwpx)의 Contents/section0.xml 에서
 7x7 표의 '값 셀' 텍스트만 치환하고 라벨·서식·병합·테두리는 그대로 둔다 → 양식 100% 보존.
 결과 파일은 아래아한글(2014+)·HOP(무료 오픈소스, github.com/golbin/hop)·한컴오피스 뷰어에서 열린다.
-(구형: make_dininglog.py = 한글 COM 으로 .hwp 생성 — Windows+한글 전용. 2026-09-23 부터 이 파일이 표준.)
+(구형: make_meetinglog.py = 한글 COM 으로 .hwp 생성 — Windows+한글 전용. 2026-09-23 부터 이 파일이 표준.)
 
 사용:
-  from make_dininglog_hwpx import make, make_batch
+  from make_meetinglog_hwpx import make, make_batch
   make(data, out_path)                          # 1건 → 저장 경로 반환
   make_batch([{'data': d, 'hwpx': path}, ...])  # 여러 건 → 경로 리스트
   CLI:
-    python make_dininglog_hwpx.py <data.json> <out.hwpx>
-    python make_dininglog_hwpx.py --batch <items.json>     # [{"data": {...}, "hwpx": "..."}, ...]
-    python make_dininglog_hwpx.py --demo <out.hwpx>        # 중립 예시값으로 생성(동작 확인용)
-    python make_dininglog_hwpx.py --dump <file.hwpx>       # 표 셀 인덱스·텍스트 덤프(디버그)
+    python make_meetinglog_hwpx.py <data.json> <out.hwpx>
+    python make_meetinglog_hwpx.py --batch <items.json>     # [{"data": {...}, "hwpx": "..."}, ...]
+    python make_meetinglog_hwpx.py --demo <out.hwpx>        # 중립 예시값으로 생성(동작 확인용)
+    python make_meetinglog_hwpx.py --dump <file.hwpx>       # 표 셀 인덱스·텍스트 덤프(디버그)
 
 data 키(전부 문자열): account 계정번호 / pi_ins '홍길동 (인)' / amount '104,200 원' / place 회의장소 /
   date '2026. 5. 21.' / purpose 회의목적(=회의록 제목) / time '11:00 ~ 13:00' / content 회의내용(여러 줄 '\\n') /

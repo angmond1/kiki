@@ -13,7 +13,7 @@
 
 템플릿: `kiki.config.example.json` · `token.txt.example` · `kiki.env.example` (이 폴더). Codex 는 `~/.codex/kiki/` + `<kiki_root>/token.txt`.
 
-**`kiki_root`** = 사용자가 설치 때 고른 kiki 폴더(기본 Windows `C:\kiki`, macOS/Linux `~/kiki`). 그 하위 `budget/`·`dining/`·`inspect/`·`_tmp/` 가 각 skill 의 기본 저장 폴더. config 예시의 `{kiki_root}` 는 이 값으로 치환해 읽는다. 비어 있으면(수동 설치) 사용자에게 한 번 묻고 기록.
+**`kiki_root`** = 사용자가 설치 때 고른 kiki 폴더(기본 Windows `C:\kiki`, macOS/Linux `~/kiki`). 그 하위 `budget/`·`meeting/`·`inspect/`·`_tmp/` 가 각 skill 의 기본 저장 폴더. config 예시의 `{kiki_root}` 는 이 값으로 치환해 읽는다. 비어 있으면(수동 설치) 사용자에게 한 번 묻고 기록.
 
 ## 공유 원칙 (skill 부트스트랩이 따름)
 1. **먼저 `~/.claude/kiki/kiki.config.json` 을 읽는다.** 이미 있는 값(이름·사번·카드책임자·행정원·과제 등)은 **다시 묻지 않는다.**
