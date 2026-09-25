@@ -209,10 +209,13 @@ def _old_mark(t: dict) -> str:
     return " ⚠오래됨" if t.get("old") else ""
 
 
-def cmd_import(root: str, paths: list, since: str = "2025-01-01") -> None:
+def cmd_import(root: str, paths: list, since: str = "2025-01-01", keep: bool = False) -> None:
     """여러 덤프를 합친다(뒤 파일이 같은 팀을 덮어씀 — OCR 보정본·재수집본 반영용).
     기간 정책(사용자 2026-09-25): since(기본 2025-01-01) 이후 글이 있는 부서가 기본이고, 그 이후 글이 없는 존속 부서는 그 전 최신 글을 쓰되 old=True(⚠오래됨)로 표시한다."""
     data = None
+    jp0 = os.path.join(staff_dir(root), "staff.json")
+    if keep and os.path.exists(jp0):                       # 차분 갱신: 기존 팀을 유지한 채 새 덤프의 팀만 덮어씀
+        data = json.load(open(jp0, encoding="utf-8"))
     for path in paths:
         d = parse_dump(io.open(path, encoding="utf-8-sig").read())
         if data is None:
@@ -259,6 +262,12 @@ def cmd_import(root: str, paths: list, since: str = "2025-01-01") -> None:
     print(f"[kk-wiki] 담당자표 저장: {len(data['teams'])}팀 (표 있음 {n_tbl}, 이미지·본문만 {len(data['teams']) - n_tbl}) → {d}")
     if old:
         print(f"  ⚠ {since} 이후 글이 없어 그 전 글을 쓴 팀 {len(old)}: {', '.join(old)} (부서 존속 여부 확인)")
+
+
+def cmd_known(root: str) -> None:
+    """팀별 글번호 JSON 한 줄 — 브라우저 코어 staffChanged(known) 에 그대로 붙여 넣는다."""
+    data = load(root)
+    print(json.dumps({t["team"]: int(t.get("no") or 0) for t in data["teams"]}, ensure_ascii=False, separators=(",", ":")))
 
 
 def load(root: str) -> dict:
@@ -314,17 +323,18 @@ def main(argv=None):
     except Exception:
         pass
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["import", "find", "team", "status"])
+    ap.add_argument("cmd", choices=["import", "find", "team", "status", "known"])
     ap.add_argument("args", nargs="*")
     ap.add_argument("--root")
     ap.add_argument("--top", type=int, default=15)
     ap.add_argument("--since", default="2025-01-01", help="이 날짜 이후 글이 없는 팀에 ⚠오래됨 표시 (빈 문자열이면 표시 안 함)")
-    a = ap.parse_args(argv)
+    ap.add_argument("--keep", action="store_true", help="import: 기존 staff.json 의 팀을 유지하고 새 덤프의 팀만 덮어씀(차분 갱신)")
+    a = ap.parse_intermixed_args(argv)   # `import --keep <덤프>` 처럼 옵션이 파일 앞에 와도 되게
     root = snapshot_root(a.root)
     if a.cmd == "import":
         if not a.args:
             raise SystemExit("import <dump.txt> [보정덤프.txt ...]")
-        cmd_import(root, a.args, a.since)
+        cmd_import(root, a.args, a.since, a.keep)
     elif a.cmd == "find":
         if not a.args:
             raise SystemExit("find <단어...>")
@@ -333,6 +343,8 @@ def main(argv=None):
         cmd_team(root, a.args[0] if a.args else "")
     elif a.cmd == "status":
         cmd_status(root)
+    elif a.cmd == "known":
+        cmd_known(root)
 
 
 if __name__ == "__main__":

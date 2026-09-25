@@ -247,6 +247,19 @@
     return 'started';
   }
   function staffStatus() { return `phase ${staffProgress.phase} | ${staffProgress.done}/${staffProgress.total}` + (staffErr ? ' | ERR ' + staffErr.slice(0, 100) : '') + (staffData ? ` | teams ${staffData.length}, tables ${staffData.filter(x => x.tables.length).length}, errors ${staffData.filter(x => x.error).length}` : ''); }
+  // 차분 갱신(수시 변경 대응, 2026-09-25): known = {팀명: 글번호}(`wiki_staff.py known` 출력) 를 주면 목록을 다시 읽어 글번호가 커진(또는 새로 생긴) 팀만 kkWiki.changed 에 남긴다.
+  //   비동기라 javascript_tool 은 {} 를 돌려주므로 staffChangedStatus() 로 결과를 읽고, staffCollect({ list: kkWiki.changed }) 로 그 팀만 수집한다.
+  let staffChangedList = null;
+  async function staffChanged(known) {
+    const r = await staffList();
+    staffChangedList = r.latest.filter(t => !(known && known[t.team] >= t.no));
+    staffChangedList.excluded = r.excluded;
+    return staffChangedList;
+  }
+  function staffChangedStatus() {
+    if (!staffChangedList) return 'staffChanged(known) 먼저 (비동기, 2~3초)';
+    return staffChangedList.length ? '바뀐 팀 ' + staffChangedList.length + ': ' + staffChangedList.map(t => `${t.team} ${t.no} ${t.date}`).join(', ') : '(변경 없음 — 담당자표가 최신)';
+  }
   // 이미지 게시글 판독 준비(OCR 1단계): 공유 주소(shareUrl)로 연 탭에서 본문 이미지(DownController.do?fileId=)를 프레임까지 뒤져 찾고,
   //   문서를 그 이미지 하나(원본 폭)로 바꾼다. 그 뒤 computer 의 zoom 으로 세로 400px 안팎 띠씩 잘라 읽어 행을 `staff_dump_yymmdd_ocr.txt`(같은 덤프 형식)에 옮기고
   //   `wiki_staff.py import <원본> <_ocr.txt>` 로 함께 준다. 이미지가 여럿이면 idx 로 고른다. 끝나면 탭 새로고침. (2026-09-25 실측: 가치혁신·총무복지·국제협력팀)
@@ -295,7 +308,7 @@
   function fmtFresh(list) { return (list || []).map(x => `${hyId(x.id)} | ${(x.updatedAt || '').slice(0, 19)} | v${x.version} | ${sanitize((x.title || x.error || '').slice(0, 40))}`).join('\n'); }
 
   window.kkWiki = { children, getPage, walk, crawlAll, status, exportSnapshot, sizeEstimate, checkFresh, sanitize, hyId, fmtFresh,
-    staffFrame, staffList, bbsListPage, teamFromTitle, staffCollect, staffStatus, staffDump, staffRender, shareUrl, readArticleViaIframe, get staff() { return staffData; }, staffProgress,
-    get tree() { return tree; }, get pages() { return pages; }, progress, staffShowImage, _version: 'kk-wiki-ops/1.3' };
+    staffFrame, staffList, bbsListPage, teamFromTitle, staffChanged, staffChangedStatus, get changed() { return staffChangedList; }, staffCollect, staffStatus, staffDump, staffRender, shareUrl, readArticleViaIframe, get staff() { return staffData; }, staffProgress,
+    get tree() { return tree; }, get pages() { return pages; }, progress, staffShowImage, _version: 'kk-wiki-ops/1.4' };
   return window.kkWiki._version;
 })();

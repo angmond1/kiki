@@ -26,7 +26,7 @@ description: |
 
 ## 실행 준비 (매 작업 시작 시)
 1. `python scripts/wiki_snapshot.py status` — 스냅샷 유무·페이지 수·build 일자. 없으면 기능 2(만들기)부터.
-2. 토큰 경로면 브라우저가 필요 없다. 브라우저 경로면 `tabs_context_mcp` → Dooray 탭(어느 화면이든 `kist.gov-dooray.com`) 확인 → 코어 주입(`kk_wiki_ops.js` Read → `javascript_tool`, 반환 `kk-wiki-ops/1.3`). 출력 제약(~1,000자·`a=b` 필터·긴 숫자 가림)과 2-스텝 회수는 kk-mail 실행 준비 3·4 와 같다.
+2. 토큰 경로면 브라우저가 필요 없다. 브라우저 경로면 `tabs_context_mcp` → Dooray 탭(어느 화면이든 `kist.gov-dooray.com`) 확인 → 코어 주입(`kk_wiki_ops.js` Read → `javascript_tool`, 반환 `kk-wiki-ops/1.4`). 출력 제약(~1,000자·`a=b` 필터·긴 숫자 가림)과 2-스텝 회수는 kk-mail 실행 준비 3·4 와 같다.
 
 ## 기능 (3가지)
 
@@ -52,8 +52,8 @@ description: |
 담당자 정보는 위키가 아니라 **KIST 포탈 > 게시판 > 부서별업무분장표**(그룹웨어 xClick 게시판 `FC_BBS224`)에 부서별 게시글로 올라온다. 부서마다 여러 글이 있어도 **가장 최근 글이 현재 담당**이다. 상세 경로·API 는 `references/staff_board.md`.
 1. 평소 Chrome(Claude in Chrome)으로 포탈 `https://p.kist.re.kr/login.do` 진입 → **첫 화면 팝업을 먼저 닫는다**(사용자 지적: 거의 항상 뜬다) → 상단 탭 **게시판** 클릭 → 왼쪽 메뉴에서(스크롤) **부서별업무분장표** 클릭 → 목록이 보인다.
 2. 이 게시판 화면은 그룹웨어 `ngw.kist.re.kr` 페이지가 iframe 으로 들어온 것이라 포탈 탭에서는 JS 로 접근이 막힌다. 그 iframe 의 주소(`…/xclick_kist/dispatcherKMS.jsp?…` 또는 `XClickController?isDispath=true`)로 **탭을 직접 띄운 뒤** 코어 `kk_wiki_ops.js` 를 주입한다. 목록은 코어가 직접 POST 하므로 **왼쪽 메뉴를 열 필요가 없다**(`XClickController?isDispath=true` 는 빈 화면이지만 같은 origin 이라 충분). 목록이 비어 오류가 나면 이 Chrome 에서 포탈 로그인이 안 된 것 → 로그인 후 다시.
-3. `window.kkWiki.staffCollect()` → `staffStatus()` 로 진행 확인(목록 2페이지 + 글 20건 ≈ 50초). **기간 정책(사용자 2026-09-25)**: 2025-01-01 이후 글을 우선하고, 그 이후 글이 없는 존속 부서(시설운영팀·데이터정보팀 등)는 그 전 최신 글을 쓰되 **오래됨** 표시(`staffList({minDate, floorDate})`, 2020년 이전 글뿐인 부서는 개편 전 조직으로 보고 `excluded` 에만). 글은 'URL복사' 공유 주소를 숨은 iframe 으로 열어 읽으므로 **탭을 앞에 둘 것**.
-4. **사용자에게 알린 뒤** `window.kkWiki.staffRender()` — 그 탭 화면이 덤프 텍스트로 바뀐다 → `get_page_text` 로 한 번에 읽는다(3만 자 이상 가능) → 그대로 `{kiki_root}\wiki\staff\staff_dump_yymmdd.txt` 에 저장 → `python scripts/wiki_staff.py import <그 파일> [보정덤프.txt …]`(여러 파일은 뒤 파일이 같은 팀을 덮어씀. `--since 2025-01-01` 기본 — 그 이후 글이 없는 팀은 ⚠오래됨 표시) → `staff.json`·`staff.md`. 끝나면 탭을 새로고침해 그룹웨어 화면을 되돌린다.
+3. `window.kkWiki.staffCollect()` → `staffStatus()` 로 진행 확인(목록 2페이지 + 글 20건 ≈ 50초). ⭐ **차분 갱신(평소 — 업무분장은 수시로 바뀐다)**: `python scripts/wiki_staff.py known` 이 찍는 `{팀:글번호}` JSON 을 `window.kkWiki.staffChanged(<JSON>)` 에 넣고 2~3초 뒤 `staffChangedStatus()` → 바뀐 팀만 `staffCollect({ list: window.kkWiki.changed })` → 아래 4 를 `--keep` 로. "변경 없음" 이면 그대로 끝. **기간 정책(사용자 2026-09-25)**: 2025-01-01 이후 글을 우선하고, 그 이후 글이 없는 존속 부서(시설운영팀·데이터정보팀 등)는 그 전 최신 글을 쓰되 **오래됨** 표시(`staffList({minDate, floorDate})`, 2020년 이전 글뿐인 부서는 개편 전 조직으로 보고 `excluded` 에만). 글은 'URL복사' 공유 주소를 숨은 iframe 으로 열어 읽으므로 **탭을 앞에 둘 것**.
+4. **사용자에게 알린 뒤** `window.kkWiki.staffRender()` — 그 탭 화면이 덤프 텍스트로 바뀐다 → `get_page_text` 로 한 번에 읽는다(3만 자 이상 가능) → 그대로 `{kiki_root}\wiki\staff\staff_dump_yymmdd.txt` 에 저장 → `python scripts/wiki_staff.py import <그 파일> [보정덤프.txt …]`(여러 파일은 뒤 파일이 같은 팀을 덮어씀. `--since 2025-01-01` 기본 — 그 이후 글이 없는 팀은 ⚠오래됨 표시. `--keep` 이면 기존 `staff.json` 의 팀을 유지한 채 새 덤프의 팀만 덮어씀 = 차분 갱신) → `staff.json`·`staff.md`. 끝나면 탭을 새로고침해 그룹웨어 화면을 되돌린다.
 5. 확인: `python scripts/wiki_staff.py status` / `find 출장` / `team 재무팀`. `status` 의 "이미지·본문만 N" 이 0 이 아니면 6 으로(표가 있는데 "본문 없음"이면 헤더 규칙 문제 — 그 글을 직접 열어 확인, `references/staff_board.md` 표 절).
 6. **이미지 게시글 판독(OCR)**: 덤프에 `(표 없음 — 이미지 게시글…)` 인 팀(2026-09-25 기준 가치혁신·총무복지·국제협력팀)은 그 글의 공유 주소(덤프의 url)를 탭에 열고 코어 주입 → `window.kkWiki.staffShowImage()`(본문 이미지 하나를 원본 폭으로 펼침) → `computer` `screenshot` 으로 전체를 본 뒤 `zoom` 으로 세로 400px 안팎 띠씩 잘라 읽어 행을 옮겨 적는다 → `staff_dump_yymmdd_ocr.txt`(같은 덤프 형식: `## 팀:` 줄은 원본 덤프 것 그대로, 헤더 행 포함, 병합 셀은 행마다 채움, 끝에 "(※ 이미지 게시글을 화면 확대 캡처로 판독해 옮김 — 날짜)") → `import <원본> <_ocr.txt>` → `team <팀>` 으로 행 수·이름을 캡처와 대조. 캡처가 30초 타임아웃이면 띠를 좁히거나 다시(전체 screenshot 이 또렷하면 그것으로). 절차 상세 `references/staff_board.md`.
 - 담당자표는 **이름·내선이 든 내부 자료** — `{kiki_root}\wiki\staff\` 밖으로 내보내지 않는다. 반년 또는 조직개편 때 갱신.

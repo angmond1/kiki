@@ -38,6 +38,14 @@
 5. `python scripts/wiki_staff.py import <원본덤프> [<보정덤프> …] <_ocr.txt>` — 뒤 파일이 같은 팀을 덮어쓴다. `status` 로 "이미지·본문만 0" 확인, `team <팀>` 으로 행 수·이름을 캡처와 대조.
 - 2026-09-25 실측: 가치혁신팀 7행(`구분|세부내용|담당자` 'T.내선'), 총무복지팀 25행(`구분|내용|담당자|내선번호`), 국제협력팀 30행(`번호|대분류|중분류|소분류(업무내용)|담당자`). 한 팀 10분 안팎. 끝나면 탭을 새로고침해 되돌린다. 답에 붙일 땐 "이미지 판독" 표시.
 
+## 차분 갱신 (수시 변경 대응 — 사용자 "담당자표 갱신해줘" 한마디에 바로)
+1. `python scripts/wiki_staff.py known` → `{"재무팀":77956,…}` 한 줄(팀별 마지막으로 읽은 글번호).
+2. `ngw.kist.re.kr` 탭(빈 화면 `XClickController?isDispath=true` 도 됨) 에 코어 주입 → `window.kkWiki.staffChanged({…known…})` → 2~3초 뒤 `staffChangedStatus()`.
+   - "(변경 없음)" 이면 끝. 바뀐 팀이 있으면 `staffCollect({ list: window.kkWiki.changed })` → `staffStatus()` done → `staffRender()` → `get_page_text` → `staff_dump_yymmdd.txt` 저장.
+3. 이미지 게시글이면 위 OCR 절차로 `_ocr.txt` 보정. `python scripts/wiki_staff.py import --keep <새 덤프> [<_ocr.txt>]` → 기존 팀은 그대로, 바뀐 팀만 교체. `status` 로 확인.
+4. 탭 새로고침(또는 닫기)으로 화면 복구. 덤프 원본은 `{kiki_root}/wiki/staff/` 에 날짜별로 남기고 `staff.json` 이전본은 `_history/` 에 자동 보관.
+- 새 부서(known 에 없는 팀)도 "바뀐 팀" 으로 잡힌다. 없어진 부서는 목록에 새 글이 안 올라오므로 그대로 남는다 → `status` 의 ⚠오래됨 이 늘면 부서 존속 여부를 사용자에게 묻는다.
+
 ## 답에 붙이는 방법
 - `python scripts/wiki_staff.py find 출장 여비` → 팀 | 직무구분 | 담당 (내선) | 기준일 + 링크. 여러 팀이 걸리면 질문 주제의 담당 부서(위키 경로의 팀)를 우선.
 - 위키 본문의 "담당자 : ○○○(☎…)" 와 다르면 둘 다 표시하고 게시판(최신 글)을 우선. OCR 로 옮긴 팀은 "이미지 판독" 표시를 붙이고 이름·내선은 링크에서 한 번 더 보라고 안내. 덤프에 `(표 없음…)` 으로 남은 팀만 "게시글 링크에서 확인".
