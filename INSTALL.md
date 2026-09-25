@@ -128,7 +128,7 @@ mkdir -p budget meeting inspect _tmp
 
 | skill | Python 패키지 (필요할 때 skill 이 확인·설치) | 첫 실행 | 사용 예 |
 |-------|------------|---------|---------|
-| **kk-mail** | — | `kk-mail 설정해줘` | `지난주 광고 스팸 골라줘` / `앞으로 nature.com 은 저널 폴더로` / `2024년 한양대 세미나 관련 메일 찾아줘` |
+| **kk-mail** | — | `kk-mail 설정해줘` | `지난주 광고 스팸 골라줘` / `앞으로 nature.com 은 저널 폴더로` / `작년 ○○대 세미나 관련 메일 찾아줘` |
 | **kk-pay** | `Pillow` `requests` (+Windows 변환 시 `pywin32`) | `kk-pay 설정해줘` (토큰·행정원 폴더·영수증 폴더) | `이번달 영수증 지급신청 처리해줘` |
 | **kk-meeting** | `openpyxl` (hwpx 회의록 옵션은 추가 설치 없음) | `kk-meeting 설정해줘` (hwpx 동봉 여부·업로드 여부) | `회의비 처리하자` |
 | **kk-budget** | `openpyxl` | `kk-budget 설정해줘` (추적 과제·카테고리) | `예산 수집해줘` / `예산 잔액 표로` |
