@@ -46,19 +46,81 @@ def _is_header(cells: list) -> bool:
             and not any(_PHONE.match(c) for c in cells) and len(joined) < 80)
 
 
-_STAFF_HDR = re.compile(r"담당|성\s*명|이름|연락처|내선|^정$|^부$")
+def _col_type(h: str, i: int, n: int) -> str:
+    """헤더 셀 → 열 종류. 구분·분류·항목 = role / 세부·내용·업무·직무 = duty(담당업무 포함) / 담당·성명·이름·연락처·내선·정·부 = staff / 첫 열 번호 = index."""
+    h = h or ""
+    if i == 0 and re.search(r"^(번\s*호|No\.?|순번)$", h, re.I):
+        return "index"
+    if re.search(r"구분|분류|항\s*목", h):
+        return "role"
+    if re.search(r"세부|내용|업무|직무", h) and not re.match(r"^담당(자)?(\s*[(（].*[)）])?$", h):
+        return "duty"
+    if re.search(r"담당|성\s*명|이름|연락처|내선|^정$|^부$", h) or (i == n - 1 and re.search(r"번호", h)):
+        return "staff"
+    return "role"
+
+
+def _col_types(header: list) -> list:
+    types = [_col_type(h, i, len(header)) for i, h in enumerate(header)]
+    duties = [i for i, t in enumerate(types) if t == "duty"]
+    for i in duties[:-1]:                     # duty 열이 여럿이면 마지막만 업무, 앞은 구분(예: 업무 | 업무내용 | 담당자)
+        types[i] = "role"
+    if "duty" not in types:                   # duty 가 없으면 staff 앞의 마지막 role 을 업무로
+        roles = [i for i, t in enumerate(types) if t == "role"]
+        if roles:
+            types[roles[-1]] = "duty"
+    return types
+
+
+def _eff_header(cur: dict) -> list:
+    """헤더 + 보조 헤더를 펼친 실제 열 목록. [항목|업무내용|담당자]+[정|부] → [항목,업무내용,담당자(정),담당자(부)],
+    [업무 분류|담당(지원)]+[대분류|중분류|소분류] → [대분류,중분류,소분류,담당(지원)]."""
+    header = list(cur.get("header") or [])
+    sub = cur.get("subheader") or []
+    if header and sub:
+        types = _col_types(header)
+        if all(re.match(r"^(정|부)$", c) for c in sub):
+            si = [i for i, t in enumerate(types) if t == "staff"]
+            if si:
+                i = si[-1]
+                header = header[:i] + [header[i] + "(" + c + ")" for c in sub] + header[i + 1:]
+        elif len(sub) >= 2:
+            ri = [i for i, t in enumerate(types) if t != "staff"]
+            if ri:
+                i = ri[0]
+                header = header[:i] + sub + header[i + 1:]
+    return header
 
 
 def _n_staff_cols(cur: dict) -> int:
-    """헤더에서 담당 계열 열 수(담당자·정·부·연락처·내선·마지막 '번호')."""
-    header = cur.get("header") or []
-    n = 0
-    for i, c in enumerate(header):
-        if _STAFF_HDR.search(c) or (i == len(header) - 1 and re.search(r"번호", c)):
-            n += 1
-    if cur.get("subheader") and all(re.match(r"^(정|부)$", c) for c in cur["subheader"]):
-        n = max(n, len(cur["subheader"]))
+    """실제 열 목록에서 담당 계열 열 수(담당자·정·부·연락처·내선·마지막 '번호')."""
+    header = _eff_header(cur)
+    n = sum(1 for t in _col_types(header) if t == "staff") if header else 0
     return max(n, 1)
+
+
+def _map_by_header(cells: list, header: list):
+    types = _col_types(header)
+    role = " > ".join(c for c, t in zip(cells, types) if t == "role" and c)
+    duty = " ".join(c for c, t in zip(cells, types) if t == "duty")
+    staff = " / ".join(c for c, t in zip(cells, types) if t == "staff" and c and c != "-")
+    return {"role": role, "duties": duty, "staff": staff}
+
+
+def _map_full_row(cur: dict, cells: list):
+    """셀 수가 실제 열 수와 같으면 열 종류대로 배치. 담당 열이 가운데 오는 표('구분|성명|세부내용|연락처')는
+    셀이 모자라도(앞 구분 열이 rowspan) 오른쪽 정렬로 배치한다."""
+    header = _eff_header(cur)
+    if not header:
+        return None
+    if len(cells) == len(header):
+        return _map_by_header(cells, header)
+    types = _col_types(header)
+    staff_idx = [i for i, t in enumerate(types) if t == "staff"]
+    duty_idx = [i for i, t in enumerate(types) if t == "duty"]
+    if staff_idx and duty_idx and min(staff_idx) < max(duty_idx) and 1 < len(cells) < len(header):
+        return _map_by_header(cells, header[len(header) - len(cells):])      # 담당이 가운데 → 오른쪽 정렬
+    return None
 
 
 def _add_row(cur: dict, cells: list) -> None:
@@ -73,6 +135,14 @@ def _add_row(cur: dict, cells: list) -> None:
     if header and re.search(r"성\s*명|이름", header[0] or ""):          # 담당이 왼쪽
         staff = cells[0] + (" (" + cells[1] + ")" if len(cells) > 2 and _PHONE.match(cells[1]) else "")
         cur["rows"].append({"role": "", "duties": " ".join(cells[2:] if len(cells) > 2 else cells[1:]), "staff": staff})
+        return
+    full = _map_full_row(cur, cells)
+    if full:
+        if not full["staff"] and prev:
+            full["staff"] = prev["staff"]
+        if not full["role"] and prev:
+            full["role"] = prev["role"]
+        cur["rows"].append(full)
         return
     if header and re.search(r"번호|No", header[0] or "", re.I) and re.match(r"^\d{1,3}$", cells[0]):
         cells = cells[1:]
@@ -135,10 +205,21 @@ def parse_dump(text: str) -> dict:
     return {"meta": meta, "teams": teams}
 
 
-def cmd_import(root: str, path: str) -> None:
-    text = io.open(path, encoding="utf-8-sig").read()
-    data = parse_dump(text)
-    if not data["teams"]:
+def cmd_import(root: str, paths: list) -> None:
+    """여러 덤프를 합친다(뒤 파일이 같은 팀을 덮어씀 — OCR 보정본·재수집본 반영용)."""
+    data = None
+    for path in paths:
+        d = parse_dump(io.open(path, encoding="utf-8-sig").read())
+        if data is None:
+            data = d
+        else:
+            by = {t["team"]: i for i, t in enumerate(data["teams"])}
+            for t in d["teams"]:
+                if t["team"] in by:
+                    data["teams"][by[t["team"]]] = t
+                else:
+                    data["teams"].append(t)
+    if not data or not data["teams"]:
         raise SystemExit("[kk-wiki] 덤프에서 팀을 찾지 못했습니다 (형식: '## 팀: ...' 줄 필요)")
     d = staff_dir(root)
     jp = os.path.join(d, "staff.json")
@@ -226,8 +307,8 @@ def main(argv=None):
     root = snapshot_root(a.root)
     if a.cmd == "import":
         if not a.args:
-            raise SystemExit("import <dump.txt>")
-        cmd_import(root, a.args[0])
+            raise SystemExit("import <dump.txt> [보정덤프.txt ...]")
+        cmd_import(root, a.args)
     elif a.cmd == "find":
         if not a.args:
             raise SystemExit("find <단어...>")

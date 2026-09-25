@@ -112,7 +112,8 @@
   //   왼쪽 메뉴 '부서별업무분장표'(movePage FC_BBS224) 를 누르면 목록 프레임에 frmList 폼이 생긴다. 이 코어는 그 폼을 복제해 fetch POST 한다.
   //   목록: command=listArticle, nextpage=/bbs/articleGenList.jsp, paging_listcnt=100, currpage_no=p  (169건 = 2페이지)
   //   본문: command=viewArticle, nextpage=/bbs/articleView.jsp, articleId, bbsId, position(목록 링크의 첫 인자 — '0'/'1' 을 그대로 넘겨야 함, 틀리면 error.jsp)
-  //   본문 표 = 헤더에 '직무'와 '담당'이 있는 가장 안쪽 <table> (직무구분 | 직무 내용 | 담당 '이름 (내선)'). 이미지로만 올린 팀은 표가 없다.
+  //   본문 표 = 헤더 행(앞 6행 안)에 담당 계열 + 업무·분류 계열이 함께 있는 가장 안쪽 <table>. 팀마다 헤더가 다르다(references/staff_board.md).
+  //   이미지로만 올린 팀은 표가 없다 → staffShowImage() 로 이미지를 원본 크기로 펼쳐 computer zoom 으로 판독(OCR)한 뒤 _ocr.txt 보정 덤프로 import 한다.
   //   데이터 반출: staffRender() 로 문서를 <pre> 덤프로 바꾼 뒤 get_page_text 로 읽는다(30,000자 이상 한 번에 읽힘 — javascript_tool 의 1,000자 제한 우회).
   const STAFF_BBS = 'FC_BBS224';
   const normTeam = s => String(s || '').replace(/[·ㆍ・]/g, '·').trim();
@@ -161,7 +162,7 @@
   let staffData = null, staffErr = null;
   // 글 1건 열람 = 'URL복사' 공유 주소(GET dispatcherArticleView.jsp?articleId=<id>&userid=SESSIONNOCHECK)를 숨은 iframe 에 띄우고
   //   안쪽 프레임 DOM 에서 표를 읽는다. (viewArticle 폼 POST 를 흉내 내면 상당수 글이 error.jsp — 세션 목록 position 의존. 2026-09-25 실측)
-  //   같은 주소가 사용자에게 줄 게시글 링크이기도 하다. 이미지로 올린 표(contentImgs>0)는 텍스트로 못 읽는다 → 링크만.
+  //   같은 주소가 사용자에게 줄 게시글 링크이기도 하다. 이미지로 올린 표(contentImgs>0)는 텍스트로 못 읽는다 → 덤프에 '(표 없음 — 이미지 게시글…)' 로 남기고 staffShowImage() + zoom 판독으로 보정한다.
   function shareUrl(id) { return `${location.origin}/xclick_kist/dispatcherArticleView.jsp?articleId=${id}&userid=SESSIONNOCHECK`; }
   function deepestArticleDoc(win) {
     let best = null; let doc; try { doc = win.document; } catch (e) { return null; }
@@ -180,10 +181,20 @@
       if (b && b.len > 150) {
         await sleep(900);                                   // 본문 표 렌더 여유
         const d = b.doc;
-        const cands = Array.from(d.querySelectorAll('table')).filter(tb => { const first = tb.querySelector('tr'); if (!first) return false; const cells = Array.from(first.children).map(cellTxt); return cells.some(c => /직무|업무|구분/.test(c)) && cells.some(c => /담당|성명|이름/.test(c)) && !tb.querySelector('table table'); });
+        // 헤더(첫 행)에 담당 계열 + 업무/분류 계열이 함께 있는 가장 안쪽 표. 팀마다 헤더가 다르다: 직무구분|직무 내용|담당 / 항 목|업무내용|담당자(+정|부) /
+        // 대분류|중분류|소분류|담당자(+정|부) / 구분|내용|담당자|내선번호 / 성 명|연락처|담당 업무 / 번호|대분류|중분류|업무 내용|담당자(정)|담당자(부)
+        // 헤더가 첫 행이 아닐 수 있다(제목 행·빈 행이 위에 오는 팀, 실측 최대 5번째 행) → 앞 6행 안에서 헤더 행을 찾고 그 행부터 담는다.
+        const isHdr = cells => cells.some(c => /직무|업무|구분|분류|항\s*목|내용|성\s*명|세부/.test(c)) && cells.some(c => /담당|성\s*명|이름/.test(c));
+        const cands = [];
+        for (const tb of d.querySelectorAll('table')) {
+          if (tb.querySelector('table table')) continue;
+          const trs = Array.from(tb.querySelectorAll('tr')).filter(tr => tr.closest('table') === tb);
+          const hi = trs.slice(0, 6).findIndex(tr => isHdr(Array.from(tr.children).map(cellTxt)));
+          if (hi >= 0 && trs.length > hi + 1) cands.push(trs.slice(hi).map(tr => Array.from(tr.children).map(cellTxt)));
+        }
         const txt = (d.body.innerText || '').replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim();
         const posterM = txt.match(/게시자\s*:\s*([^\n]+?)\s*(?:>|\n)/);
-        res = Object.assign({}, item, { textLen: txt.length, tables: cands.map(tb => Array.from(tb.querySelectorAll('tr')).map(tr => Array.from(tr.children).map(cellTxt))),
+        res = Object.assign({}, item, { textLen: txt.length, tables: cands,
           contentImgs: Array.from(d.querySelectorAll('img')).filter(i => /DownController/.test(i.getAttribute('src') || '')).length,
           poster: item.poster || (posterM ? posterM[1].trim() : ''), url: shareUrl(item.id), ms: Date.now() - t0 });
         break;
@@ -209,6 +220,27 @@
     return 'started';
   }
   function staffStatus() { return `phase ${staffProgress.phase} | ${staffProgress.done}/${staffProgress.total}` + (staffErr ? ' | ERR ' + staffErr.slice(0, 100) : '') + (staffData ? ` | teams ${staffData.length}, tables ${staffData.filter(x => x.tables.length).length}, errors ${staffData.filter(x => x.error).length}` : ''); }
+  // 이미지 게시글 판독 준비(OCR 1단계): 공유 주소(shareUrl)로 연 탭에서 본문 이미지(DownController.do?fileId=)를 프레임까지 뒤져 찾고,
+  //   문서를 그 이미지 하나(원본 폭)로 바꾼다. 그 뒤 computer 의 zoom 으로 세로 400px 안팎 띠씩 잘라 읽어 행을 `staff_dump_yymmdd_ocr.txt`(같은 덤프 형식)에 옮기고
+  //   `wiki_staff.py import <원본> <_ocr.txt>` 로 함께 준다. 이미지가 여럿이면 idx 로 고른다. 끝나면 탭 새로고침. (2026-09-25 실측: 가치혁신·총무복지·국제협력팀)
+  function staffShowImage(idx) {
+    const found = [];
+    const walk = (win) => {
+      let doc; try { doc = win.document; } catch (e) { return; }
+      for (const im of doc.querySelectorAll('img')) if (/DownController/.test(im.getAttribute('src') || '')) found.push(im);
+      let k = 0; try { k = win.frames.length; } catch (e) { return; }
+      for (let i = 0; i < k; i++) walk(win.frames[i]);
+    };
+    walk(window);
+    if (!found.length) return '본문 이미지 없음(글이 아직 안 떴으면 잠시 뒤 다시)';
+    const i = idx || 0, im = found[i];
+    if (!im) return '이미지 번호 범위 밖: 0~' + (found.length - 1);
+    const w = im.naturalWidth || 1200;
+    document.documentElement.innerHTML = '<head><meta charset="utf-8"><title>kk-wiki staff image</title><style>html,body{margin:0;background:#fff}</style></head>'
+      + '<body><img src="' + im.src.replace(/"/g, '&quot;') + '" style="display:block;width:' + w + 'px;height:auto"></body>';
+    return '이미지 ' + i + '/' + found.length + ' 원본 ' + w + 'x' + (im.naturalHeight || '?') + ' — zoom 으로 띠씩 읽고 새로고침으로 되돌리기';
+  }
+
   // 덤프 문자열(wiki_staff.py import 형식)
   function staffDump() {
     if (!staffData) return '';
@@ -237,6 +269,6 @@
 
   window.kkWiki = { children, getPage, walk, crawlAll, status, exportSnapshot, sizeEstimate, checkFresh, sanitize, hyId, fmtFresh,
     staffFrame, staffList, staffCollect, staffStatus, staffDump, staffRender, shareUrl, readArticleViaIframe, get staff() { return staffData; }, staffProgress,
-    get tree() { return tree; }, get pages() { return pages; }, progress, _version: 'kk-wiki-ops/1.1' };
+    get tree() { return tree; }, get pages() { return pages; }, progress, staffShowImage, _version: 'kk-wiki-ops/1.2' };
   return window.kkWiki._version;
 })();
