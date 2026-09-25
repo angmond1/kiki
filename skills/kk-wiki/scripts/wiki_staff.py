@@ -205,8 +205,13 @@ def parse_dump(text: str) -> dict:
     return {"meta": meta, "teams": teams}
 
 
-def cmd_import(root: str, paths: list) -> None:
-    """여러 덤프를 합친다(뒤 파일이 같은 팀을 덮어씀 — OCR 보정본·재수집본 반영용)."""
+def _old_mark(t: dict) -> str:
+    return " ⚠오래됨" if t.get("old") else ""
+
+
+def cmd_import(root: str, paths: list, since: str = "2025-01-01") -> None:
+    """여러 덤프를 합친다(뒤 파일이 같은 팀을 덮어씀 — OCR 보정본·재수집본 반영용).
+    기간 정책(사용자 2026-09-25): since(기본 2025-01-01) 이후 글이 있는 부서가 기본이고, 그 이후 글이 없는 존속 부서는 그 전 최신 글을 쓰되 old=True(⚠오래됨)로 표시한다."""
     data = None
     for path in paths:
         d = parse_dump(io.open(path, encoding="utf-8-sig").read())
@@ -221,6 +226,14 @@ def cmd_import(root: str, paths: list) -> None:
                     data["teams"].append(t)
     if not data or not data["teams"]:
         raise SystemExit("[kk-wiki] 덤프에서 팀을 찾지 못했습니다 (형식: '## 팀: ...' 줄 필요)")
+    old = []
+    for t in data["teams"]:
+        d0 = (t.get("asof") or t.get("date") or "")[:10]
+        t["old"] = bool(since and re.match(r"^\d{4}-\d{2}-\d{2}$", d0) and d0 < since)
+        if t["old"]:
+            old.append(f"{t['team']}({d0})")
+    data["since"] = since or ""
+    data["old_teams"] = old
     d = staff_dir(root)
     jp = os.path.join(d, "staff.json")
     if os.path.exists(jp):
@@ -228,10 +241,10 @@ def cmd_import(root: str, paths: list) -> None:
         os.replace(jp, os.path.join(hist, f"staff_{time.strftime('%y%m%d_%H%M')}.json"))
     data["imported_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
     json.dump(data, open(jp, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    lines = [f"# 부서별 업무분장표 — 담당자 (수집 {data['imported_at'][:10]}, {len(data['teams'])}팀)", "",
+    lines = [f"# 부서별 업무분장표 — 담당자 (수집 {data['imported_at'][:10]}, {len(data['teams'])}팀, 기준 {since or '전체'}~ 우선)", "",
              "출처: KIST 포탈 > 게시판 > 부서별업무분장표 (부서별 최신 게시글). 내부 자료 — 각자 PC 에만.", ""]
     for t in data["teams"]:
-        lines.append(f"## {t['team']}  (게시글 #{t.get('no', '')}, 기준 {t.get('asof') or t.get('date', '')}, 게시자 {t.get('poster', '')})")
+        lines.append(f"## {t['team']}  (게시글 #{t.get('no', '')}, 기준 {t.get('asof') or t.get('date', '')}{_old_mark(t)}, 게시자 {t.get('poster', '')})")
         if t.get("url"):
             lines.append(f"링크: {t['url']}")
         if t["rows"]:
@@ -244,6 +257,8 @@ def cmd_import(root: str, paths: list) -> None:
     io.open(os.path.join(d, "staff.md"), "w", encoding="utf-8", newline="\n").write("\n".join(lines))
     n_tbl = sum(1 for t in data["teams"] if t["rows"])
     print(f"[kk-wiki] 담당자표 저장: {len(data['teams'])}팀 (표 있음 {n_tbl}, 이미지·본문만 {len(data['teams']) - n_tbl}) → {d}")
+    if old:
+        print(f"  ⚠ {since} 이후 글이 없어 그 전 글을 쓴 팀 {len(old)}: {', '.join(old)} (부서 존속 여부 확인)")
 
 
 def load(root: str) -> dict:
@@ -263,10 +278,10 @@ def cmd_find(root: str, terms: list, top: int) -> None:
             if all(p.search(hay) for p in pats):
                 score = sum(len(p.findall(hay)) for p in pats) + (3 if any(p.search(r["role"]) for p in pats) else 0)
                 hits.append((score, t, r))
-    hits.sort(key=lambda x: -x[0])
+    hits.sort(key=lambda x: (bool(x[1].get("old")), -x[0]))   # 최근 글 있는 팀 먼저, 그 안에서 점수순 (⚠오래됨 팀은 뒤로)
     print(f"[kk-wiki] 담당자 '{' AND '.join(terms)}' → {len(hits)}건 (수집 {data.get('imported_at', '')[:10]})")
     for score, t, r in hits[:top]:
-        print(f"- {t['team']} | {r['role']} | {r['staff']} | 기준 {t.get('asof') or t.get('date', '')} | {r['duties'][:90]}" + (f"\n    링크 {t['url']}" if t.get('url') else ""))
+        print(f"- {t['team']} | {r['role']} | {r['staff']} | 기준 {t.get('asof') or t.get('date', '')}{_old_mark(t)} | {r['duties'][:90]}" + (f"\n    링크 {t['url']}" if t.get('url') else ""))
     noimg = [t["team"] for t in data["teams"] if not t["rows"]]
     if noimg:
         print(f"  ※ 표가 이미지라 검색 안 되는 팀: {', '.join(noimg)}")
@@ -276,7 +291,7 @@ def cmd_team(root: str, name: str) -> None:
     data = load(root)
     for t in data["teams"]:
         if norm_team(name) in t["team"]:
-            print(f"## {t['team']} (#{t.get('no', '')}, 기준 {t.get('asof') or t.get('date', '')}, 게시자 {t.get('poster', '')})")
+            print(f"## {t['team']} (#{t.get('no', '')}, 기준 {t.get('asof') or t.get('date', '')}{_old_mark(t)}, 게시자 {t.get('poster', '')})")
             for r in t["rows"]:
                 print(f"- {r['role']} | {r['staff']} | {r['duties'][:120]}")
             if not t["rows"]:
@@ -288,9 +303,9 @@ def cmd_team(root: str, name: str) -> None:
 def cmd_status(root: str) -> None:
     data = load(root)
     teams = data["teams"]
-    print(f"[kk-wiki] 담당자표: {len(teams)}팀, 수집 {data.get('imported_at', '')}, 표 있음 {sum(1 for t in teams if t['rows'])}")
+    print(f"[kk-wiki] 담당자표: {len(teams)}팀, 수집 {data.get('imported_at', '')}, 표 있음 {sum(1 for t in teams if t['rows'])}, 기준 {data.get('since') or '전체'}~ 우선(⚠오래됨 = 그 이후 글 없음)")
     for t in teams:
-        print(f"  {t['team']:14s} #{t.get('no', ''):6s} 기준 {t.get('asof') or t.get('date', ''):10s} {'표 ' + str(len(t['rows'])) + '행' if t['rows'] else '(이미지·본문만)'}")
+        print(f"  {t['team']:14s} #{t.get('no', ''):6s} 기준 {t.get('asof') or t.get('date', ''):10s} {'표 ' + str(len(t['rows'])) + '행' if t['rows'] else '(이미지·본문만)'}{_old_mark(t)}")
 
 
 def main(argv=None):
@@ -303,12 +318,13 @@ def main(argv=None):
     ap.add_argument("args", nargs="*")
     ap.add_argument("--root")
     ap.add_argument("--top", type=int, default=15)
+    ap.add_argument("--since", default="2025-01-01", help="이 날짜 이후 글이 없는 팀에 ⚠오래됨 표시 (빈 문자열이면 표시 안 함)")
     a = ap.parse_args(argv)
     root = snapshot_root(a.root)
     if a.cmd == "import":
         if not a.args:
             raise SystemExit("import <dump.txt> [보정덤프.txt ...]")
-        cmd_import(root, a.args)
+        cmd_import(root, a.args, a.since)
     elif a.cmd == "find":
         if not a.args:
             raise SystemExit("find <단어...>")

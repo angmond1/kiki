@@ -110,7 +110,7 @@
   // ---------- 담당자표: 포탈 게시판 "부서별업무분장표" (그룹웨어 xClick, 게시판 id FC_BBS224) — ✅ 2026-09-25 실측 ----------
   // 진입: 포탈(p.kist.re.kr, 첫 화면 팝업 닫기) 상단 '게시판' → 그 화면은 그룹웨어(ngw.kist.re.kr) iframe. 탭을 그 iframe 주소로 직접 띄운 뒤
   //   왼쪽 메뉴 '부서별업무분장표'(movePage FC_BBS224) 를 누르면 목록 프레임에 frmList 폼이 생긴다. 이 코어는 그 폼을 복제해 fetch POST 한다.
-  //   목록: command=listArticle, nextpage=/bbs/articleGenList.jsp, paging_listcnt=100, currpage_no=p  (169건 = 2페이지)
+  //   목록: command=listArticle, nextpage=/bbs/articleGenList.jsp, paging_listcnt=100, currpage_no=p  (169건 = 2페이지). frmList 없이 직접 POST 도 된다 → 게시판 메뉴를 안 열어도 됨.
   //   본문: command=viewArticle, nextpage=/bbs/articleView.jsp, articleId, bbsId, position(목록 링크의 첫 인자 — '0'/'1' 을 그대로 넘겨야 함, 틀리면 error.jsp)
   //   본문 표 = 헤더 행(앞 6행 안)에 담당 계열 + 업무·분류 계열이 함께 있는 가장 안쪽 <table>. 팀마다 헤더가 다르다(references/staff_board.md).
   //   이미지로만 올린 팀은 표가 없다 → staffShowImage() 로 이미지를 원본 크기로 펼쳐 computer zoom 으로 판독(OCR)한 뒤 _ocr.txt 보정 덤프로 import 한다.
@@ -136,27 +136,54 @@
     const r = await fetch(fr.win.location.origin + '/xclick_kist/XClickController', { method: 'POST', body: fd, credentials: 'include' });
     return new DOMParser().parseFromString(await r.text(), 'text/html');
   }
-  // 목록 전체 → 팀별 최신 글(글번호 최대). 반환 { rows, latest:[{team,id,pos,no,title,poster,date}] }
-  async function staffList({ maxPages = 3 } = {}) {
-    const fr = staffFrame(); if (!fr) throw new Error('부서별업무분장표 목록 프레임(frmList)이 없다 — 게시판 화면에서 왼쪽 메뉴를 먼저 열 것');
+  // 목록 POST 는 frmList 폼 없이도 된다(2026-09-25 실측: 같은 origin 의 아무 탭에서 URLSearchParams 로 POST, 빈 화면이어도 됨). 게시판 프레임이 있으면 그 폼을 복제하고, 없으면 직접 POST.
+  async function bbsListPage(p) {
+    const fields = { facade: 'BBSArticleFacade', command: 'listArticle', nextpage: '/bbs/articleGenList.jsp', transaction_yn: 'N', paging_listcnt: '100', listSelect: '100', currpage_no: String(p), bbsId: STAFF_BBS, category: 'FREEBBS' };
+    const fr = staffFrame();
+    if (fr) return bbsPost(fr, fields);
+    const r = await fetch(location.origin + '/xclick_kist/XClickController', { method: 'POST', body: new URLSearchParams(fields), credentials: 'include' });
+    return new DOMParser().parseFromString(await r.text(), 'text/html');
+  }
+  // 제목 → 팀명. 제목 형식 3종(2026-09-25 실측 169건): "[팀명] 업무분장 안내(…)" 99건 / "[ 부서별 업무분장 ] 팀명 …" 15건(2014~2018) / "팀명 업무분장 안내(…)" 55건(괄호 없음, 2010~2024).
+  //   개편 전 이름은 게시판 이력으로 확인된 것만 현재 이름으로 묶는다(글로벌협력팀→국제협력팀 '22.1, 홍보팀→커뮤니케이션팀 '22.6, 구매팀·구매자산팀→구매·자산팀, 안전보안팀→안전보건팀, KIST 스쿨→사무국(KIST스쿨), 정보통신팀→데이터정보팀).
+  const TEAM_ALIAS = { '글로벌협력팀': '국제협력팀', '홍보팀': '커뮤니케이션팀', '구매팀': '구매·자산팀', '구매자산팀': '구매·자산팀', '안전보안팀': '안전보건팀', 'KIST 스쿨': '사무국(KIST스쿨)', 'KIST스쿨': '사무국(KIST스쿨)', '정보통신팀': '데이터정보팀', '사이버보안팀/정보통신팀': '데이터정보팀/사이버보안팀' };
+  function teamFromTitle(title) {
+    const t = String(title || '').replace(/\[\s*부서별 업무분장\s*\]/, '').replace(/\[\s*([^\]]*?)\s*FAQ\s*\]/, '[$1]').trim();
+    const m = t.match(/^\[([^\]]+)\]/);
+    let name = m ? m[1] : (t.match(/^([가-힣A-Za-z0-9·ㆍ・()\/\s]*?(?:팀|스쿨|사무국\([^)]*\)|연구지원실))\s/) || [])[1] || '';
+    name = normTeam(name).replace(/\s+/g, ' ');
+    if (/^(부서별|행정부문|국가과학기술연구회)/.test(name)) name = '';
+    return TEAM_ALIAS[name] || name;
+  }
+  // 목록 전체 → 팀별 최신 글(글번호 최대). ⭐ 기간 정책(사용자 2026-09-25): minDate(기본 2025-01-01) 이후 글을 우선하되, 그 이후 글이 없는 존속 부서(시설운영팀·데이터정보팀 등)는
+  //   그 전 최신 글을 쓰고 stale:true 로 표시한다. floorDate(기본 2020-01-01) 이전 글만 있는 부서는 개편 전 조직으로 보고 excluded 에만 남긴다(팀·글번호·날짜).
+  //   이번 해 글의 날짜 셀은 'MM-DD HH:MM'(연도 없음) → 최신으로 본다. 반환 { rows, latest:[{team,id,pos,no,title,poster,date,stale}], excluded:[{team,no,date}] }
+  async function staffList({ maxPages = 3, minDate = '2025-01-01', floorDate = '2020-01-01' } = {}) {
     const rows = [], seen = new Set();
     for (let p = 1; p <= maxPages; p++) {
-      const d = await bbsPost(fr, { facade: 'BBSArticleFacade', command: 'listArticle', nextpage: '/bbs/articleGenList.jsp', transaction_yn: 'N', paging_listcnt: '100', listSelect: '100', currpage_no: String(p), bbsId: STAFF_BBS });
+      const d = await bbsListPage(p);
       const links = Array.from(d.querySelectorAll('a[onclick*="viewArticle"]'));
+      if (!links.length && p === 1) throw new Error('게시판 목록이 비어 있다 — 이 Chrome 에서 KIST 포탈(e.kist.re.kr) 로그인이 돼 있는지 확인');
       for (const a of links) {
         const m = (a.getAttribute('onclick') || '').match(/viewArticle\('([^']*)',\s*'([^']+)'/); if (!m || seen.has(m[2])) continue; seen.add(m[2]);
         const inner = a.closest('table'); const outer = inner ? inner.closest('tr') : a.closest('tr');
         const cells = outer ? Array.from(outer.children).map(cellTxt) : [];
         const title = (a.textContent || '').trim().replace(/\s+/g, ' ');
-        const team = normTeam((title.match(/\]\s*\[([^\]]+)\]/) || title.match(/^\[([^\]]+)\]/) || [])[1] || '');
-        rows.push({ id: m[2], pos: m[1], team, no: parseInt(cells[2]) || 0, title, poster: cells[5] || '', date: cells[6] || '' });
+        rows.push({ id: m[2], pos: m[1], team: teamFromTitle(title), no: parseInt(cells[2]) || 0, title, poster: cells[5] || '', date: cells[6] || '' });
       }
       if (links.length < 100) break;
       await sleep(300);
     }
-    const latest = {};
-    for (const r of rows) if (r.team && (!latest[r.team] || r.no > latest[r.team].no)) latest[r.team] = r;
-    return { rows, latest: Object.values(latest).sort((a, b) => b.no - a.no) };
+    const dated = r => /^\d{4}-\d{2}-\d{2}$/.test(r.date);
+    const latest = {}, dropped = {};
+    for (const r of rows) {
+      if (!r.team) continue;
+      const bag = (dated(r) && r.date < floorDate) ? dropped : latest;
+      if (!bag[r.team] || r.no > bag[r.team].no) bag[r.team] = r;
+    }
+    for (const r of Object.values(latest)) r.stale = dated(r) && r.date < minDate;
+    const excluded = Object.values(dropped).filter(r => !latest[r.team]).map(r => ({ team: r.team, no: r.no, date: r.date })).sort((a, b) => b.no - a.no);
+    return { rows, latest: Object.values(latest).sort((a, b) => b.no - a.no), excluded };
   }
   const staffProgress = { phase: 'idle', done: 0, total: 0 };
   let staffData = null, staffErr = null;
@@ -246,7 +273,7 @@
     if (!staffData) return '';
     const L = [`=== KKWIKI-STAFF v1 | exported ${new Date().toISOString()} | board ${STAFF_BBS} | teams ${staffData.length} ===`];
     for (const t of staffData) {
-      L.push(`## 팀: ${t.team} | 글번호 ${t.no} | 게시일 ${t.date} | 게시자 ${t.poster || ''} | 제목 ${t.title || ''} | id ${t.id} | url ${t.url || shareUrl(t.id)}`);
+      L.push(`## 팀: ${t.team} | 글번호 ${t.no} | 게시일 ${t.date} | 게시자 ${t.poster || ''} | 제목 ${t.title || ''} | id ${t.id} | url ${t.url || shareUrl(t.id)}` + (t.stale ? ' | 오래됨 예' : ''));
       const tb = (t.tables || []).slice().sort((a, b) => b.length - a.length)[0];
       if (tb && tb.length > 1) { for (const row of tb) L.push('| ' + row.map(c => c.replace(/\|/g, '/')).join(' | ') + ' |'); }
       else L.push(t.error ? `(표 없음 — ${t.error})` : `(표 없음 — 이미지 게시글, 이미지 ${t.contentImgs || 0}개: 링크에서 직접 확인)`);
@@ -268,7 +295,7 @@
   function fmtFresh(list) { return (list || []).map(x => `${hyId(x.id)} | ${(x.updatedAt || '').slice(0, 19)} | v${x.version} | ${sanitize((x.title || x.error || '').slice(0, 40))}`).join('\n'); }
 
   window.kkWiki = { children, getPage, walk, crawlAll, status, exportSnapshot, sizeEstimate, checkFresh, sanitize, hyId, fmtFresh,
-    staffFrame, staffList, staffCollect, staffStatus, staffDump, staffRender, shareUrl, readArticleViaIframe, get staff() { return staffData; }, staffProgress,
-    get tree() { return tree; }, get pages() { return pages; }, progress, staffShowImage, _version: 'kk-wiki-ops/1.2' };
+    staffFrame, staffList, bbsListPage, teamFromTitle, staffCollect, staffStatus, staffDump, staffRender, shareUrl, readArticleViaIframe, get staff() { return staffData; }, staffProgress,
+    get tree() { return tree; }, get pages() { return pages; }, progress, staffShowImage, _version: 'kk-wiki-ops/1.3' };
   return window.kkWiki._version;
 })();
