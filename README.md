@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-# KIST 행정 자동화 스킬 패키지 
+# KIST 포탈 자동화 스킬 패키지 
 
 KIST 포탈 제어 claude code, codex skill 모음. 
 
