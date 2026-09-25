@@ -98,6 +98,7 @@ if command -v node >/dev/null 2>&1 && command -v npx >/dev/null 2>&1; then echo 
 else echo "[주의] Node.js 가 없습니다 — 파일첨부(chrome-devtools-mcp) 에 필요. macOS: brew install node  /  Linux: sudo apt install nodejs npm  /  https://nodejs.org/ (LTS)"; fi
 
 echo ""
+echo "=^.^=  kiki 설치 완료"
 echo "완료. ⚠️  Claude Code(또는 Claude Desktop)를 재시작한 뒤 'kk-<skill> 설정해줘' 로 첫 실행하세요."
 echo "    (새 skill 은 재시작해야 인식됩니다. Desktop 은 Dock 아이콘 → Quit 으로 완전 종료 후 재실행)"
 echo "kiki 작업 폴더: $root   (엑셀·회의록·검수 파일은 여기 하위 budget/ meeting/ inspect/ 에)"

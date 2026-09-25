@@ -112,5 +112,5 @@
     queryPreApprovals: queryPreApprovals, matchPreApproval: matchPreApproval,
     _version: 'kk-meeting-portal/1.0',
   };
-  return window.kkmeeting._version;
+  return window.kkmeeting._version + ' =^.^=';
 })();

@@ -276,7 +276,7 @@
     const i = idx || 0, im = found[i];
     if (!im) return '이미지 번호 범위 밖: 0~' + (found.length - 1);
     const w = im.naturalWidth || 1200;
-    document.documentElement.innerHTML = '<head><meta charset="utf-8"><title>kk-wiki staff image</title><style>html,body{margin:0;background:#fff}</style></head>'
+    document.documentElement.innerHTML = '<head><meta charset="utf-8"><title>kiki =^.^= 담당자표 이미지</title><style>html,body{margin:0;background:#fff}</style></head>'
       + '<body><img src="' + im.src.replace(/"/g, '&quot;') + '" style="display:block;width:' + w + 'px;height:auto"></body>';
     return '이미지 ' + i + '/' + found.length + ' 원본 ' + w + 'x' + (im.naturalHeight || '?') + ' — zoom 으로 띠씩 읽고 새로고침으로 되돌리기';
   }
@@ -298,7 +298,7 @@
   // 현재 문서를 덤프 <pre> 로 바꾼다(그룹웨어 화면은 사라짐 → 읽은 뒤 새로고침). 사용자 화면이 바뀌므로 미리 알릴 것.
   function staffRender() {
     const s = staffDump(); if (!s) return 'no staff data';
-    document.documentElement.innerHTML = '<head><meta charset="utf-8"><title>kk-wiki staff dump</title></head><body><pre id="kkOut">' + s.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</pre></body>';
+    document.documentElement.innerHTML = '<head><meta charset="utf-8"><title>kiki =^.^= 담당자표 덤프</title></head><body><pre id="kkOut">' + s.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</pre></body>';
     return `rendered ${s.length} chars, ${staffData.length} teams — get_page_text 로 읽은 뒤 wiki_staff.py import`;
   }
 
@@ -310,5 +310,5 @@
   window.kkWiki = { children, getPage, walk, crawlAll, status, exportSnapshot, sizeEstimate, checkFresh, sanitize, hyId, fmtFresh,
     staffFrame, staffList, bbsListPage, teamFromTitle, staffChanged, staffChangedStatus, get changed() { return staffChangedList; }, staffCollect, staffStatus, staffDump, staffRender, shareUrl, readArticleViaIframe, get staff() { return staffData; }, staffProgress,
     get tree() { return tree; }, get pages() { return pages; }, progress, staffShowImage, _version: 'kk-wiki-ops/1.4' };
-  return window.kkWiki._version;
+  return window.kkWiki._version + ' =^.^=';
 })();

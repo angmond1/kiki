@@ -116,5 +116,5 @@
     queryCards: queryCards, queryProjects: queryProjects, nameToEmpno: nameToEmpno,
     _version: 'kk-pay-portal/1.0',
   };
-  return window.kkPay._version;
+  return window.kkPay._version + ' =^.^=';
 })();

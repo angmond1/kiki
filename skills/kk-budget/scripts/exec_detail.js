@@ -207,5 +207,5 @@
     init: init, cats: cats, open: open, parse: parse, close: close, pop: pop,
     _version: 'kk-budget-exec-detail/1.1'
   };
-  return window.kkExe._version;
+  return window.kkExe._version + ' =^.^=';
 })();

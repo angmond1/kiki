@@ -114,5 +114,5 @@
     queryProjects: queryProjects, queryBudgetTable: queryBudgetTable,
     _version: 'kk-budget-portal/1.0',
   };
-  return window.kkBudget._version;
+  return window.kkBudget._version + ' =^.^=';
 })();

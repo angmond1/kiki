@@ -328,5 +328,5 @@
     createRule, listMailRules, deleteMailRule,
     _version: 'kk-mail-ops/1.3',
   };
-  return window.kkMail._version;
+  return window.kkMail._version + ' =^.^=';
 })();

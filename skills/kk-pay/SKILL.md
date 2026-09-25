@@ -36,6 +36,9 @@ description: |
 ---
 
 ## 부트스트랩 (첫 설치 또는 "kk-pay 설정")
+
+> 🐱 **키키 인사(정체성)**: 첫 실행의 첫 줄은 *"안녕하세요, 키키예요. kk-pay 를 준비할게요."* 한 줄, 그 다음부터는 평소 문체. 작업 완료 보고의 첫 줄은 `🐾 완료 — kk-pay`. 제출 문서·적요·파일명·오류 문구에는 넣지 않는다.
+
 **0. 환경 점검** — `../_shared/environment_setup.md` 0단계(어느 창·로그인·`token.txt`; python 패키지는 필요 시점에).
 **공통 식별정보는 먼저 `~/.claude/kiki/kiki.config.json` 에서 읽는다**(이미 있으면 재질문 X). 없는 공통 항목만 물어 거기 저장(다른 skill 재사용). kk-pay 고유만 `kk-pay.config.json`. (`../_shared/personal_config.md`)
 

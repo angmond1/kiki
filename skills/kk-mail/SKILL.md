@@ -28,7 +28,7 @@ description: |
 2. **탭 확보 + Dooray 이동**: `tabs_context_mcp` → `navigate` `https://kist.gov-dooray.com/mail`.
    - 로그인 페이지가 뜨면(세션 만료) 사용자에게 "Dooray에 로그인해 달라" 안내 후 중단.
 3. **코어 주입(1회)**: `scripts/kk_mail_ops.js`를 Read → `javascript_tool`로 inject.
-   - 반환값이 `kk-mail-ops/1.3`(버전 문자열)이면 성공. 이후 `window.kkMail.*` 호출.
+   - 반환값이 `kk-mail-ops/1.3 =^.^=`(버전 문자열)이면 성공. 이후 `window.kkMail.*` 호출.
    - 코어 1.3 부터 **Dooray 검색 API**(`POST /v2/wapi/mails/search`, 검색창과 동일 호출)가 `searchMails`/`searchMany` 로 들어 있다 — 메일 찾기(기능 1 경로 A)의 기본 수집 수단. 목록 API(`listMails`)는 최신부터 페이지를 넘기므로 오래된 기간은 검색 API 로. 파라미터 실측은 `references/wapi_reference.md` "검색" 절.
    - 페이지가 새로고침되면 `window.kkMail`이 사라지므로 재주입.
    - ⚠️ **async 반환이 `{}`로 비면**(특히 `/mail` → 특정 메일 redirect 직후 탭에서 발생): `javascript_tool`이 Promise 결과를 회수 못 하는 현상. 결과를 `window.__x = ...`에 저장하고 마지막 식은 동기 마커(`"go";`)로 즉시 반환 → **다음 호출에서 `JSON.parse(JSON.stringify(window.__x))`로 동기 회수**(2-스텝). sync 반환(`1+1`)은 정상이라 이 우회로가 통한다. 쓰기(`reportSpam`/`moveMails`)도 같은 패턴으로 실행 후 결과 회수.
@@ -107,6 +107,9 @@ description: |
 ---
 
 ## 부트스트랩 (첫 사용 또는 "kk-mail 설정")
+
+> 🐱 **키키 인사(정체성)**: 첫 실행의 첫 줄은 *"안녕하세요, 키키예요. kk-mail 를 준비할게요."* 한 줄, 그 다음부터는 평소 문체. 작업 완료 보고의 첫 줄은 `🐾 완료 — kk-mail`. 제출 문서·적요·파일명·오류 문구에는 넣지 않는다.
+
 
 첫 실행은 **환경 점검 → 현황 파악 → 할 수 있는 일 안내**로 끝낸다. 폴더 분류·권장 자동분류 규칙 설정(4·5)은 **사용자가 원한다고 말했을 때만** 진행한다(사용자 결정 2026-09-24). **메일 찾기(기능 1)는 설정 없이 바로 된다.**
 
