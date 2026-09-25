@@ -41,7 +41,7 @@
 ## 차분 갱신 (수시 변경 대응 — 사용자 "담당자표 갱신해줘" 한마디에 바로)
 1. `python scripts/wiki_staff.py known` → `{"재무팀":77956,…}` 한 줄(팀별 마지막으로 읽은 글번호).
 2. `ngw.kist.re.kr` 탭(빈 화면 `XClickController?isDispath=true` 도 됨) 에 코어 주입 → `window.kkWiki.staffChanged({…known…})` → 2~3초 뒤 `staffChangedStatus()`.
-   - "(변경 없음)" 이면 끝. 바뀐 팀이 있으면 `staffCollect({ list: window.kkWiki.changed })` → `staffStatus()` done → `staffRender()` → `get_page_text` → `staff_dump_yymmdd.txt` 저장.
+   - "(변경 없음)" 이면 끝. (2026-09-25 실측: 빈 화면 탭에 코어 1.4 주입 → 4초 만에 "(변경 없음 — 담당자표가 최신)" + excluded 3건 표시, 게시판 메뉴 클릭 없이 동작) 바뀐 팀이 있으면 `staffCollect({ list: window.kkWiki.changed })` → `staffStatus()` done → `staffRender()` → `get_page_text` → `staff_dump_yymmdd.txt` 저장.
 3. 이미지 게시글이면 위 OCR 절차로 `_ocr.txt` 보정. `python scripts/wiki_staff.py import --keep <새 덤프> [<_ocr.txt>]` → 기존 팀은 그대로, 바뀐 팀만 교체. `status` 로 확인.
 4. 탭 새로고침(또는 닫기)으로 화면 복구. 덤프 원본은 `{kiki_root}/wiki/staff/` 에 날짜별로 남기고 `staff.json` 이전본은 `_history/` 에 자동 보관.
 - 새 부서(known 에 없는 팀)도 "바뀐 팀" 으로 잡힌다. 없어진 부서는 목록에 새 글이 안 올라오므로 그대로 남는다 → `status` 의 ⚠오래됨 이 늘면 부서 존속 여부를 사용자에게 묻는다.
