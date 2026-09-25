@@ -37,10 +37,10 @@ POST /v2/wapi/mails/unread   { "mailIdList": ["..."] }
 ## 검색 — Dooray 검색창과 동일 호출 (기능 1 경로 A, ✅ 2026-09-24 캡처·실측)
 ```
 POST /v2/wapi/mails/search?preview=true
-{ "exceptFolders": ["draft","spam","trash"], "all": ["한양대"], "page": 0, "order": "-createdAt", "highlight": true, "size": 100,
-  "since": "2024-01-01T00:00:00+09:00", "before": "2024-12-31T23:59:59+09:00" }
+{ "exceptFolders": ["draft","spam","trash"], "all": ["○○대"], "page": 0, "order": "-createdAt", "highlight": true, "size": 100,
+  "since": "2025-01-01T00:00:00+09:00", "before": "2025-12-31T23:59:59+09:00" }
 ```
-- `all` = 제목·본문·발신자 전체 대상. 배열 원소끼리 **AND**(`["한양대","세미나"]` → 54건), 한 원소 안의 띄어쓰기는 **구절 매칭**(`["한양대 세미나"]` → 9건). 본문에만 있는 구절도 hit(실측).
+- `all` = 제목·본문·발신자 전체 대상. 배열 원소끼리 **AND**(`["○○대","세미나"]`), 한 원소 안의 띄어쓰기는 **구절 매칭**(`["○○대 세미나"]`). 본문에만 있는 구절도 hit(실측).
 - 기간: **`since` / `before` 만 유효**(`until`·`period`·`createdAt`·`startDate`·`sentAt` 등은 조용히 무시). **ISO 시각+타임존 필수** — 날짜만(`2024-01-01`) 넣으면 -200200. 오름차순은 `order:"createdAt"`.
 - 폴더 지정 없음(`folderName` 무시 → 받은·보낸 모두). `exceptFolders`(시스템 폴더 이름) 만 동작. 결과의 `folderId` 를 `references.folderMap` 으로 이름 매핑해 사후 필터.
 - `subject` / `body` / `from` 같은 대상 한정 필드는 무시되고 totalCount 2000(cap) 전체가 돌아온다 → 대상 한정은 없다.

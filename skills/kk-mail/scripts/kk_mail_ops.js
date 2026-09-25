@@ -240,11 +240,11 @@
   }
 
   // ---------- 기능 1 경로 A: 서버 검색 (POST /v2/wapi/mails/search — Dooray 검색창과 동일 호출, 2026-09-24 캡처·실측) ----------
-  // terms: ['한양대'] 단어 배열. 원소끼리 AND, 한 원소 안의 띄어쓰기('한양대 화공세미나')는 구절(인접) 매칭. 대상 = 제목·본문·발신자 전체.
+  // terms: ['○○대'] 단어 배열. 원소끼리 AND, 한 원소 안의 띄어쓰기('○○대 세미나')는 구절(인접) 매칭. 대상 = 제목·본문·발신자 전체.
   //   기간: since/before ('YYYY-MM-DD' 또는 ISO 시각; 서버는 ISO 시각+타임존만 받으므로 날짜면 보정) 또는 sinceDays. until/period 등 다른 이름은 조용히 무시된다.
   //   폴더 지정 파라미터 없음(folderName 무시, 받은·보낸 모두) — exceptFolders(시스템 폴더 이름, 기본 draft/spam/trash 제외)만. 결과 folder 로 사후 필터.
   //   응답: result.contents[{id}] + references.mailMap[id](목록과 같은 메일 객체 + mailSummary.previewText 본문 앞 ~300자) + references.folderMap[id]{name,type}.
-  //   실측: size 100 OK / '한양대' 전체 237건, 2024년 34건 즉시 / 본문에만 있는 구절도 hit.
+  //   실측: size 100 OK / 연도 조건은 서버가 걸러 즉시 / 본문에만 있는 구절도 hit.
   async function searchMails(terms, opt = {}) {
     const size = opt.size || 100, maxPages = opt.maxPages || 5;
     const iso = (d, end) => /T/.test(d) ? d : d + (end ? 'T23:59:59+09:00' : 'T00:00:00+09:00');
@@ -273,7 +273,7 @@
     }
     return out;
   }
-  // 동의어 묶음별로 검색해 합치고 중복 제거(최신순). groups = [['한양대'], ['hanyang'], ['한양대학교', '세미나']]
+  // 동의어 묶음별로 검색해 합치고 중복 제거(최신순). groups = [['○○대'], ['univ'], ['○○대학교', '세미나']]
   async function searchMany(groups, opt = {}) {
     const seen = new Map(); let totalSum = 0;
     for (const g of groups) {
@@ -294,7 +294,7 @@
   }
   function hyId(id) { return String(id).replace(/(\d{4})(?=\d)/g, '$1-'); }
   // 목록 정규식 1차 선별(제목·발신자·발신주소). Claude 가 동의어·영문·약어를 넓혀 만든 정규식을 넘긴다.
-  //   excludeFrom: 발신 주소 제외 정규식(예 /kist\.re\.kr$/i 로 사내 공지 제외). ⚠️ 약어는 대소문자 구분·단어경계로(/HYU/i 는 'Hyun' 에 걸린다).
+  //   excludeFrom: 발신 주소 제외 정규식(예 /kist\.re\.kr$/i 로 사내 공지 제외). ⚠️ 약어는 대소문자 구분·단어경계로(짧은 약어 정규식은 다른 단어 조각에도 걸린다).
   function pick(mails, re, { excludeFrom } = {}) {
     return (mails || []).filter(m => (re.test(m.subject) || re.test(m.fromName) || re.test(m.fromEmail)) && !(excludeFrom && excludeFrom.test(m.fromEmail)));
   }
