@@ -48,7 +48,7 @@ claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문�
 
 ### 4. chrome 브라우저로 KIST 포탈·Dooray 로그인 필요
 - kk-mail, kk-budget 스킬은 먼저 chrome 브라우저로 KIST 포탈에 로그인해 둔 채로 진행  
-- 파일첨부 스킬 (kk-pay 세금계산서, kk-dining, kk-inspect)은 새 chrome 브라우저를 띄워주면서 새 로그인을 다시 요구함 (kk-pay 카드결제건 RPA 업로드는 기존 브라우저)  
+- 파일첨부 스킬 (kk-pay 세금계산서, kk-dining, kk-inspect)은 새 chrome 브라우저를 띄워주면서 새 로그인을 다시 요구함  
 
 ### 5. Dooray 토큰 (카드결제건 RPA 업로드용)
 토큰 생성페이지 https://kist.gov-dooray.com/setting/api/token 에서 토큰 생성하고  
