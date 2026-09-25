@@ -58,10 +58,10 @@
 ## 파이썬 헬퍼 (`scripts/meeting_log_xlsx.py`)
 - `openpyxl` 만 필요. `pyhwpx` 와 달리 한글·COM 불요.
 - 9컬럼 양식 자동 생성 + 행 추가 + 회의목적 셀 wrap_text + 금액 `#,##0` 포맷.
-- 사용자가 hwpx 를 요청하면(그때그때) → kk-dining 이 같은 데이터로 `make_dininglog_hwpx.py` 로 hwpx 도 생성(엑셀이 master, 한글 불요). 중복 검사는 `all_titles(root)`.
+- 사용자가 hwpx 를 요청하면(그때그때) → kk-meeting 이 같은 데이터로 `make_dininglog_hwpx.py` 로 hwpx 도 생성(엑셀이 master, 한글 불요). 중복 검사는 `all_titles(root)`.
 
 ## 한글파일 동시 저장 (사용자 옵션)
-설치 시 묻는 항목 (`kk-dining.config.json`):
+설치 시 묻는 항목 (`kk-meeting.config.json`):
 ```json
 "log_format": "xlsx_only" | "xlsx_and_hwpx"
 ```

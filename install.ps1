@@ -53,6 +53,10 @@ foreach ($s in $Skills) {
   Write-Host "[복사] $s"
 }
 
+# 2-1) 개명된 skill 의 옛 폴더 정리 (2026-09-26 kk-dining → kk-meeting)
+$legacy = Join-Path $dstDir "kk-dining"
+if (Test-Path $legacy) { Remove-Item -Recurse -Force $legacy; Write-Host "[정리] 옛 이름 kk-dining 폴더 삭제 (지금은 kk-meeting)" }
+
 # 3) kiki 작업 폴더 (root) — 데이터 폴더 + token.txt
 New-Item -ItemType Directory -Force -Path $Root | Out-Null
 foreach ($sub in @("budget", "dining", "inspect", "_tmp")) {
@@ -66,6 +70,8 @@ if (-not (Test-Path $tok)) {
 
 # 4) 개인설정 폴더 + 템플릿 (없을 때만 — 기존 값 보존) + kiki_root 기록
 New-Item -ItemType Directory -Force -Path $cfgDir | Out-Null
+$legacyCfg = Join-Path $cfgDir "kk-dining.config.json"; $newCfg = Join-Path $cfgDir "kk-meeting.config.json"
+if ((Test-Path $legacyCfg) -and -not (Test-Path $newCfg)) { Move-Item $legacyCfg $newCfg; Write-Host "[정리] kk-dining.config.json → kk-meeting.config.json (skill 개명)" }
 $cfg = Join-Path $cfgDir "kiki.config.json"
 if (-not (Test-Path $cfg)) {
   Copy-Item (Join-Path $srcDir "_shared\kiki.config.example.json") $cfg
@@ -87,7 +93,7 @@ function Test-Cmd($name) { return [bool](Get-Command $name -ErrorAction Silently
 $hasPy   = (Test-Cmd "python") -or (Test-Cmd "py")
 $hasNode = (Test-Cmd "node") -and (Test-Cmd "npx")
 Write-Host ""
-if ($hasPy)   { Write-Host "[확인] Python  있음" } else { Write-Warning "Python 이 없습니다 — kk-budget/kk-pay/kk-dining/kk-inspect 에 필요. https://www.python.org/downloads/ (설치 시 'Add python.exe to PATH' 체크) 또는  winget install -e --id Python.Python.3.12" }
+if ($hasPy)   { Write-Host "[확인] Python  있음" } else { Write-Warning "Python 이 없습니다 — kk-budget/kk-pay/kk-meeting/kk-inspect 에 필요. https://www.python.org/downloads/ (설치 시 'Add python.exe to PATH' 체크) 또는  winget install -e --id Python.Python.3.12" }
 if ($hasNode) { Write-Host "[확인] Node.js 있음" } else { Write-Warning "Node.js 가 없습니다 — 파일첨부(chrome-devtools-mcp) 에 필요. https://nodejs.org/ (LTS) 또는  winget install -e --id OpenJS.NodeJS.LTS" }
 
 Write-Host ""

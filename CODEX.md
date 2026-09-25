@@ -7,13 +7,13 @@
 ## 1. 설치 구조 (Codex)
 **설치 폴더부터 묻는다**: 기본 `C:\kiki`(Windows) / `~/kiki`(macOS/Linux) 또는 사용자 지정 경로. 선택한 `kiki_root`에 패키지를 확보하고 그 폴더에서 진행한다(git 불요: ZIP/동료 폴더 가능). 원본 `skills/`를 아래 Codex 경로에 복사한다. 배포본 `install.ps1`·`install.sh`는 Claude 경로용이므로 Codex 설치에는 아래 복사 예를 쓴다.
 
-- **설치 때 에이전트가 Python 3·Node.js 유무를 확인하고, 없으면 한 줄 안내 후 바로 설치를 시작한다**. 정본 [CLAUDE.md Step 0](CLAUDE.md)의 범위: 전체 설치 = 둘 다 / kk-mail만 = 둘 다 불필요 / kk-budget = Python / kk-pay·kk-dining·kk-inspect = Python + Node.js. Python 패키지는 각 skill에서 필요할 때 확인·설치한다.
+- **설치 때 에이전트가 Python 3·Node.js 유무를 확인하고, 없으면 한 줄 안내 후 바로 설치를 시작한다**. 정본 [CLAUDE.md Step 0](CLAUDE.md)의 범위: 전체 설치 = 둘 다 / kk-mail만 = 둘 다 불필요 / kk-budget = Python / kk-pay·kk-meeting·kk-inspect = Python + Node.js. Python 패키지는 각 skill에서 필요할 때 확인·설치한다.
 - Windows: `python --version`·`node --version`·`npx --version` 확인. `python`이 없어도 `py -3 --version`이 되면 재설치하지 않고 이후 실행·pip에 `py -3`·`py -3 -m pip`를 쓴다. Store 실행 별칭·설치 직후 PATH 미반영을 구분하고, 미설치 시 winget 및 UAC/수동 설치 안내는 Step 0을 따른다.
 - macOS/Linux 절차도 [CLAUDE.md Step 0](CLAUDE.md)·[INSTALL.md §6](INSTALL.md)을 따른다(실기기 미검증). macOS는 Python 미설치 시 Xcode 명령줄 도구, Node.js는 기존 Homebrew 또는 `.pkg`; Linux는 `python3` 확인 후 sudo가 필요한 명령은 사용자에게 안내하고, sudo 불가 시 사용자 경로 설치를 따른다. OS별 설치 절차를 이 문서에 중복 관리하지 않는다.
 
 | 구분 | Codex 설치 경로 | 비고 |
 |---|---|---|
-| skill 본체 | `~/.codex/skills/kk-budget`, `kk-pay`, `kk-dining`, `kk-inspect`, `kk-mail` | repo 의 `skills/kk-*` 그대로 |
+| skill 본체 | `~/.codex/skills/kk-budget`, `kk-pay`, `kk-meeting`, `kk-inspect`, `kk-mail`, `kk-wiki` | repo 의 `skills/kk-*` 그대로. 2026-09-26 `kk-dining` → `kk-meeting` 개명: 옛 `kk-dining` 폴더가 남아 있으면 삭제, 개인 설정 `kk-dining.config.json` 은 `kk-meeting.config.json` 으로 이름 변경 |
 | 공통 문서 | `~/.codex/skills/_shared` | repo 의 `skills/_shared` 그대로 |
 | 개인 설정 | `~/.codex/kiki/` | **repo 밖** (아래 §3) |
 | 토큰 | `<kiki_root>/token.txt` (또는 `~/.codex/kiki/token.txt`) | kiki 폴더(기본 `C:\kiki` / `~/kiki`)에 `token.txt.example` 복사 |
@@ -100,8 +100,8 @@ s.textContent = `[id*="_form_modalPopDiv"], [id*="modalPopDivScrollableInnerCont
 - **kk-budget**: 예실대비표 `bdg_2030` 좌표 없이 fetch 조회 → JSON 스냅샷 → `scripts/make_report.py` 엑셀. **조회 전용**(저장/제출/결재 안 함). 로그인 세션만 있으면 토큰 불요.
 - **kk-pay**: 카드 승인번호·과제·금액 fetch 조회 + 파일명 규칙 변환 + Dooray Drive 업로드(`DOORAY_TOKEN`). 세금계산서 직접작성 경로는 **첨부는 Codex 에서도 됨**, 단 **계좌 실명검증**은 통과법 확정 후 end-to-end 활성(공휴일·주말 미가동 추정).
 - **kk-inspect**: `mcs_0003` 필드맵·팝업 제어. 검수신청구분은 보통 **비자산** 선택 후 조회. **첨부는 건별 행 선택 후 해당 세금계산서·거래명세서 1개씩** (여러 건 한꺼번에 4개 X — 행 바꿔가며 해당 증빙만). 숨은 input 패턴으로 첨부 가능.
-- **kk-dining**: [SKILL](skills/kk-dining/SKILL.md) 기준으로 **회의 주제를 먼저 묻고, 회의내용은 사용자가 작성을 부탁할 때만** 근거자료로 채운다(직접 준 내용은 그대로 기록). 사전결재 적용 시점·회의시간·참석자 판단은 SKILL을 따른다. Codex도 chrome-devtools에서 `evaluate_script`로 제어하며, 계정/비목은 **`doDecision()` 콜백**, 통장표기는 **`common_onkillfocus` 동기화**를 사용한다.
-  회의록 엑셀은 임시저장 직후 `{kiki_root}/dining/meeting_log/{yymm}_회의록.xlsx`에 자동 기록한다(처리 연월별 1파일, 연월 하위폴더 없음). 회의록 파일은 **hwpx로 통일**하고 요청 시에만 [make_dininglog_hwpx.py](skills/kk-dining/scripts/make_dininglog_hwpx.py)로 같은 폴더에 `{yymmdd}_{과제번호}_{과제이름 간략}_회의록.hwpx`를 만든다(건당 1파일). 생성은 표준 라이브러리로 모든 OS에서 **아래아한글 없이** 가능하고, 열람은 한글 또는 HOP을 쓴다. 세부 저장·중복 검사 규칙은 [회의록 엑셀 안내](skills/kk-dining/references/meeting_log_excel.md)를 따른다.
+- **kk-meeting**: [SKILL](skills/kk-meeting/SKILL.md) 기준으로 **회의 주제를 먼저 묻고, 회의내용은 사용자가 작성을 부탁할 때만** 근거자료로 채운다(직접 준 내용은 그대로 기록). 사전결재 적용 시점·회의시간·참석자 판단은 SKILL을 따른다. Codex도 chrome-devtools에서 `evaluate_script`로 제어하며, 계정/비목은 **`doDecision()` 콜백**, 통장표기는 **`common_onkillfocus` 동기화**를 사용한다.
+  회의록 엑셀은 임시저장 직후 `{kiki_root}/dining/meeting_log/{yymm}_회의록.xlsx`에 자동 기록한다(처리 연월별 1파일, 연월 하위폴더 없음). 회의록 파일은 **hwpx로 통일**하고 요청 시에만 [make_dininglog_hwpx.py](skills/kk-meeting/scripts/make_dininglog_hwpx.py)로 같은 폴더에 `{yymmdd}_{과제번호}_{과제이름 간략}_회의록.hwpx`를 만든다(건당 1파일). 생성은 표준 라이브러리로 모든 OS에서 **아래아한글 없이** 가능하고, 열람은 한글 또는 HOP을 쓴다. 세부 저장·중복 검사 규칙은 [회의록 엑셀 안내](skills/kk-meeting/references/meeting_log_excel.md)를 따른다.
 - **kk-mail**: [SKILL](skills/kk-mail/SKILL.md)의 기능 번호는 **1 자연어로 메일 찾기(가장 많이 쓰는 기능) · 2 폴더 분류 · 3 자동분류 규칙 · 4 스팸 처리**. 로그인 세션 쿠키로 동작하며 토큰·추가 설치는 불필요하다(§1의 Codex 브라우저 도구 준비 전제).
   기능 1은 코어 1.3의 **`searchMails`/`searchMany` → Dooray 검색 API `POST /v2/wapi/mails/search`** 경로가 기본이고, 검색어를 정하기 어려우면 **`listMails`로 목록 훑기** 경로를 쓴다. 검색·읽음 상태 보존의 상세는 [SKILL](skills/kk-mail/SKILL.md)·[wapi 참조](skills/kk-mail/references/wapi_reference.md)를 따른다.
   첫 실행(`kk-mail 설정해줘`)은 **환경 점검 → 기존 폴더·규칙 파악 → 4가지 기능 안내로 종료**한다. 폴더 분류·권장 규칙 설정은 사용자가 원할 때만 진행한다. 기능 3의 기본 조건은 **발신 주소만**이며, 제목 조건은 사용자가 명시할 때만 추가한다.

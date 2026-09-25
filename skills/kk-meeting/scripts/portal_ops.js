@@ -1,5 +1,5 @@
 // ============================================================
-// kk-dining 코어 (1) — KIST 통합정보시스템 조회 (window.kkdining)
+// kk-meeting 코어 (1) — KIST 통합정보시스템 조회 (window.kkdining)
 // ------------------------------------------------------------
 // 동작: p.kist.re.kr:8081 (NEXACRO) 탭의 세션쿠키 + window.application.authTk 로
 //   backend 를 fetch 직접 호출. 화면 클릭·좌표 0, 해상도/모니터 무관.
@@ -110,7 +110,7 @@
     authTk: authTk, ready: ready, nexBody: nexBody, ds: ds, post: post, parseRows: parseRows,
     queryCards: queryCards, queryCardsBoth: queryCardsBoth, queryProjects: queryProjects,
     queryPreApprovals: queryPreApprovals, matchPreApproval: matchPreApproval,
-    _version: 'kk-dining-portal/1.0',
+    _version: 'kk-meeting-portal/1.0',
   };
   return window.kkdining._version;
 })();

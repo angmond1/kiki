@@ -1,6 +1,6 @@
 # kiki 토큰 파일 — 이 파일은 본인 PC 에만 있고, 공유·업로드되지 않습니다.
 #
-# 언제 필요한가: kk-pay 의 "카드결제건 → Dooray 드라이브 업로드(RPA)" 와 kk-dining 의 RPA 업로드 옵션에만.
+# 언제 필요한가: kk-pay 의 "카드결제건 → Dooray 드라이브 업로드(RPA)" 와 kk-meeting 의 RPA 업로드 옵션에만.
 #   (kk-mail · kk-budget · kk-inspect · 세금계산서 직접작성은 토큰이 필요 없습니다.)
 #
 # 발급: https://kist.gov-dooray.com/setting/api/token

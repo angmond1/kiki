@@ -96,5 +96,5 @@ description: |
 - `references/dooray_folder.md` — 행정원 폴더 조회(링크/이름검색·본부약어·캐시·성능).
 - `references/dooray_wiki.md` — 비목·규정 wiki 실시간 검색.
 - `../_shared/security_policy.md` — 보안 규약(C1~C5). `../_shared/dooray_wapi.md` — wapi 공통.
-- `../_shared/nexacro_file_upload.md` — ⭐ **NEXACRO `ExtFileUpload` 첨부 자동화 공통 가이드**(2026-06-07 codex 해법). kk-pay·kk-dining·kk-inspect 공유. fam_0702 특화 적용은 `references/tax_invoice_payment.md` §9-1.
+- `../_shared/nexacro_file_upload.md` — ⭐ **NEXACRO `ExtFileUpload` 첨부 자동화 공통 가이드**(2026-06-07 codex 해법). kk-pay·kk-meeting·kk-inspect 공유. fam_0702 특화 적용은 `references/tax_invoice_payment.md` §9-1.
 - **실패 시**: portal 은 `kkPay.ready()`(authTk) 확인 → fetch 응답 XML 의 `ErrorCode` 확인 → 빌드 TODO(chkPopupValueSetting body)면 DevTools 캡처. dooray 는 토큰(`token.txt`)·rate limit(429) 확인.

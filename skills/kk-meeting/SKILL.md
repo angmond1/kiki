@@ -1,9 +1,9 @@
 ---
-name: kk-dining
+name: kk-meeting
 description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전결재(fam_0100) 매칭, 회의록 엑셀 관리, fam_0704 지급신청서 직접 자동작성(카드매핑→계정/비목 콜백→통장표기→적요→회의록 입력→사전결재 연동→임시저장→결재상신). 사용자가 "회의비 처리하자", "회의록 작성/만들어줘", "회의비 정리해줘", "이번달 회의비", "식대 회의록" 등을 요청할 때 사용. 통합정보(p.kist.re.kr) + (선택)아래아한글 + (선택)두레이 기반.
 ---
 
-# kk-dining — KIST 회의비 처리
+# kk-meeting — KIST 회의비 처리
 
 카드로 결제한 회의비(식사·카페)를 골라 **사전결재와 매칭 → 회의록 엑셀 작성 → fam_0704 지급신청서 직접 자동작성·임시저장·결재상신**까지 처리한다. 조회는 통합정보 SSO 세션(토큰 불요), fam_0704 자동작성은 부모탭 JS 로 NEXACRO 팝업 제어 — 회의록 팝업 **첨부가 있으므로 Claude 전용 새 Chrome 창(chrome-devtools-mcp)에서 처음부터**(JS 는 `evaluate_script`; 첨부 없는 조회만 Claude in Chrome). **회의록 엑셀은 항상 자동 저장**, 별지1호 회의록 **hwpx 는 사용자가 원할 때만**(매번 묻는다, 기본 안 만듦)·업로드는 사용자 옵션.
 
@@ -14,12 +14,12 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 - **A 내장**: 회의비 판별(음식점·카페), 인원 산정(⌈금액÷5만⌉+1, **식대+음료 합산**), 회의시간 융통성(USETIME 참고), 별지1호 hwpx 셀매핑(요청 시만, 한글 불요), 회의록 엑셀 9컬럼, fam_0704 자동작성 11단계, 회의내용 가이드, 분류코드 면제(**I·S·B·F·부서운영비**).
 - **B 런타임조회**: 카드내역(fam_0711 법인+연구비)·참여과제(rdm_2011)·사전결재(fam_0100)·발의자 사번. → `scripts/portal_ops.js`
 - **C 환경준비**: **Claude 전용 새 Chrome 창**(chrome-devtools-mcp — 회의록 팝업 첨부 때문; 그 창에서 포탈 `e.kist.re.kr` 로그인 **한 번 더**, 평소 Chrome 로그인은 넘어오지 않는다고 미리 안내) + KIST 사내망(밖이면 VPN) / Python `openpyxl`(엑셀 작성 직전에 확인·설치) / (요청 시) hwpx 회의록 — **추가 설치 없음**(표준 라이브러리, 한글 불요·모든 OS; 열람은 한글 또는 무료 HOP) / (옵션) Dooray 로그인 + `token.txt`.
-- **D config**: 공통(이름·카드책임자·참여과제)은 `~/.claude/kiki/kiki.config.json`(형제 공유), kk-dining 고유(upload_via_rpa·폴더)는 `kk-dining.config.json`. → `../_shared/personal_config.md`.
+- **D config**: 공통(이름·카드책임자·참여과제)은 `~/.claude/kiki/kiki.config.json`(형제 공유), kk-meeting 고유(upload_via_rpa·폴더)는 `kk-meeting.config.json`. → `../_shared/personal_config.md`.
 - **E 격리**: Dooray 토큰(`<kiki_root>/token.txt`)·사번·참석자 실명. skill 텍스트엔 0건.
 
-## 설치/부트스트랩 (`kk-dining 설정해줘`)
+## 설치/부트스트랩 (`kk-meeting 설정해줘`)
 **0. 환경 점검** — `../_shared/environment_setup.md` 0단계(새 Chrome 창·통합정보 로그인[포탈 `e.kist.re.kr` → 업무화면 `p.kist.re.kr:8081`]; python `openpyxl` 은 엑셀 작성 시점에; hwpx 는 설치 때 묻지 않는다 — 작업마다 요청 시).
-**공통 식별정보는 `~/.claude/kiki/kiki.config.json` 에서 읽는다**(없으면 1회 수집·저장, 다른 skill 재사용). kk-dining 고유만 `kk-dining.config.json`. (`../_shared/personal_config.md`)
+**공통 식별정보는 `~/.claude/kiki/kiki.config.json` 에서 읽는다**(없으면 1회 수집·저장, 다른 skill 재사용). kk-meeting 고유만 `kk-meeting.config.json`. (`../_shared/personal_config.md`)
 
 1. **성함·카드책임자·참여과제** *(공통 `user`/`card_holder`/`projects`)* — kiki.config 에 없으면 묻는다. 카드책임자 본인 여부 확인 + 사번 1회(없으면 fam_0711 에서). 참여과제는 `queryProjects` 자동조회 → 분류코드 포함 확인.
 2. **사전결재 면제 판정** *(자동 + 확인)* — 참여과제 분류코드(`projects[].code`)로 **I·S·B·F·부서운영비** 면제 자동 판정. **N(정부수탁) 과제는 소관부처에 따라 달라** 사용자가 답할 수 있게 부처 목록을 같이 보여준다: *"사전 내부결재 폐지 대상 = 과기정통부·산업통상자원부·문체부·식약처·국방부·환경부·복지부·경찰청·기상청 과제 + 주요사업(E). 이 과제의 소관부처가 이 중 하나인가요?"* → "맞나요?" 확인 (`project_code.md`). 과제별 저장 불필요.
@@ -99,7 +99,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
 ## 참고
 - `references/fam_0704_automation.md` — **NEXACRO 부모탭 JS 완전자동 11단계** (DOC_CLS / 식비팝업 / 카드매핑 / popBudgList 콜백 / 통장표기 killfocus / 회의록 / 사전결재 연동 / **첨부**(회의록 팝업 `pop_fam_0703_02` 의 `fileDiv1`서명록/`fileDiv2`증빙/`fileDiv3`사전결재, 패턴 C = `extUp._input_node` 직접 노출) / 저장 / 결재상신). gfn_msg 원복 트랩 포함.
 - `references/fam_0703_automation.md` — ⭐ **연구비카드 회의비(fam_0703_02) 전용 절차서** (정찰 스니펫 / 이름표 / closure curRow 행 전환 `goRow()` / 매핑→계정→적요 순서 / DESP_LIST 오염 검증·복구 / 저장 체크리스트 / 2026-09-08 버벅거림 13건→예방).
-- `../_shared/nexacro_file_upload.md` — ⭐ **NEXACRO `ExtFileUpload` 첨부 자동화 공통 가이드**(2026-06-07 codex 실증, A/B/C 3 패턴). kk-pay·kk-dining·kk-inspect 공유. **C(정공법, `extUp._input_node` 직접) 우선 시도** 권장.
+- `../_shared/nexacro_file_upload.md` — ⭐ **NEXACRO `ExtFileUpload` 첨부 자동화 공통 가이드**(2026-06-07 codex 실증, A/B/C 3 패턴). kk-pay·kk-meeting·kk-inspect 공유. **C(정공법, `extUp._input_node` 직접) 우선 시도** 권장.
 - `references/meeting_log_excel.md` — 회의록 엑셀 9컬럼 관리 표준 (처리일 1파일).
 - `references/meeting_form.md` — (요청 시) hwpx 별지1호 양식·셀매핑·인원·증빙·중복.
 - `references/project_code.md` — 분류코드·비목·면제(I·S·B·F·부서운영비)·발의자.

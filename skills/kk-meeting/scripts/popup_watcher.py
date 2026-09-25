@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-kk-dining 코어 (3) — 한글 보안 팝업 자동 처리 watcher (독립 프로세스)
+kk-meeting 코어 (3) — 한글 보안 팝업 자동 처리 watcher (독립 프로세스)
 - 한글 보안 팝업 = WPF 창(class 'HwndWrapper[hwp.exe;;...]', 제목 한컴사제폰트 '글', 작은 크기).
   WPF 라 win32 버튼 0개 + UIAutomation 차단 → 클릭 불가.
 - 해결: 창 감지 → SetForegroundWindow → Alt+N('모두 허용(N)' 액셀러레이터) keybd_event.
