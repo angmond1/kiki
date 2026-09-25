@@ -29,7 +29,7 @@
 - 이 창은 **평소 Chrome 과 로그인이 공유되지 않는다** → 첨부 작업 때 그 창에서 `e.kist.re.kr` 에 **한 번 더 로그인**(이후 기억).
 
 ### 0-4. Python 3 + Node.js (설치 때 에이전트가 기본으로 설치)
-- 어느 skill 에 필요한가: **kk-mail 없음 / kk-budget Python / kk-pay·kk-dining·kk-inspect Python + Node.js**(파일첨부 도구 chrome-devtools-mcp 가 Node 프로그램). 전체 설치(기본)면 둘 다.
+- 어느 skill 에 필요한가: **kk-mail 없음 / kk-budget·kk-wiki Python / kk-pay·kk-dining·kk-inspect Python + Node.js**(파일첨부 도구 chrome-devtools-mcp 가 Node 프로그램). 전체 설치(기본)면 둘 다.
 - **직접 할 일은 없다** — "kiki 설치해줘" 과정에서 에이전트가 없는 것을 찾아 안내와 함께 바로 설치한다(Windows `winget`, 1~3분; kk-mail 만 설치할 때는 건너뜀). **설치 중 '사용자 계정 컨트롤' 창이나 설치 화면이 뜨면 '예 / 다음'**만 눌러 주면 된다.
 - `winget` 은 Windows 11·최신 Windows 10 에 기본 포함(PowerShell 어디서든 실행). 새 PC 에서 `winget` 이 안 잡히면 Microsoft Store 를 열어 '앱 설치 관리자'가 업데이트되게 하거나, 회사 정책으로 막힌 PC 면 에이전트가 다운로드 페이지를 열어 주고 설치 마법사 단계를 안내한다 — Python 은 첫 화면의 **"Add python.exe to PATH" 체크** 가 핵심, Node.js 는 기본값으로 Next 만 누르면 된다.
 - 미리 깔아두고 싶으면: Python https://www.python.org/downloads/ (PATH 체크) / Node.js(LTS) https://nodejs.org/en/download . macOS `brew install python node` / Ubuntu `sudo apt install python3 python3-pip nodejs npm`(macOS 에 Homebrew 가 없으면 `.pkg` 설치 파일로, 새 Mac 은 `python3` 첫 실행 때 Xcode 개발자 도구 설치 창이 뜰 수 있음).
@@ -131,6 +131,7 @@ mkdir -p budget dining inspect _tmp
 | **kk-dining** | `openpyxl` (hwpx 회의록 옵션은 추가 설치 없음) | `kk-dining 설정해줘` (hwpx 동봉 여부·업로드 여부) | `회의비 처리하자` |
 | **kk-budget** | `openpyxl` | `kk-budget 설정해줘` (추적 과제·카테고리) | `예산 수집해줘` / `예산 잔액 표로` |
 | **kk-inspect** | `Pillow` (+ pdf→jpg 시 `PyMuPDF`) | `kk-inspect 설정해줘` (위치·행정원·검수 폴더) | `이 폴더 증빙들 소액검수 올려줘` |
+| **kk-wiki** | `requests` (토큰 경로만) | `kk-wiki 설정해줘` (위키 스냅샷 만들기 2~3분) | `출장 식비 한도 알려줘` / `외자 구매 절차 관련 페이지 다 모아줘` |
 
 > **쓰기 작업(업로드·제출·결재상신·검수 신청·파일 첨부)은 항상 본인 확인 후** 진행된다.
 

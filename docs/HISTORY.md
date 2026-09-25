@@ -28,6 +28,7 @@ kiki/
 | kk-dining | 카드 회의비 추출 + 사전결재 매칭 + 회의록 엑셀 master + **fam_0704_02(법인)·fam_0703_02(연구비카드)** 자동작성·임시저장·결재상신 + 2026-08-01 규정(사전결재 폐지 대상·PROJJOINYN) 반영 | 통합정보 SSO (좌표0 부모탭 JS) |
 | kk-budget | 좌표0 fetch 예실대비표(`BUDGYEAR=9999`+`ACCCLSCD` LEV1) + 직접비 소계 + 개인지분(적요+신청인 합산) | 통합정보 SSO (조회 전용) |
 | kk-inspect | 소액검수 `mcs_0003` NEXACRO form 직접제어 + 자산 보수판정 + 외화 `fam_0711` USEAMT + **첨부 자동**(chrome-devtools-mcp 단일채널) | 통합정보 SSO (첨부는 chrome-devtools-mcp) |
+| kk-wiki | KIST Wiki 2.0 규정·지침 자연어 찾기 — 전체 본문 스냅샷(`{kiki_root}/wiki`) 로컬 검색·판독 + 인용 페이지 `fresh` 최신 확인 + 첨부(토큰) (2026-09-25 신설) | Dooray 토큰(권장) 또는 세션 쿠키 |
 
 ## 공통 규약
 `skills/_shared/security_policy.md` C1~C5 — 개인 credential·식별자·개인학습 repo 0건 / 모든 쓰기 confirm / 개인화는 자동조회+로컬 config / config·token 은 `~/.claude/kiki/`(repo 밖)+gitignore / 한국어.
@@ -50,6 +51,7 @@ kiki/
 재사용 패턴(NEXACRO 부모탭 JS 완전자동·fetch backend 직접호출·form 직접제어·hwp 자동화·과제분류코드·데이터 master·임시저장↔결재상신 분리·killfocus 동기화 등)은 전부 **[DEVELOPMENT.md](DEVELOPMENT.md)** 에 통합. skill 별 화면·필드 캡처 상세는 각 skill 의 `references/`.
 
 ## 빌드 이력 (요약)
+- **2026-09-25 v0.3.0 (kk-wiki 신설)**: KIST Wiki 2.0 규정·지침 자연어 찾기. 위키 전체 본문(373p, ≈3MB)을 `{kiki_root}/wiki` 스냅샷(raw/·pages/·index.json·index.md·CHANGES)으로 두고 로컬 검색(`wiki_search.py` AND/OR·발췌·목록)과 본문 판독으로 관련 조항을 모은 뒤, 인용 페이지만 `wiki_snapshot.py fresh` 로 수정일·버전 대조(바뀐 것만 재수집) → 원문 인용+링크+수정일. 경로 A 토큰(공식 API `/wiki/v1/wikis/{space}/pages`, 첨부 hwp/pdf 는 307→file-api 직접 GET) / 경로 B 브라우저 세션(코어 `kk_wiki_ops.js` crawlAll → export JSON → import; 백그라운드 탭 타이머 지연 실측). 첫 실행은 스냅샷 유무 확인 → 만들기 제안 → 기능 안내. 위키 내용은 내부 자료라 각자 PC 만(repo 0).
 - **2026-09-24 (kk-mail 첫 실행 흐름)**: `kk-mail 설정해줘` = 환경 점검 → 기존 폴더·규칙 파악 → **기능 안내(메일 찾기 우선)로 끝**. 폴더 분류 여부 질문·권장 6항목 제안·config 저장은 **사용자가 원한다고 말했을 때만**(4·5·6, 선택). 사용자 결정: "바로 3·4번을 하라고 하진 말자, 할 수 있다고만 보여주자".
 - **2026-09-24 (kk-mail 기능 번호 재정렬)**: "Tier" 표기를 버리고 번호+기능명으로 — **1 자연어 메일 찾기(가장 많이 쓰일 기능, 사용자 결정)** · 2 폴더 분류 · 3 자동분류 규칙 · 4 스팸 처리(README 구성표 순서와 일치). SKILL 절 순서를 1→4 로 재배치하고 description·핵심 한 줄·부트스트랩 마무리 안내도 메일 찾기 우선. 참고문서·코어 주석·config 예시 동일 반영(동작 변경 없음).
 - **2026-09-24 (kk-mail 부트스트랩 마무리 안내)**: 첫 설정 끝에 사용 예시(스팸·분류·규칙·**메일 찾기**)와 "준비물 추가 없음"을 반드시 출력하도록 6단계 추가(사용자 지적: 설치 안내에 자연어 검색 언급 없었음). INSTALL.md kk-mail 예시에 메일 찾기 추가.

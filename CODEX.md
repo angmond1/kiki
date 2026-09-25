@@ -106,6 +106,7 @@ s.textContent = `[id*="_form_modalPopDiv"], [id*="modalPopDivScrollableInnerCont
   기능 1은 코어 1.3의 **`searchMails`/`searchMany` → Dooray 검색 API `POST /v2/wapi/mails/search`** 경로가 기본이고, 검색어를 정하기 어려우면 **`listMails`로 목록 훑기** 경로를 쓴다. 검색·읽음 상태 보존의 상세는 [SKILL](skills/kk-mail/SKILL.md)·[wapi 참조](skills/kk-mail/references/wapi_reference.md)를 따른다.
   첫 실행(`kk-mail 설정해줘`)은 **환경 점검 → 기존 폴더·규칙 파악 → 4가지 기능 안내로 종료**한다. 폴더 분류·권장 규칙 설정은 사용자가 원할 때만 진행한다. 기능 3의 기본 조건은 **발신 주소만**이며, 제목 조건은 사용자가 명시할 때만 추가한다.
   **도구별 검증 범위**: SKILL의 "출력 약 1,000자 잘림·`a=b` 필터"는 **Claude in Chrome의 `javascript_tool`에서 실측**한 제약이다. Codex의 **`evaluate_script`에서는 미확인**이며 동일하게 적용된다고 단정하지 않는다. 결과 분할 등의 우회는 실제 증상이 있을 때만 정본을 참고한다.
+- **kk-wiki**: [SKILL](skills/kk-wiki/SKILL.md). 위키 본문 스냅샷을 `{kiki_root}/wiki`에 두고 로컬 검색(`wiki_search.py`) → 인용 페이지만 `wiki_snapshot.py fresh`로 최신 확인. **토큰이 있으면 Python만으로**(브라우저 불요) 수집·최신 확인·첨부. 토큰이 없으면 chrome-devtools 창의 Dooray 탭에 코어 `kk_wiki_ops.js`를 주입 → `crawlAll()`(탭을 앞에 둘 것) → export JSON 다운로드 → `import`. 스냅샷은 KIST 내부 자료 — repo 밖에만.
 
 ## 7. 안전 경계 (Claude·Codex 공통)
 - 조회·로컬 파일 작성 = 자동 가능.

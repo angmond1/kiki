@@ -1,0 +1,64 @@
+---
+name: kk-wiki
+description: |
+  KIST Wiki 2.0(Dooray 위키)의 규정·지침·안내를 자연어로 찾아 관련 조항을 빠짐없이 정리해 주는 skill (kiki 패키지).
+  위키 전체 본문을 각자 PC 에 스냅샷으로 두고 로컬에서 검색·판독한 뒤, 인용할 페이지만 위키 API 로 최신 여부를 확인해 링크와 함께 답한다.
+  트리거: "규정 찾아줘", "지침에 뭐라고 돼 있어", "위키에서 ~~ 찾아줘", "출장비 한도가 얼마야", "회의비 규정", "법인카드 사용 기준",
+  "구매 절차", "KIST 위키", "kk-wiki", "위키 스냅샷 갱신" 등 KIST 내부 규정·업무 절차 질문 시 활성.
+  KIST 구성원 누구나 본인 계정으로 사용(Dooray 로그인 세션 또는 본인 토큰). 위키 내용은 각자 PC 에만 저장한다.
+---
+
+# kk-wiki — KIST Wiki 2.0 규정·지침 찾기
+
+## 핵심 한 줄
+**1 규정 찾기(자연어 → 관련 조항 전부 + 링크 + 최신 확인)** · **2 스냅샷 만들기·갱신**(전체 본문 로컬 저장, 첨부 옵션). 조회 전용 — 위키에 쓰는 일은 없다.
+
+## 왜 스냅샷인가
+위키 검색창은 키워드 한 번에 한 페이지씩 보여준다. 규정 질문은 "관련 조항을 빠짐없이"가 핵심이라 본문 373페이지(≈3MB)를 로컬에 두고 Claude 가 넓게 훑어 뜻으로 고른다. 최신성은 **인용할 페이지의 수정일을 API 로 대조**해 지키고, 바뀐 페이지만 다시 받는다.
+
+## 전제 (환경)
+- 공통 환경 점검은 [`../_shared/environment_setup.md`](../_shared/environment_setup.md) 0단계. Python 3 필요(`requests` 는 토큰 경로에서만, 실행 직전 설치).
+- **인증 두 경로 — 같은 결과**:
+  - **A. Dooray 토큰(권장)**: `<kiki_root>/token.txt`(kk-pay 와 공유). Python 하나로 수집·증분 갱신·최신 확인·첨부 다운로드까지. 브라우저 불요, 출력 제한 없음.
+  - **B. 토큰 없음**: 평소 쓰는 Chrome(Claude in Chrome) 의 Dooray 로그인 세션으로 코어(`scripts/kk_wiki_ops.js`)를 주입해 수집 → export JSON 다운로드 → `wiki_snapshot.py import`. 최신 확인도 코어 `checkFresh`. 첨부는 못 받는다.
+- 스냅샷 위치 `{kiki_root}\wiki\`(기본 `C:\kiki\wiki` / `~/kiki/wiki`): `pages/<경로>.md`(frontmatter + 본문), `index.json`, `index.md`(목록), `raw/`, `attachments/`(옵션), `CHANGES_yymmdd.md`.
+- ⛔ **위키 내용은 KIST 내부 자료** — 스냅샷·첨부·검색 결과를 repo·공개 저장소·채팅 외부로 옮기지 않는다. skill 에는 수집 방법만 있고 내용은 0.
+
+## 실행 준비 (매 작업 시작 시)
+1. `python scripts/wiki_snapshot.py status` — 스냅샷 유무·페이지 수·build 일자. 없으면 기능 2(만들기)부터.
+2. 토큰 경로면 브라우저가 필요 없다. 브라우저 경로면 `tabs_context_mcp` → Dooray 탭(어느 화면이든 `kist.gov-dooray.com`) 확인 → 코어 주입(`kk_wiki_ops.js` Read → `javascript_tool`, 반환 `kk-wiki-ops/1.0`). 출력 제약(~1,000자·`a=b` 필터·긴 숫자 가림)과 2-스텝 회수는 kk-mail 실행 준비 3·4 와 같다.
+
+## 기능 (2가지)
+
+### 1. 규정 찾기 (자연어 → 관련 조항 전부, 조회 전용 · confirm 불필요)
+"출장 갈 때 식비 한도가 어떻게 돼?", "법인카드로 회의비 쓸 때 사전결재가 아직 필요해?", "외자 구매 절차와 필요한 서류 다 알려줘".
+1. **질문 분해** — 주제어와 **동의어·약어·행정 용어**를 넓게 잡는다(예: 회의비 → 회의비|식대|다과|간담회, 출장 → 출장|여비|일비|숙박). 대상 본부·팀이 짐작되면 경로 힌트(재무팀·인사경영팀·구매·자산팀·정보경영실 …)도.
+2. **후보 수집** — `python scripts/wiki_search.py "회의비|식대" 한도 --top 30` 처럼 AND/OR 로 2~3번 돌려 후보를 넓게 뽑는다. 결과의 `pages/…` 경로와 발췌, 첨부 유무를 본다. 필요하면 `--list 재무팀` 으로 그 팀 페이지 목록을 통째로 훑는다(목록은 `index.md`).
+3. **본문 판독** — 후보 페이지의 `.md` 를 Read 해 관련 조항을 **원문 그대로** 모은다(요약·추측 금지). 규정 원문이 첨부(hwp/pdf)에만 있으면 토큰 경로에서 `wiki_snapshot.py attach <pageId>` 로 받아 읽고, 브라우저 경로면 링크를 주고 사용자가 열어 확인하게 한다.
+4. **최신 확인** — 인용할 페이지 id 들을 `python scripts/wiki_snapshot.py fresh <id> <id> … --update`(토큰) 또는 `window.kkWiki.checkFresh([...])`(브라우저) 로 대조. CHANGED 면 재수집 뒤 다시 읽는다. 답에 **수정일**을 붙인다.
+5. **답 제시** — 조항별로 **원문 인용 + 출처(경로·수정일·링크)** 표. 서로 어긋나는 페이지가 있으면 둘 다 보여주고 더 최근 것을 표시. 없는 내용은 "위키에 없음" 이라 말하고 담당 부서(경로의 팀명)를 알려준다. 해석이 갈리는 부분은 담당팀 확인을 권한다.
+- 답변 시작 때 스냅샷 build 일자가 `refresh_days`(기본 180일)를 넘었으면 "전체 재수집(2~3분) 할까요?" 를 한 번만 묻는다. 안 해도 인용 페이지는 fresh 로 매번 확인되므로 답의 정확성엔 지장 없다.
+
+### 2. 스냅샷 만들기·갱신
+- **전체 수집(토큰)**: `python scripts/wiki_snapshot.py crawl` — 373페이지 ≈ 2~3분. 완료 후 `CHANGES_yymmdd.md`(신규·변경·삭제)를 보여준다.
+- **전체 수집(브라우저)**: 코어 `window.kkWiki.crawlAll()` → `status()` 로 진행 확인(**그 탭을 앞에 두게 안내** — 뒤로 가면 10배 느려짐) → 끝나면 **사용자 확인 후** `exportSnapshot()`(다운로드 폴더에 `kist_wiki_YYYYMMDD.json`, 크기는 `sizeEstimate()`) → `python scripts/wiki_snapshot.py import <다운로드경로>`.
+- **증분**: `fresh <id…> --update` 는 인용 시점에 자동. 큰 갱신은 전체 수집이 단순하고 안전하다.
+- **첨부(토큰만)**: `python scripts/wiki_snapshot.py attach` (전체) 또는 `attach <pageId>`. 규정 원문 hwp/pdf 가 여기 있다. 읽기는 `hwp` skill 이나 PDF 텍스트 추출로.
+
+## 안전 규칙
+- **조회 전용** — 위키 페이지 생성·수정·삭제 API 는 부르지 않는다.
+- **내부 자료 격리** — 스냅샷·첨부·검색 결과는 `{kiki_root}\wiki\` 밖으로 내보내지 않는다. repo 커밋 금지(`.gitignore` 대상 아님이므로 애초에 repo 안에 두지 말 것).
+- **원문 우선** — 규정은 요약하지 말고 조항을 인용하고 출처·수정일을 붙인다. 위키에 없는 내용을 지어내지 않는다.
+- 토큰 값·세션 정보는 출력하지 않는다(파일에서만 읽는다).
+
+## 부트스트랩 (첫 사용 또는 "kk-wiki 설정")
+1. 환경 점검(위) → 토큰 유무 확인(있으면 A, 없으면 B 안내. 토큰이 없어도 되고, 있으면 첨부까지 받을 수 있다고 알린다).
+2. `status` 로 스냅샷 확인 → 없으면 "위키 전체 본문을 내 PC 의 `{kiki_root}\wiki\` 에 저장합니다(≈3MB, 2~3분). 진행할까요?" → 예면 기능 2 로 수집.
+3. **기능 안내(반드시 출력)** — 예시: *"출장 식비 한도 알려줘"*, *"법인카드 회의비에 사전결재가 필요한지 규정 찾아줘"*, *"외자 구매 절차 관련 페이지 다 모아줘"*. 답은 원문 인용 + 링크 + 수정일로 오고, 인용 페이지는 매번 최신 확인된다고 안내. 첨부(hwp/pdf 원문) 다운로드는 토큰이 있을 때만.
+4. 설정 파일 `~/.claude/kiki/kk-wiki.config.json` 은 기본값으로 충분하면 만들지 않는다(`kk-wiki.config.example.json` 참고).
+
+## 참고 문서
+- `references/wiki_api.md` — 공식 API(토큰)·internal wapi(세션) endpoint, 응답 필드, 첨부 다운로드(307 → file-api), 실측 제약.
+- `references/search_playbook.md` — 질문 → 검색어 확장 → 판독 → 답 형식, 규정 분야별 동의어 표, 흔한 함정.
+- scripts: `wiki_snapshot.py`(crawl/import/build/fresh/attach/status) · `wiki_search.py`(AND/OR 검색·발췌·목록) · `kk_wiki_ops.js`(브라우저 코어).
+- 관련: kk-mail(Dooray 메일 찾기 — 같은 출력 제약·2-스텝), `../_shared/dooray_api_guide.md`(토큰 발급).

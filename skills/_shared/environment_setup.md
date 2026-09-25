@@ -17,6 +17,7 @@ kiki 는 Chrome 창 두 종류를 쓴다. **skill 마다 쓰는 창이 정해져
 | kk-pay — 세금계산서 직접작성 | **Claude 전용 새 Chrome 창** | chrome-devtools-mcp (`evaluate_script`·`upload_file` …) | 그 창에서 포탈 로그인 **한 번 더** |
 | kk-dining | **Claude 전용 새 Chrome 창** (첨부 때문) | chrome-devtools-mcp | 그 창에서 포탈 로그인 한 번 더 |
 | kk-inspect | **Claude 전용 새 Chrome 창** | chrome-devtools-mcp | 그 창에서 포탈 로그인 한 번 더 |
+| kk-wiki | 토큰 있으면 **브라우저 불요**(Python) / 없으면 평소 쓰는 Chrome | `wiki_snapshot.py` 또는 Claude in Chrome 확장(`kk_wiki_ops.js`) | 토큰 또는 Dooray 로그인 상태면 끝 |
 
 - **"Claude in Chrome" 확장** — `list_connected_browsers` 로 연결 확인. 안 되면: *"이 skill 은 Chrome 의 'Claude in Chrome' 확장으로 동작합니다. 확장 설치(https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn)·연결(Desktop: 설정 → Claude in Chrome ON / Code: `claude --chrome`) 후 다시 해주세요."* 후 중단. 연결됐으면 `select_browser` / `tabs_context_mcp` 로 작업 탭 확보.
 - 🔴 **내장 브라우저 ≠ Claude in Chrome** — Claude Desktop 앱에는 별도의 내장 브라우저(`mcp__Claude_Browser__*`, 'browser pane')가 있고 세션 기본값으로 잡혀 있을 수 있다. 여기엔 **사용자 Chrome 의 포탈 로그인이 없다** → kiki skill 은 항상 `mcp__claude-in-chrome__*` 도구(ToolSearch 로 로드)를 쓴다. 내장 쪽 `browser_batch` 를 부르면 빈 창이 열리고 `Preview not found` 로 실패한다.
@@ -51,6 +52,7 @@ kiki 는 Chrome 창 두 종류를 쓴다. **skill 마다 쓰는 창이 정해져
 | kk-pay | `Pillow`(이미지→jpg) · `requests`(Dooray 업로드) · Windows 문서 변환 시 `pywin32` | 증빙 변환 직전 / 업로드 직전 |
 | kk-inspect | `Pillow` (+ pdf→jpg 시 `PyMuPDF`) | 증빙 변환 직전 |
 | kk-mail | — | — |
+| kk-wiki | `requests` (토큰 경로) | 스냅샷 수집·최신 확인 직전 |
 
 ### 5. 아래아한글 · MS Office — 있으면 자동, 없으면 **물어본다**
 - 필요한 경우만: kk-pay 증빙이 hwp/docx/xlsx 라 pdf 변환이 필요할 때. (kk-dining 의 hwpx 회의록은 **한글 없이 생성**되므로 해당 없음 — 열람만 한글/HOP) 대부분의 KIST PC 엔 둘 다 있다 — `python convert.py --check`(kk-pay) 로 유무 확인.

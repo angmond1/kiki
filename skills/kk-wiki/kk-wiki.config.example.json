@@ -1,0 +1,18 @@
+{
+  "_help": "kk-wiki 고유 설정. 실제 config 는 ~/.claude/kiki/kk-wiki.config.json (repo 밖). 없어도 기본값으로 동작한다.",
+  "_common": "kiki_root(스냅샷 상위 폴더)와 Dooray 토큰(선택)은 공통 규칙: ~/.claude/kiki/kiki.config.json 의 kiki_root, <kiki_root>/token.txt. 상세 ../_shared/personal_config.md.",
+
+  "space_id": "3538560283559420253",
+  "_space_id": "KIST Wiki 2.0 공간 id — 위키 URL https://kist.gov-dooray.com/wiki/<space_id>/<page_id> 의 첫 번째 숫자. 다른 위키 공간을 쓰려면 바꾼다.",
+  "home_page_id": "3538560286709555986",
+  "_home_page_id": "수집을 시작할 최상위(Home) 페이지 id — URL 의 두 번째 숫자.",
+
+  "snapshot_dir": "{kiki_root}/wiki",
+  "_snapshot_dir": "스냅샷 저장 위치. {kiki_root} = kiki.config.json 의 kiki_root (기본 C:\\kiki / ~/kiki). KIST 내부 자료라 각자 PC 에만 둔다.",
+
+  "auth": "auto",
+  "_auth": "auto = 토큰(token.txt)이 있으면 Python 공식 API(권장), 없으면 브라우저 코어(로그인 세션) 경로. 'token' / 'browser' 로 고정 가능.",
+
+  "refresh_days": 180,
+  "_refresh_days": "이 일수가 지나면 답변 시작 때 전체 재수집을 한 번 제안한다(강제 아님). 인용 페이지는 매번 fresh 로 확인하므로 급하지 않다."
+}
