@@ -200,7 +200,7 @@ C.ds_datagrid1_oncolumnchanged.call(C, g, {columnid:"KORNM", row:r});
 
 ##### ⚠️ 중복 참석 경고 `DUPLICATE_EAT_YN` (2026-09-24)
 검색결과/등록행의 `DUPLICATE_EAT_YN` 이 `'N'` 이 아니면 그 사람이 **같은 날 다른 회의비 회의록에 이미 참석자로 등록**돼 있다
-(예 `사용시간 : 12:21 / 계정 : 26N4090 / 적요 : … / 목적: … / 인원: ○○○외 3명`). gfn_msg 로 "…중복인 경우 제외바랍니다" 가 뜬다.
+(예 `사용시간 : 12:21 / 계정 : 26N0002 / 적요 : … / 목적: … / 인원: ○○○외 3명`). gfn_msg 로 "…중복인 경우 제외바랍니다" 가 뜬다.
 → **저장하지 말고 사용자에게 그 내용을 그대로 보여주고 결정을 받는다**(제외 / 유지 / 중단). 발의자·카드책임자여도 제외될 수 있고, 제외하면 적요 `○○○ 외 N명` 의 대표자를 남은 첫 참석자로 바꾼다.
 
 ##### 외부/미참여자 등록
@@ -287,7 +287,7 @@ F.bt_approval_onclick.call(F, null, {});
 - **같은날 식당+카페 연달아 사용** = 동일 상신건에 묶음(1건처럼).
 - ⚠️⚠️ **행 전환(fam_0704_02) = `F.ds_rqstGrid.set_rowposition(i); F.rqstGrid_oncellclick.call(F,F.rqstGrid,{row:i});`** — 핸들러가 `this.curRow = e.row` 후 `doGetDesp()` 로 **`ds_temp_popup_CONFERENCE`(회의록 팝업 인자)** 를 그 행 카드로 채운다. `{}` 를 넘기면 curRow 가 undefined 가 되어 **회의록 버튼이 직전 행 카드의 회의록을 연다**(2026-09-24 실측: 9/4 행에서 9/1 카드 회의록이 열림). fam_0703_02(연구비)는 closure curRow 라 `{}` 로도 되지만, **양쪽 다 `{row:i}` 를 넘기는 것으로 통일**.
 - 회의록 팝업을 연 뒤 입력 전에 **가드**: `C.ds_param.getColumn(0,'CARDUSEMGRNO') === F.ds_rqstGrid.getColumn(i,'CARDUSEMGRNO')` 이고 `C.ds_SAVE.CONFERENCEPERPOSE` 가 비어 있을 때만 입력. 아니면 그대로 닫고(`C.bt_close_onclick.call(C,C.bt_close,{})`) 행 전환부터 다시.
-- CONFERENCENO 는 법인카드도 **지급신청서당 1개**(행끼리 공유, 2026-09-24 두 행 모두 2026014713). 통장표기(`import2.ds_main_DPST.DPSTDISPNM`)도 문서당 1개(첫 행 가맹점명)라 행마다 넣을 필요 없음.
+- CONFERENCENO 는 법인카드도 **지급신청서당 1개**(행끼리 공유, 2026-09-24 두 행이 같은 번호). 통장표기(`import2.ds_main_DPST.DPSTDISPNM`)도 문서당 1개(첫 행 가맹점명)라 행마다 넣을 필요 없음.
 
 ### 결재선 (gw 전자결재 별도 창, 사용자 직접)
 - **계정책임자(과제) 무조건 결재선 포함**. 계정책임자 = 화면 회계구분 아랫칸 (== `F.ds_rqstGrid.getColumn(0,"RDSBJEMPNM")`).
@@ -394,7 +394,7 @@ C.fileDiv2.gfn_upload("", "fn_endFileCallBack1", "ds_file", "RQST_NO="+rqst, "02
 - 거래처구분 핸들러 = `switch1_RNDCARD_combo_custcls_onitemchanged`, 거래처명 = `switch1_RNDCARD_formDetail_Custnm_onchanged`(killfocus 아님). **거래처구분 코드표(인라인 innerdataset)**: `""`=선택 / `0`=거래처코드 / `1`=직원번호 / **`2`=거래처명** / `3`=주민등록번호 / `4`=사업자등록번호(국내 가맹점 기본). 해외 가맹점은 `2` 거래처명.
 - 콤보 innerdataset 이 인라인이면 `cb.innerdataset` 은 문자열 id 이고 실체는 `cb[id]` (예 `cb["combo_custcls_innerdataset"]`), 컬럼명은 `codecolumn`/`datacolumn`.
 
-## 2026-09-24 예방표 — 법인카드 국내 2건(9/1 강경불고기·9/4 신창돼지국밥) 1상신에서 막힌 곳
+## 2026-09-24 예방표 — 법인카드 국내 식당 2건 1상신에서 막힌 곳
 | # | 증상 | 원인 | 예방 |
 |---|---|---|---|
 | 1 | 내부 참석자 7명 등록했는데 아무도 조회 안 됨(PAYNO 빈칸) | `new nexacro.DSColChangeEventInfo(...)` 인자 매핑이 달라 `e.columnid` 가 'KORNM' 이 아님 → 핸들러 `if(e.columnid=="KORNM")` 불통과 | 평범 객체 `{columnid:'KORNM',row:r}` + 먼저 `g.set_rowposition(r)` (§9-c) |
