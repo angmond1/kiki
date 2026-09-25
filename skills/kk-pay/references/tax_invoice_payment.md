@@ -316,7 +316,7 @@ var rg=f.ds_rqstGrid; rg.set_rowposition(rg.getRowCount()-1);   // 새 행
 - **첨부 배치(행당 4턴)**: `[evaluate: 행 전환(ei.cell=2)+_input_node adoptNode 노출]` → `take_snapshot` → `Grep '파일 선택'` uid → **`upload_file` 2개(세금계산서·거래명세서)를 같은 응답에 병렬 호출**(CDP 직렬 처리라 ds_files 에 순서대로 2건, 이전의 순차 2턴 불필요) → `[evaluate: gfn_upload 를 tmHeader 전부 'S' 될 때까지 최대 3회 루프(6s 간격) → 성공 시 다음 행 전환+노출까지]`. 이번 4행 모두 1회에 'S'.
 - **계좌검증 배치**: 행당 `[전환 3.5s + btn_accCstm00 fire + 7s]` ≈ 10.5s → **행 2개 + 마지막 gfn_upload + input 숨김** 을 한 배치(≈27s), **나머지 행 + `bt_save` + 행별 최종검증(첨부 tmHeader·TRANSFERSTAT_DESC·INVTRSNCONT)** 을 다음 배치. **계좌검증 3행 이상을 한 배치에 넣지 말 것**(45s 초과 위험).
 - 저장·상신 뒤 남는 `저장 되었습니다` alert 는 다음 도구 호출을 막으니 **배치 직후 `handle_dialog('accept')` 1회** 를 습관처럼(§0-1 4).
-- **첨부 사본 명명**: 원본 거래명세서명은 `거래명세서_XX000000-1 KIST_홍길동 박사님 ○○ .pdf` 처럼 길고 확장자 앞 공백까지 있어 시스템 첨부명이 지저분해진다 → scratchpad 에 `{YYMMDD} 세금계산서.pdf` / `{YYMMDD} 거래명세서.pdf` 로 **복사본**을 만들어 올린다(원본은 건드리지 않음). 처리완료 이동은 **원본명 그대로**(§0-0 10).
+- **첨부 사본 명명**: 원본 거래명세서명은 `거래명세서_XX000000-1 KIST_김키키 박사님 ○○ .pdf` 처럼 길고 확장자 앞 공백까지 있어 시스템 첨부명이 지저분해진다 → scratchpad 에 `{YYMMDD} 세금계산서.pdf` / `{YYMMDD} 거래명세서.pdf` 로 **복사본**을 만들어 올린다(원본은 건드리지 않음). 처리완료 이동은 **원본명 그대로**(§0-0 10).
 - PDF 4쌍의 발급일·품목·금액·국세청승인번호 파악은 PyMuPDF `fitz` 로 8개 한 번에 텍스트 추출(1턴). 세금계산서 `승인번호` 24자리 = 영수증함 `NTS_ISSUEID` 와 그대로 매칭.
 
 ## 미해결 / TODO

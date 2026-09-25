@@ -54,7 +54,7 @@ if (i>0) F.bt_addRow_onclick.call(F,F.bt_addRow,{});
 let idx=-1; for(let r=0;r<F.ds_rndGrid.getRowCount();r++) if(String(F.ds_rndGrid.getColumn(r,'CARDAPPRNO'))===apprNo) idx=r;
 F.ds_rqstGrid.set_rowposition(i); F.ds_rndGrid.set_rowposition(idx); F.doSetDesp('rndGrid');
 // 4-2 계정 — ⚠️ 매핑이 그 행의 예산항목/비목/책임자/적요를 초기화하므로 반드시 매핑 뒤에
-goRow(i); F.ds_main_RNDCARD.setColumn(0,'BUDGSBJCD','26E0001');   // ← 실제 계정번호 F.openBudgPopup();
+goRow(i); F.ds_main_RNDCARD.setColumn(0,'BUDGSBJCD','2E11111');   // ← 실제 계정번호 F.openBudgPopup();
 //     popBudgList: Grid00/01/02_oncellclick — BUDGITEMCD='33', EXPITEMCD='523' 행을 코드로 검색(계정마다 행번호 다름) → doDecision()
 // 4-3 거래처구분 — 해외 가맹점(CUSTCD 없음)은 '2'=거래처명, 국내는 기본 '4'=사업자등록번호 유지
 //     코드표(인라인 innerdataset = cb[cb.innerdataset], codecolumn/datacolumn): ""선택 / 0 거래처코드 / 1 직원번호 / 2 거래처명 / 3 주민등록번호 / 4 사업자등록번호
@@ -62,7 +62,7 @@ const prev=cb.value; cb.set_value('2'); F.switch1_RNDCARD_combo_custcls_onitemch
 cn.set_value(name); F.switch1_RNDCARD_formDetail_Custnm_onchanged.call(F,cn,{fromobject:cn,postvalue:name});
 F.ds_rqstGrid.setColumn(i,'CUSTCLSCD','2'); F.ds_rqstGrid.setColumn(i,'CUSTNM',name);
 // 4-4 적요 — 마지막에
-F.ds_rqstGrid.setColumn(i,'COMDSCCONT','일시: YYYY-MM-DD / 장소: ○○식당 / 회의제목: … / 홍길동 외 N명 / (필요시 사유, 예: 해외출장 중 사용으로 식비 1회분 반납 수입의뢰서 첨부)');
+F.ds_rqstGrid.setColumn(i,'COMDSCCONT','일시: YYYY-MM-DD / 장소: ○○식당 / 회의제목: … / 김키키 외 N명 / (필요시 사유, 예: 해외출장 중 사용으로 식비 1회분 반납 수입의뢰서 첨부)');
 ```
 - 적요 `외 N명` = 총원 − 1. 회의제목·내용·적요 모두 **괄호 금지**. 출장계정 ≠ 회의비계정이면 공동계정 사용 사유 추가.
 

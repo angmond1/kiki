@@ -84,6 +84,6 @@ def make(data, hwp_path, template, watcher_path=None, visible=False):
     return make_batch([{'data': data, 'hwp': hwp_path}], template, watcher_path, visible)[0]
 
 
-# data dict 키: account, pi_ins('홍길동 (인)'), amount('104,200 원'), place, date('2026. 5. 21.'),
+# data dict 키: account, pi_ins('김키키 (인)'), amount('NN,NNN 원'), place, date('2026. 5. 21.'),
 #   purpose(회의목적=제목), time('11:00 ~ 13:00'), content(회의내용·여러줄 \n, 1과 2 사이 빈줄),
-#   ext_cnt('1명'), ext_mem('(○○대학교) 김외부'), int_cnt('3명'), int_mem('홍길동, 김연구, 이연구')
+#   ext_cnt('1명'), ext_mem('(○○대학교) 최키키'), int_cnt('3명'), int_mem('김키키, 이키키, 박키키')

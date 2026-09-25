@@ -17,9 +17,9 @@
     python make_meetinglog_hwpx.py --demo <out.hwpx>        # 중립 예시값으로 생성(동작 확인용)
     python make_meetinglog_hwpx.py --dump <file.hwpx>       # 표 셀 인덱스·텍스트 덤프(디버그)
 
-data 키(전부 문자열): account 계정번호 / pi_ins '홍길동 (인)' / amount '104,200 원' / place 회의장소 /
+data 키(전부 문자열): account 계정번호 / pi_ins '김키키 (인)' / amount 'NN,NNN 원' / place 회의장소 /
   date '2026. 5. 21.' / purpose 회의목적(=회의록 제목) / time '11:00 ~ 13:00' / content 회의내용(여러 줄 '\\n') /
-  ext_cnt '1명' / ext_mem '(○○대학교) 김외부' / int_cnt '3명' / int_mem '홍길동, 김연구, 이연구'
+  ext_cnt '1명' / ext_mem '(○○대학교) 최키키' / int_cnt '3명' / int_mem '김키키, 이키키, 박키키'
 """
 from __future__ import annotations
 import html, io, json, os, re, sys, zipfile
@@ -42,11 +42,11 @@ LABELS = {
     "ext_cnt": "외부 인원", "ext_mem": "외부 명단", "int_cnt": "내부 인원", "int_mem": "내부 명단",
 }
 DEMO_DATA = {
-    "account": "26E0001", "pi_ins": "홍길동 (인)", "amount": "104,200 원",
+    "account": "2E11111", "pi_ins": "김키키 (인)", "amount": "NN,NNN 원",
     "place": "한국과학기술연구원 ○○동 회의실", "date": "2026. 5. 21.",
     "purpose": "○○ 과제 연구 진행 논의", "time": "11:00 ~ 13:00",
     "content": "1. ○○ 실험 결과 검토\n- 조건별 결과 비교 및 원인 분석\n\n2. 향후 계획\n- 다음 단계 실험 설계 및 일정 협의",
-    "ext_cnt": "1명", "ext_mem": "(○○대학교) 김외부", "int_cnt": "3명", "int_mem": "홍길동, 김연구, 이연구",
+    "ext_cnt": "1명", "ext_mem": "(○○대학교) 최키키", "int_cnt": "3명", "int_mem": "김키키, 이키키, 박키키",
 }
 
 _TBL = re.compile(r"<hp:tbl\b.*?</hp:tbl>", re.S)

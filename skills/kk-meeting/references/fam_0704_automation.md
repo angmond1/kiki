@@ -51,7 +51,7 @@ F.doSetDesp("RAWCARD");                    // = CARDNO 셀 클릭과 동일 (매
 계정번호 input(`switch1_RAWCARD_formDetail_BudgSbjtNo`) 7자리 입력 = `ds_main_RAWCARD.BUDGSBJCD set + openBudgPopup` 와 동치.
 
 ```js
-F.ds_main_RAWCARD.setColumn(0,"BUDGSBJCD","26E0001");   // 과제 1건 필터
+F.ds_main_RAWCARD.setColumn(0,"BUDGSBJCD","2E11111");   // 과제 1건 필터
 F.openBudgPopup();                                       // popBudgList 띄움
 // → window.application.popupframes.popBudgList.form 생성, ds_BudgList = 1건
 ```
@@ -98,7 +98,7 @@ P.doDecision();
 // → popBudgList 닫힘 + F.ds_rqstGrid 에 계정·과제명·책임자·한도·비목 정합 반영
 ```
 
-⚠️ **직접 `setColumn` 우회 절대 금지** — NEXACRO 내부검증 alert(`"26E0001=33-523/17-448/09-523/90-448"`)로 거부됨. 반드시 `openBudgPopup()` 정식 경로로 띄우고 `doDecision()` 콜백 경유 (window.opener 생존).
+⚠️ **직접 `setColumn` 우회 절대 금지** — NEXACRO 내부검증 alert(`"2E11111=33-523/17-448/09-523/90-448"`)로 거부됨. 반드시 `openBudgPopup()` 정식 경로로 띄우고 `doDecision()` 콜백 경유 (window.opener 생존).
 
 ### 7) 통장표기 (`dpstDispNm` + killfocus 동기화 필수)
 5단 중첩 `F.import2.useGroup.switch2.case1.dpstDispNm` (binddataset 없는 직접입력 컴포넌트).
@@ -127,7 +127,7 @@ F.import2.common_onkillfocus.call(F.import2, disp, {fromobject:disp, fromreferen
 ### 8) 적요 (신청내역)
 ```js
 F.ds_rqstGrid.setColumn(0,"COMDSCCONT",
-  "일시: 2026-04-30 / 장소: ○○식당 / 회의제목: 연구 진행상황 논의 / 홍길동 외 7명");
+  "일시: 2026-04-30 / 장소: ○○식당 / 회의제목: 연구 진행상황 논의 / 김키키 외 7명");
 ```
 ⚠️ **`외 N명` 의 N = 총 참석인원 − 1** (발의자 본인 제외. 8명이면 `외 7명`, 11명이면 `외 10명`).
 ⚠️⚠️ **회의록 저장·사전결재(button00) 연동 시 시스템이 적요를 자동 재생성**하며 `외 N명` 을 잘못 계산할 수 있음(11명인데 `외 9명` 실측) → **10) 임시저장 직전 최종 적요 `외 N명` 재검증** 후 틀리면 `COMDSCCONT` 재설정.
@@ -186,7 +186,7 @@ C.rd_UseType_onitemchanged.call(C, rdUseType, {fromobject:rdUseType, postvalue:"
 
 ```js
 const g = C.ds_datagrid1;
-const r = g.addRow(); g.setColumn(r, "KORNM", "홍길동"); g.set_rowposition(r);   // rowposition 필수
+const r = g.addRow(); g.setColumn(r, "KORNM", "김키키"); g.set_rowposition(r);   // rowposition 필수
 C.ds_datagrid1_oncolumnchanged.call(C, g, {columnid:"KORNM", row:r});
 // ⏱ 3초. 결과는 세 갈래:
 //  (a) 검색결과 1명 → 팝업 없이 자동 반영: PAYNO·DEPTNM 채워짐
@@ -200,12 +200,12 @@ C.ds_datagrid1_oncolumnchanged.call(C, g, {columnid:"KORNM", row:r});
 
 ##### ⚠️ 중복 참석 경고 `DUPLICATE_EAT_YN` (2026-09-24)
 검색결과/등록행의 `DUPLICATE_EAT_YN` 이 `'N'` 이 아니면 그 사람이 **같은 날 다른 회의비 회의록에 이미 참석자로 등록**돼 있다
-(예 `사용시간 : 12:21 / 계정 : 26N0002 / 적요 : … / 목적: … / 인원: ○○○외 3명`). gfn_msg 로 "…중복인 경우 제외바랍니다" 가 뜬다.
+(예 `사용시간 : 12:21 / 계정 : 2N11111 / 적요 : … / 목적: … / 인원: 김키키 외 N명`). gfn_msg 로 "…중복인 경우 제외바랍니다" 가 뜬다.
 → **저장하지 말고 사용자에게 그 내용을 그대로 보여주고 결정을 받는다**(제외 / 유지 / 중단). 발의자·카드책임자여도 제외될 수 있고, 제외하면 적요 `○○○ 외 N명` 의 대표자를 남은 첫 참석자로 바꾼다.
 
 ##### 외부/미참여자 등록
 ```js
-[{nm:"김철수", org:"○○대학교"}, {nm:"이영희", org:"한국과학기술연구원"}].forEach(p=>{
+[{nm:"이키키", org:"○○대학교"}, {nm:"박키키", org:"한국과학기술연구원"}].forEach(p=>{
   const r2 = C.ds_datagrid2.addRow();
   C.ds_datagrid2.setColumn(r2,"OUTNAME",p.nm);
   C.ds_datagrid2.setColumn(r2,"OUTCOMPANY",p.org);
@@ -291,7 +291,7 @@ F.bt_approval_onclick.call(F, null, {});
 
 ### 결재선 (gw 전자결재 별도 창, 사용자 직접)
 - **계정책임자(과제) 무조건 결재선 포함**. 계정책임자 = 화면 회계구분 아랫칸 (== `F.ds_rqstGrid.getColumn(0,"RDSBJEMPNM")`).
-- **계정책임자 ≠ 발의자(사용자)** → "*[안내] 좌상단 결재선 버튼 → 팝업서 ○○○님(계정책임자) 검색·선택해 추가하세요.*" 출력.
+- **계정책임자 ≠ 발의자(사용자)** → "*[안내] 좌상단 결재선 버튼 → 팝업서 김키키님(계정책임자) 검색·선택해 추가하세요.*" 출력.
 - **계정책임자 == 발의자** → "*[안내] 사용자님이 이 과제(....) 계정책임자이므로 결재선 책임연구원 칸에 이미 포함되어 있습니다. 그대로 상신하시면 됩니다.*"
 - (드물게) 신청서 검토용 행정원 추가 → 본인↔계정책임자 사이. 발의자=계정책임자면 자기 다음.
 

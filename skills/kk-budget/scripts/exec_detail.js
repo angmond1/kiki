@@ -139,7 +139,7 @@
     return !/[가-힣A-Za-z0-9]/.test(a);
   }
 
-  // names: ['홍길동','김철수'] — 적요/신청인 등 행의 "모든 문자열 컬럼"을 합쳐 매칭.
+  // names: ['김키키','이키키'] — 적요/신청인 등 행의 "모든 문자열 컬럼"을 합쳐 매칭.
   // 팝업별 컬럼명 차이(COMDSCCONT vs CONT, USERNM vs RQSTEMPNM)를 그대로 흡수한다.
   function parse(names, showAll, cap) {
     var fm = pop();

@@ -17,9 +17,9 @@ kk-meeting 회의록 엑셀 헬퍼.
         "date_text": "4월 30일 13:00~14:30",
         "amount": 323000,
         "place": "○○식당",
-        "acccd": "26E0001",
-        "int_members": "홍길동",
-        "ext_members": "김철수, 이영희, 박민수, 정지원, 최유리, 강현우, 윤서연",
+        "acccd": "2E11111",
+        "int_members": "김키키",
+        "ext_members": "이키키, 박키키, 최키키",
         "ext_org": "○○대학교",
         "title": "연구 진행상황 논의",
         "content": "1. 연구 진행상황 및 향후 계획 공유\n - ...",
@@ -101,7 +101,7 @@ def append_row(path: str, data: dict) -> int:
         date_text   사용일자 (예 '4월 30일 13:00~14:30')
         amount      금액 (int)
         place       장소(거래처)
-        acccd       처리계정 (예 '26E0001')
+        acccd       처리계정 (예 '2E11111')
         int_members 내부참석자 (성명, 콤마 구분)
         ext_members 외부참석자 (성명, 콤마 구분)
         ext_org     외부참석자 소속

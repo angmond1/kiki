@@ -28,7 +28,7 @@ description: KIST 회의비 처리 자동화 — 카드 회의비 추출, 사전
    - hwpx 는 `scripts/make_meetinglog_hwpx.py` 가 **아래아한글 없이**(모든 OS, 추가 설치 없음) 별지1호 양식(`assets/minutes_template.hwpx`)의 값 셀만 치환해 만든다 → 한글 설치 여부를 묻거나 확인할 필요가 없다. hwp(구형)는 더 이상 만들지 않는다.
    - 열람: 아래아한글 2014+ 또는 무료 오픈소스 **HOP**(Open HWP, Windows/macOS/Linux, https://github.com/golbin/hop). 한글이 없는 PC 에서 파일을 열어보고 싶어하면 HOP 을 안내(설치는 사용자 몫, **작성엔 불필요**). **HOP 0.4.4 에서 표시 확인(2026-09-24).** 회의 목적이 길면 셀 안에서 줄바꿈된다(생성기가 줄 배치 캐시를 제거해 한글이 재계산 — 2026-09-24 수정). 그래도 제목은 간결하게, 상세는 회의내용에.
 5. **"Dooray 드라이브 업로드 RPA 처리? (예/아니요)"** — 아니요(기본)면 fam_0704 직접 자동작성. 예면 토큰(`<kiki_root>/token.txt`) + 담당 행정원 폴더(공통 `payment_admin.folder_url`).
-6. **근거자료 요청** — *"회의록을 대신 쓰려면 근거자료가 필요합니다. 과제제안서·보고서 파일(hwp/hwpx/pdf/docx)을 `{kiki_root}\meeting\project_report\` 에 복사해 주세요 — 파일명에 과제번호를 넣어 주시면 매칭이 정확합니다(예 `26E0001_제안서.hwpx`)."* + 폴더 3종 지침 안내 — 아래 "경로".
+6. **근거자료 요청** — *"회의록을 대신 쓰려면 근거자료가 필요합니다. 과제제안서·보고서 파일(hwp/hwpx/pdf/docx)을 `{kiki_root}\meeting\project_report\` 에 복사해 주세요 — 파일명에 과제번호를 넣어 주시면 매칭이 정확합니다(예 `2E11111_제안서.hwpx`)."* + 폴더 3종 지침 안내 — 아래 "경로".
 
 ### 토큰 (5=예일 때만)
 `<kiki_root>/token.txt`(형제 공유, 예 `C:\kiki\token.txt`) 의 `Dooray token:` 다음 줄. **절대경로를 보여주며** 안내하고 **채팅 붙여넣기는 노출 위험을 항상 경고**. 상세 `../_shared/personal_config.md`. 발급 https://kist.gov-dooray.com/setting/api/token.
