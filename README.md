@@ -35,7 +35,7 @@ https://github.com/angmond1/kk 설치해줘
 ## 준비물
 
 ### 1. claude 또는 chatgpt 유료 계정과 데스크탑 앱 (또는 CLI) 설치
-- claude desktop app 설치 https://claude.com/download  
+- claude 설치 https://claude.com/download  
 - codex (chatgpt) 설치 https://openai.com/ko-KR/codex/  
 
 ### 2. chrome 브라우저 + 확장 프로그램 Claude in Chrome 설치
