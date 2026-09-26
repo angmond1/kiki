@@ -22,7 +22,7 @@
 <br><br>
 
 ## 설치
-claude code (claude 데스크탑 앱에서 code), codex 대화창에 아래 문구 붙여넣기  
+claude code (claude 데스크탑 앱에서 code), codex 대화창에  
 
 ```
 https://github.com/angmond1/kk 설치해줘
