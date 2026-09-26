@@ -204,13 +204,144 @@
     });
   }
 
+  // ---------- 제목 키워드 (기능 3·4 공통 — 2026-09-27 사용자 확정) ----------
+  // 사용자가 발신 주소 말고 제목도 거르는 조건으로 쓰라고 하면, 제목 전체가 아니라 그 시리즈 메일에 매번 그대로 들어가는 핵심 구절만 쓴다.
+  //   '[To:한국과학기술연구원*NNN][매입]○○업체(유)로부터 전자세금계산서(NNNNNNNNNN)가 YYYYMMDD 발급되었습니다.(XXXXXXXX)' → '○○업체(유)로부터 전자세금계산서'
+  //   '거래명세서_○○업체 NNNNNNNNNN' → '거래명세서_○○업체'
+  //   'Re: Invitation to ○○ Materials Science Conference' → '○○ Materials Science Conference'
+  //   'Dear Dr. Professor, Publish at very low APC - Journal of ○○ Science' → 'Journal of ○○ Science'
+  // Dooray 제목 조건은 '포함' 일치 → 키워드는 원문 제목 안에 이어 붙어 있는 구간 그대로(띄어쓰기·괄호·밑줄까지). 조각을 이어 붙이거나 고쳐 쓰지 않는다.
+  // subjectKeyword 는 1차 후보일 뿐 — 최종 구절은 Claude 가 같은 시리즈 제목 2~3건을 보고 뜻으로 고르고 사용자 confirm.
+  const KW_CUT = [
+    /\[(?:to|cc|bcc|from)\s*:[^\]]*\]|\[[^\]]*[*@][^\]]*\]/gi,  // [To:…] 같은 받는 곳 태그는 통째로
+    /[\[\]【】〔〕]/g,                                         // 그 밖의 [태그]는 괄호만 — [매입] 은 짧아 빠지고 [NNNN 추계 ○○학회] 는 이름이 후보로 남는다
+    /\((?=[^)]*\d)[^)]*\)/g,                                     // 숫자가 든 괄호(승인번호·추적 코드)
+    /\((?=[^)]*[A-Za-z])[A-Za-z0-9]{6,}\)/g,                     // 영숫자 추적 코드 괄호
+    /\d{2,4}[-./]\d{1,2}(?:[-./]\d{1,2})?/g,                     // 날짜
+    /\d{4,}/g,                                                   // 번호·연도·YYYYMMDD
+    /\b\d+(?:st|nd|rd|th)\b/gi,                                  // 회차(영문)
+    /제\s*\d+\s*회/g,                                            // 회차(한글)
+    /^\s*(?:(?:re|fw|fwd)\s*(?:\[\d+\])?\s*:\s*|(?:회신|답장|전달)\s*:\s*)+/gi,  // 답장·전달 머리말
+    /^\s*dear\b[^,]{0,60},\s*/gi,                                // 인사말
+    /\s+[-–—|:]\s+|\s*::\s*|:\s+/g,                              // 문구 구분자( - | : )
+  ];
+  const KW_LEAD = /^(?:(?:special\s+)?invitation|invite|call\s+for\s+(?:papers|abstracts|speakers|submissions)|final\s+call|last\s+call|reminder|greetings)\b\s*(?:to|for)?\s*/i;
+  const KW_EDGE = /^[\s.,:;!?·~\-–—|_'"“”‘’]+|[\s.,:;!?·~\-–—|_'"“”‘’]+$/g;
+  const KW_TAIL = /\s*\([^)]*(?:요청|회신|참석|필독|중요|긴급)[^)]*\)$|\s*(?:안내|공지|알림)(?:\s*드립니다)?$/;   // 끝의 공지 꼬리
+  const KW_EMPTY = /^(?:안내|알림|공지|입니다|발급되었습니다|님|귀하|[가이을를은는의에와과및로])$/;
+  const KW_ADS = /\b(?:publish(?:\s+at)?|apc|discount|low\s+cost|fast\s+track|submit|submission|special\s+issue|cfp|deadline|extended|still\s+available|now\s+open|register(?:\s+now)?|don'?t\s+miss|limited|last\s+chance|early\s+bird)\b|\d+\s*%|할인|무료|마감|모집|투고/i;
+  const KW_NAME = /journal|conference|congress|symposium|summit|forum|workshop|webinar|expo|society|association|institute|committee|council|학회|협회|위원회|저널|심포지엄|심포지움|워크숍|세미나|포럼|컨퍼런스|학술/i;
+  const KW_DOC = /세금계산서|계산서|거래명세서|명세서|견적서|청구서|발주서|납품|invoice|statement|quotation|receipt/i;
+  const KW_COMMON = /^(?:(?:전자)?세금계산서|거래명세서|견적서|명세서|안내|공지|알림|초대|세미나|학회|저널|conference|journal|invitation|call\s+for\s+papers|newsletter|webinar|seminar)$/i;
+
+  function kwSegments(s) {
+    const cut = new Array(s.length).fill(false);
+    for (const re of KW_CUT) {
+      const r = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g');
+      let m;
+      while ((m = r.exec(s)) !== null) {
+        if (!m[0].length) { r.lastIndex++; continue; }
+        for (let i = m.index; i < m.index + m[0].length; i++) cut[i] = true;
+      }
+    }
+    const segs = [];
+    for (let i = 0; i < s.length;) {
+      if (cut[i]) { i++; continue; }
+      let j = i; while (j < s.length && !cut[j]) j++;
+      segs.push(s.slice(i, j)); i = j;
+    }
+    return segs;
+  }
+  function kwClean(t) {
+    let x = t.replace(KW_EDGE, '');
+    for (let k = 0; k < 3; k++) { const y = x.replace(KW_LEAD, '').replace(KW_TAIL, '').replace(KW_EDGE, ''); if (y === x) break; x = y; }
+    return x;
+  }
+  function kwScore(t) {
+    if (t.length < 4 || KW_EMPTY.test(t) || KW_COMMON.test(t)) return 0;
+    let sc = Math.min(t.length, 40) / 10;
+    if (KW_NAME.test(t)) sc += 3;
+    if (KW_DOC.test(t)) sc += 3;
+    if (KW_ADS.test(t)) sc -= 4;
+    return Math.round(sc * 10) / 10;
+  }
+  // 제목 1건 → { keyword(1순위), candidates[], removed[](키워드 앞·뒤로 뺀 부분) }. 후보가 없으면 keyword ''.
+  function subjectKeyword(subject) {
+    const s = String(subject || '');
+    const cands = [];
+    for (const g of kwSegments(s)) {
+      const t = kwClean(g);
+      if (!t || !s.includes(t) || cands.some(c => c.keyword === t)) continue;
+      const score = kwScore(t);
+      if (score > 0) cands.push({ keyword: t, score });
+    }
+    cands.sort((a, b) => b.score - a.score);
+    const keyword = cands.length ? cands[0].keyword : '', at = keyword ? s.indexOf(keyword) : -1;
+    const removed = at < 0 ? [] : [s.slice(0, at).trim(), s.slice(at + keyword.length).trim()].filter(Boolean);
+    return { keyword, candidates: cands.map(c => c.keyword), removed };
+  }
+  // 규칙에 넣기 전 점검 → [{ keyword, level:'block'|'warn', problem }] (빈 배열이면 통과).
+  //   subjects(선택) = 잡으려는 메일들의 원문 제목 → 키워드가 제목마다 그대로 들어 있는지, 제목을 통째로 넣지 않았는지도 본다.
+  //   block = createRule 이 거부(번호·날짜·회차·머리말·[To:…]·번호 태그·인사말·60자 초과·원문에 없음·제목 통째). warn = 너무 흔한 말·일반 [태그] → 사용자에게 알리고 선택.
+  function checkSubjectKeywords(keywords, subjects) {
+    const out = [], subs = (subjects || []).map(String);
+    for (const k of (keywords || [])) {
+      const kw = String(k == null ? '' : k), t = kw.trim();
+      const add = (level, problem) => out.push({ keyword: kw.slice(0, 40), level, problem });
+      if (!t) { add('block', '빈 키워드'); continue; }
+      if (/\d{4,}/.test(kw) || /\d{2,4}[-./]\d{1,2}/.test(kw)) add('block', '번호·날짜·연도(4자리 이상 숫자) — 다음 메일부터 안 잡힘');
+      if (/\b\d+(?:st|nd|rd|th)\b|제\s*\d+\s*회/i.test(kw)) add('block', '회차 — 해마다 바뀜');
+      if (/^\s*(?:(?:re|fw|fwd)\s*(?:\[\d+\])?\s*:|(?:회신|답장|전달)\s*:)/i.test(kw)) add('block', '답장·전달 머리말');
+      if (/\[(?:to|cc|bcc|from)\s*:[^\]]*\]|\[[^\]]*[\d*@][^\]]*\]/i.test(kw)) add('block', '[To:…]·번호가 든 태그 — 받는 곳·번호 표시는 뺄 것');
+      else if (/\[[^\]]*\]/.test(kw)) add('warn', '[태그] 포함 — 그 태그로 거르려는 게 아니면 뺄 것');
+      if (/^\s*dear\b/i.test(kw)) add('block', '인사말');
+      if (kw.length > 60) add('block', '60자 초과 — 제목을 통째로 넣은 것 같음');
+      if (KW_COMMON.test(t) || KW_EMPTY.test(t)) add('warn', '너무 흔한 말 — 다른 정상 메일까지 걸림(발신처·고유 이름과 묶을 것)');
+      if (subs.length) {
+        const miss = subs.filter(x => !x.includes(kw)).length;
+        if (miss) add('block', `대상 제목 ${subs.length}건 중 ${miss}건에 이 구절이 그대로 없음 — 원문에서 이어진 구간을 글자 그대로`);
+        if (subs.some(x => x.trim() === t)) add('block', '제목 전체와 같음');
+      }
+    }
+    return out;
+  }
+  // 규칙 미리보기(⛔ 먼저 보여주고 묻는다): 이 조건이면 지난 받은 메일 중 무엇이 잡히는지.
+  //   spec = { subjectKeywords:[…], fromEmails?:[…], since?:'YYYY-MM-DD', sinceDays?(기본 365) }
+  //   서버 검색은 키워드의 긴 낱말 2개로 넓게 받고, 제목 포함 여부는 여기서 대소문자 무시로 다시 거른다(실제 규칙보다 좁게 보이지 않게). 보낸 메일은 뺀다.
+  async function previewSubjectRule(spec = {}) {
+    const kws = (spec.subjectKeywords || []).map(String).filter(x => x.trim());
+    const froms = (spec.fromEmails || []).map(x => String(x).toLowerCase());
+    const opt = { size: 100, maxPages: 5 };
+    if (spec.since) opt.since = spec.since; else opt.sinceDays = spec.sinceDays || 365;
+    const seen = new Map(), hits = {};
+    for (const kw of kws) {
+      const words = kw.split(/[^0-9A-Za-z가-힣]+/).filter(w => w.length >= 2).sort((a, b) => b.length - a.length).slice(0, 2);
+      const r = await searchMails(words.length ? words : [kw], opt);
+      const low = kw.toLowerCase();
+      hits[kw] = 0;
+      for (const m of r.mails) {
+        if (m.folder === 'sent' || !m.subject.toLowerCase().includes(low)) continue;
+        if (froms.length && !froms.some(f => m.fromEmail.toLowerCase().includes(f))) continue;
+        hits[kw]++;
+        if (!seen.has(m.id)) seen.set(m.id, m);
+      }
+      await new Promise(res => setTimeout(res, 200));
+    }
+    const mails = Array.from(seen.values()).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    return { hits, total: mails.length, mails };
+  }
+
   // ---------- 기능 3: 자연어 자동분류 규칙 엔진 ----------
   // 규칙 1건 생성. 조건은 from(발신) 또는 subject(제목 키워드) — 둘 다 주면 AND.
   // 정책(2026-09-24): 기본은 fromEmails(정확 주소) 만 넘긴다. subjectKeywords 는 사용자가 명시했을 때만 — 발신+제목 AND 규칙은 제목이 조금만 바뀌어도 빠져나간다.
-  //   spec = { fromEmails?:[], subjectKeywords?:[], toFolderName, applyBefore?, operator?, applyOrder? }
+  // 정책(2026-09-27): subjectKeywords 는 제목 전체가 아니라 핵심 구절만(위 '제목 키워드'). checkSubjectKeywords 에 block 문제가 있으면 만들지 않고 { blocked, problems } 를 돌려준다.
+  //   spec = { fromEmails?:[], subjectKeywords?:[], sampleSubjects?:[원문 제목…], toFolderName, applyBefore?, operator?, applyOrder?, overrideKeywordCheck? }
+  //   overrideKeywordCheck:true 는 사용자가 경고를 듣고도 그 키워드를 그대로 원할 때만.
   // ⚠️ Dooray 제약: 배열 POST 시 "첫 1건만" 생성 → 단건 호출. from.type은 include만(not_include -200200).
   // ⚠️ 같은 도메인 두 용도 분기는 applyOrder로 — 정확주소(예 nzine@nrf.re.kr)를 도메인(nrf.re.kr)보다 작게(먼저).
   async function createRule(spec) {
+    const kwCheck = (spec.subjectKeywords && spec.subjectKeywords.length) ? checkSubjectKeywords(spec.subjectKeywords, spec.sampleSubjects) : [];
+    if (!spec.overrideKeywordCheck && kwCheck.some(p => p.level === 'block')) return { blocked: 'subjectKeywords', problems: kwCheck };
     const folder = await ensureFolder(spec.toFolderName);
     if (folder.needManual) return { needManualFolder: folder.name };
     const condition = { operator: spec.operator || 'and' };
@@ -226,7 +357,7 @@
     if (spec.applyOrder != null) rule.applyOrder = spec.applyOrder;  // 우선순위(낮을수록 먼저 적용)
     // 단건 배열 POST (Dooray 제약)
     const res = await dfetch('/v2/wapi/mail-rules', { method: 'POST', body: [rule] });
-    return { folder, rule, res };
+    return { folder, rule, res, keywordCheck: kwCheck };
   }
 
   async function listMailRules() {
@@ -326,7 +457,8 @@
     pick, fmtList, fmtBody, sanitize, hyId, openMail,
     reportSpam, moveMails,
     createRule, listMailRules, deleteMailRule,
-    _version: 'kk-mail-ops/1.3',
+    subjectKeyword, checkSubjectKeywords, previewSubjectRule,
+    _version: 'kk-mail-ops/1.4',
   };
   return window.kkMail._version + ' =^.^=';
 })();
