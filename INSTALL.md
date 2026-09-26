@@ -11,7 +11,7 @@
 ### 0-2. Google Chrome + "Claude in Chrome" 확장 (필수 — 평소 Chrome 창 제어)
 1. 설치: https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn
 2. 연결
-   - Claude Desktop: 좌하단 이니셜 → 설정 → **"Claude in Chrome"** 켜기.
+   - Claude Desktop: 좌하단 이니셜 클릭 → "설정" 클릭 → 좌측 탭에서 **"Claude in Chrome 설정"** 클릭 → **"Claude in Chrome 사용설정"** 켜기.
    - Claude Code: `claude --chrome` 로 시작(또는 세션에서 `/chrome` → "Enabled by default"). https://code.claude.com/docs/en/chrome
 3. 확인: 세션에서 `list_connected_browsers` 가 브라우저를 돌려주면 성공.
 

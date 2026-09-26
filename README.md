@@ -42,7 +42,7 @@ https://github.com/angmond1/kk 설치해줘
 - chrome 브라우저 설치 https://www.google.com/chrome/  
 - 확장 프로그램 Claude in Chrome 설치 → https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn  
 
-  그리고 나서 claude desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" 켜기  
+  그러고 나서 Claude Desktop: 좌하단 이니셜 클릭 → "설정" 클릭 → 좌측 탭에서 "Claude in Chrome 설정" 클릭 → "Claude in Chrome 사용설정" 켜기  
 
 ### 3. chrome-devtools-mcp 설치 (파일첨부용)
 - claude desktop: 대화창에서 "chrome-devtools-mcp 설치해줘"  

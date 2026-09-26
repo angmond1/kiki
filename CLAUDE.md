@@ -49,7 +49,7 @@ KIST 행정 자동화 skill 6종(`kk-mail`·`kk-wiki`·`kk-pay`·`kk-meeting`·`
 스크립트는 `_shared` + 선택 skill → `~/.claude/skills/`, 개인설정 템플릿 → `~/.claude/kiki/`(+ `kiki_root` 기록), root 에 `budget/ meeting/ inspect/ _tmp/` + **`token.txt`** 를 만든다. 스크립트를 못 쓰면 [INSTALL.md](INSTALL.md) §2 방법 B(수동 복사) — `_shared`·`~/.claude/kiki/`·`token.txt`·`kiki_root` 누락 주의.
 
 ### Step 3 — 브라우저 도구 2개 (없으면 지금 설치·안내)
-1. **"Claude in Chrome" 확장** — Chrome 웹스토어 https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn 설치 → 연결(Desktop: 좌하단 이니셜 → 설정 → "Claude in Chrome" ON / Code: `claude --chrome` 또는 `/chrome`). `list_connected_browsers` 로 확인.
+1. **"Claude in Chrome" 확장** — Chrome 웹스토어 https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn 설치 → 연결(Desktop: 좌하단 이니셜 → "설정" → 좌측 탭 "Claude in Chrome 설정" → "Claude in Chrome 사용설정" 켜기 / Code: `claude --chrome` 또는 `/chrome`). `list_connected_browsers` 로 확인.
 2. **chrome-devtools-mcp** (파일첨부용 Claude 전용 Chrome 창) — 도구 목록에 `upload_file`/`evaluate_script` 가 없으면 미등록. 사용자 confirm 후 등록:
    ```
    claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest
