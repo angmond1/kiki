@@ -94,3 +94,8 @@ DELETE /v2/wapi/mail-rules/{rule-id}
 - **삭제**: `DELETE /v2/wapi/mail-folders/{id}`.
 - 코어: `ensureFolder(name)`(찾고 없으면 생성) / `deleteFolder(id)`(정리·롤백).
 - 폴더 객체 필드: `id, name, type, parentFolderId(null=루트), displayOrder, totalCount`.
+
+## 메일 팝업 보기 (2026-09-27 캡처·실측)
+- 주소 `GET /mail/popup/mails/{mailId}` — Dooray 메일 화면의 새 창 버튼(`fa-external-link` 아이콘)이 `window.open('/mail/popup/mails/{id}?_t={시각}', '_blank', 'resizable=yes,toolbar=no,location=no,…,width=720,height=800')` 로 여는 주소. 목록·사이드바 없이 그 메일 한 통과 답장·전달 버튼만 나온다. 폴더와 무관(받은·보낸 메일 모두 확인), `_t` 는 없어도 된다. 열면 읽음 처리.
+- 스크립트(javascript_tool)만으로 `window.open` 하면 Chrome 팝업 차단기가 막는다(null 반환). 페이지에 임시 버튼을 넣고 Claude in Chrome `computer left_click` 으로 실제 클릭하면 사용자 동작으로 인정돼 팝업 창이 열린다 → 코어 `openMail`·`popupStatus`·`closePopups`.
+- ⚠️ 새 창 버튼의 주소를 가로채려고 `window.open` 을 null 을 돌려주는 가짜로 바꾸면 Dooray 가 알림창을 띄워 탭이 멈춘다(CDP 입력 30초 타임아웃, 탭을 다시 불러와 복구). 가로챌 때는 가짜 창 객체를 돌려줄 것.

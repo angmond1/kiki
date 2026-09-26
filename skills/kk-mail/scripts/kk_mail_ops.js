@@ -445,8 +445,46 @@
     const head = `${b.subject.slice(0, 40)} | ${b.date.slice(5)} | ${b.fromName || b.fromEmail} | files ${b.files.length}${files} | txt ${b.textLen}${b.restoredUnread ? ' | unread restored' : ''}`;
     return sanitize(head + '\n' + b.text.slice(offset, offset + chars));
   }
-  // "그 메일 열어줘" 할 때만: 현재 탭에서 그 메일로 이동(열면 읽음 처리됨 → 사용자가 말했을 때만).
-  function openMail(m) { location.assign(m.url || ('https://kist.gov-dooray.com/mail/systems/inbox/' + m.id)); return 'opening'; }
+  // ---------- 메일 팝업 보기 (2026-09-27 사용자 확정: 링크·열기 모두 팝업 방식) ----------
+  // Dooray 새 창 버튼과 같은 주소 /mail/popup/mails/{id} — 폴더와 관계없이 id 하나로, 목록 없이 그 메일 한 통만 보인다(받은·보낸 메일 실측).
+  //   답의 링크도 이 주소로 준다. 대화창 링크는 브라우저 새 탭으로 열리지만 쓰던 메일함 화면은 그대로 남는다.
+  // "그 메일 열어줘/띄워줘" 할 때만(열면 읽음 처리됨): openMail(항목) → 화면 오른쪽 위에 임시 버튼 'kiki 메일 팝업 열기' 가 생긴다
+  //   → Claude 가 find 로 그 버튼을 찾아 computer left_click(ref) → popupStatus() 가 opened 인지 확인.
+  //   스크립트만으로 window.open 하면 Chrome 팝업 차단기가 막는다(실측) — 실제 클릭이 있어야 열린다. 버튼은 누르면 스스로 사라진다.
+  //   클릭 한 번에 창 하나라 여러 통이면 한 통씩 반복. 같은 메일은 같은 창을 다시 쓴다(창 이름 kkmail_<id>). closePopups() 로 한꺼번에 닫는다.
+  const POPUP_BASE = 'https://kist.gov-dooray.com/mail/popup/mails/';
+  const popupWins = {};
+  let popupState = null;
+  function popupUrl(x) { return POPUP_BASE + String(x && x.id ? x.id : x); }
+  function openMail(m) {
+    const id = String(m && m.id ? m.id : m);
+    const old = document.getElementById('kk-mail-popup-btn'); if (old) old.remove();
+    const b = document.createElement('button');
+    b.id = 'kk-mail-popup-btn';
+    b.textContent = 'kiki 메일 팝업 열기';
+    b.style.cssText = 'position:fixed;top:12px;right:12px;z-index:2147483647;padding:12px 18px;font-size:15px;background:#ffb300;color:#000;border:2px solid #000;border-radius:8px;cursor:pointer';
+    popupState = { id, state: 'waiting' };
+    b.onclick = () => {
+      const n = Object.keys(popupWins).length % 5;
+      const left = Math.max(0, (window.screenX || 0) + Math.round(((window.outerWidth || 1200) - 720) / 2) + 30 * n);
+      const top = Math.max(0, (window.screenY || 0) + 80 + 30 * n);
+      const w = window.open(popupUrl(id), 'kkmail_' + id, `popup=yes,width=720,height=800,left=${left},top=${top},resizable=yes,scrollbars=yes`);
+      if (w) { popupWins[id] = w; try { w.focus(); } catch (e) { /* 무시 */ } }
+      popupState = { id, state: w ? 'opened' : 'blocked' };
+      b.remove();
+    };
+    document.body.appendChild(b);
+    return 'popup button ready';
+  }
+  function popupStatus() { return popupState ? popupState.state + ' ' + hyId(popupState.id) : 'none'; }
+  function closePopups() {
+    let k = 0;
+    for (const id of Object.keys(popupWins)) {
+      try { if (!popupWins[id].closed) { popupWins[id].close(); k++; } } catch (e) { /* 무시 */ }
+      delete popupWins[id];
+    }
+    return 'closed ' + k;
+  }
 
   // ---------- export ----------
   window.kkMail = {
@@ -454,11 +492,11 @@
     listInbox, listFolderMails, summarize,
     listMails, getMail, getMails, htmlToText, markRead, markUnread,
     searchMails, searchMany,
-    pick, fmtList, fmtBody, sanitize, hyId, openMail,
+    pick, fmtList, fmtBody, sanitize, hyId, openMail, popupUrl, popupStatus, closePopups,
     reportSpam, moveMails,
     createRule, listMailRules, deleteMailRule,
     subjectKeyword, checkSubjectKeywords, previewSubjectRule,
-    _version: 'kk-mail-ops/1.4',
+    _version: 'kk-mail-ops/1.5',
   };
   return window.kkMail._version + ' =^.^=';
 })();
